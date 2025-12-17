@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADA Compliance Scanner - Professional Edition</title>
+  <style>
+    :root {
+      /* Dark Theme (Default) */
+      --bg-dark: #0f172a;
+      --bg-gradient: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+      --glass-panel: rgba(30, 41, 59, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --primary-gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-inverse: #0f172a;
+      --accent-error: #f87171;
+      --accent-warning: #fbbf24;
+      --accent-success: #34d399;
+      --input-bg: rgba(0, 0, 0, 0.3);
+      --code-bg: rgba(0, 0, 0, 0.3);
+      --code-text: #ffffff;
+      --shadow-color: rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="light"] {
+      /* Light Theme - High Contrast */
+      --bg-dark: #f0f9ff;
+      --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+
+      /* Solid panels for better readability */
+      --glass-panel: #ffffff;
+      /* Darker, visible borders */
+      --glass-border: #334155;
+
+      --primary-gradient: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-inverse: #ffffff;
+
+      --accent-error: #dc2626;
+      --accent-warning: #d97706;
+      --accent-success: #15803d;
+
+      --input-bg: #f8fafc;
+      --code-bg: #f1f5f9;
+      --code-text: #0f172a;
+      /* Stronger drop shadows */
+      --shadow-color: rgba(15, 23, 42, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      color: var(--text-main);
+      padding: 40px 20px;
+      line-height: 1.5;
+      transition: background 0.5s ease;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header & Toggle */
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 48px;
+      position: relative;
+    }
+
+    .header-content {
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      right: 0;
+      top: 0;
+      background: var(--glass-panel);
+      border: 2px solid var(--glass-border);
+      color: var(--text-main);
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      backdrop-filter: blur(8px);
+    }
+
+    .theme-toggle:hover {
+      transform: rotate(15deg);
+    }
+
+    .header h1 {
+      font-size: 48px;
+      font-weight: 800;
+      background: linear-gradient(to right, var(--text-main), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -1.5px;
+      margin-bottom: 12px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      /* Fallback for readability */
+    }
+
+    .header p {
+      font-size: 18px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Glass Components */
+    .glass-panel {
+      background: var(--glass-panel);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px -5px var(--shadow-color);
+      transition: all 0.3s ease;
+    }
+
+    [data-theme="light"] .glass-panel {
+      border: 2px solid #334155;
+      /* Even starker border for light mode */
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 32px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 6px;
+      border-radius: 16px;
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+      border: 1px solid var(--glass-border);
+    }
+
+    [data-theme="light"] .tabs {
+      background: #ffffff;
+      border: 2px solid #334155;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .tab {
+      padding: 10px 24px;
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .tab:hover {
+      color: var(--text-main);
+    }
+
+    .tab.active {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      box-shadow: 0 4px 12px var(--shadow-color);
+    }
+
+    [data-theme="light"] .tab.active {
+      background: #0284c7;
+      color: white;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+    }
+
+    /* Scanner Box */
+    .scanner-box {
+      padding: 48px;
+      margin-bottom: 32px;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Inputs */
+    .input-group {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    input[type="url"],
+    select {
+      flex: 1;
+      background: var(--input-bg);
+      border: 1px solid var(--glass-border);
+      padding: 16px 24px;
+      border-radius: 12px;
+      color: var(--text-main);
+      font-size: 16px;
+      transition: all 0.3s;
+      font-family: inherit;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="light"] input[type="url"],
+    [data-theme="light"] select {
+      border: 2px solid #334155;
+      /* Thicker border for visibility */
+      background: #ffffff;
+      color: #0f172a;
+    }
+
+    [data-theme="light"] input[type="url"]::placeholder {
+      color: #94a3b8;
+    }
+
+    input[type="url"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2);
+    }
+
+    /* Buttons */
+    button.primary {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 0 32px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 10px 20px -5px rgba(56, 189, 248, 0.4);
+    }
+
+    button.primary:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    /* Quick Links */
+    .examples {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .examples span {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .example-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    [data-theme="light"] .example-btn {
+      background: white;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="light"] .example-btn:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+      background: #eff6ff;
+    }
+
+    .example-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      border-color: var(--text-muted);
+    }
+
+    /* Upload Area */
+    .upload-area {
+      border: 2px dashed var(--glass-border);
+      border-radius: 20px;
+      padding: 60px;
+      text-align: center;
+      transition: all 0.3s;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    [data-theme="light"] .upload-area {
+      background: white;
+      border-color: #cbd5e1;
+    }
+
+    .upload-area:hover,
+    .upload-area.dragover {
+      border-color: #818cf8;
+      background: rgba(129, 140, 248, 0.05);
+      transform: scale(1.01);
+    }
+
+    .upload-area .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .upload-area h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      background: var(--input-bg);
+      border-radius: 12px;
+      margin-top: 12px;
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+    }
+
+    [data-theme="light"] .file-item {
+      border-color: #cbd5e1;
+    }
+
+    .file-item button {
+      background: rgba(248, 113, 113, 0.2);
+      color: var(--accent-error);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Results Dashboard */
+    .results,
+    .pdf-results-container {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .results.active,
+    .pdf-results-container.active {
+      display: block;
+    }
+
+    .page-info {
+      background: var(--glass-panel);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+    }
+
+    .page-info-row strong {
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .page-info-row span,
+    .page-info-row a {
+      font-size: 16px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--glass-panel);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      padding: 32px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px -10px var(--shadow-color);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px -5px var(--shadow-color);
+    }
+
+    [data-theme="light"] .stat-card {
+      border: 2px solid #334155;
+      background: white;
+    }
+
+    .stat-card .number {
+      font-size: 56px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+
+    .stat-card .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .stat-card.total .number {
+      color: var(--text-main);
+    }
+
+    .stat-card.errors .number {
+      color: var(--accent-error);
+    }
+
+    .stat-card.warnings .number {
+      color: var(--accent-warning);
+    }
+
+    /* Issue List */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .section-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .filters {
+      display: flex;
+      gap: 12px;
+    }
+
+    .filter-select {
+      background: var(--input-bg);
+      color: var(--text-main);
+      border: 1px solid var(--glass-border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+
+    [data-theme="light"] .filter-select {
+      border-color: #cbd5e1;
+      background: white;
+    }
+
+    .export-btn {
+      background: rgba(52, 211, 153, 0.1);
+      color: var(--accent-success);
+      border: 1px solid var(--accent-success);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .export-btn:hover {
+      background: var(--accent-success);
+      color: white;
+    }
+
+    .issue-item {
+      background: var(--glass-panel);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      transition: all 0.2s;
+    }
+
+    [data-theme="light"] .issue-item {
+      border-color: #cbd5e1;
+      background: white;
+    }
+
+    .issue-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 12px var(--shadow-color);
+    }
+
+    .issue-item.error {
+      border-left: 5px solid var(--accent-error);
+    }
+
+    .issue-item.warning {
+      border-left: 5px solid var(--accent-warning);
+    }
+
+    .issue-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .issue-badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .issue-badge.error {
+      background: rgba(248, 113, 113, 0.1);
+      color: var(--accent-error);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+
+    .issue-badge.warning {
+      background: rgba(251, 191, 36, 0.1);
+      color: var(--accent-warning);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .plain-language {
+      background: var(--input-bg);
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 16px;
+      font-size: 15px;
+      border: 1px solid var(--glass-border);
+    }
+
+    [data-theme="light"] .plain-language {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+    }
+
+    .what {
+      color: var(--text-main);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .why {
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 14px;
+    }
+
+    /* Technical Snippets */
+    .code-snippet {
+      background: var(--code-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Monaco', monospace;
+      font-size: 12px;
+      margin-top: 8px;
+      overflow-x: auto;
+      color: var(--code-text);
+    }
+
+    .code-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    /* PDF Report Cards */
+    .pdf-card {
+      background: var(--glass-panel);
+      border: 1px solid var(--glass-border);
+      padding: 32px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      color: var(--text-main);
+    }
+
+    [data-theme="light"] .pdf-card {
+      border: 2px solid #334155;
+      background: white;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15);
+    }
+
+    .pdf-card h3 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+
+    .status-pill {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 4px 12px;
+      border-radius: 12px;
+    }
+
+    .status-pill.error {
+      color: var(--accent-error);
+      background: rgba(248, 113, 113, 0.1);
+    }
+
+    .status-pill.success {
+      color: var(--accent-success);
+      background: rgba(52, 211, 153, 0.1);
+    }
+
+    .pdf-issue {
+      background: var(--input-bg);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-main);
+    }
+
+    [data-theme="light"] .pdf-issue {
+      border: 1px solid #334155;
+      background: #f1f5f9;
+    }
+
+    .critical-header {
+      color: var(--accent-error);
+      font-weight: 700;
+      margin: 16px 0 8px;
+      display: block;
+    }
+
+    .warning-header {
+      color: var(--accent-warning);
+      font-weight: 700;
+      margin: 16px 0 8px;
+      display: block;
+    }
+
+    /* Loading Spinner */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 60px;
+    }
+
+    .loading.active {
+      display: block;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top-color: #38bdf8;
+      animation: spin 0.8s ease-in-out infinite;
+      margin: 0 auto 24px;
+    }
+
+    [data-theme="light"] .spinner {
+      border-color: rgba(0, 0, 0, 0.1);
+      border-top-color: #0284c7;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body data-theme="dark">
+  <div class="container">
+    <div class="header-row">
+      <div class="header-content">
+        <div class="header">
+          <h1>ADA Compliance Scanner</h1>
+          <p>Professional Compliance Intelligence</p>
+        </div>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+        ☀️
+      </button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('website')">Website Audit</button>
+      <button class="tab" onclick="switchTab('crawler')">Gap Analysis (Spider)</button>
+    </div>
+
+    <!-- Scanner Area -->
+    <div class="glass-panel scanner-box">
+
+      <!-- Website Tab -->
+      <div id="websiteTab" class="tab-content active">
+        <div class="input-group">
+          <input type="url" id="urlInput" placeholder="Enter website URL (e.g., https://example.com)">
+          <button class="primary" id="scanBtn" onclick="scanWebsite()">Initialize Scan</button>
+        </div>
+
+        <!-- Scan Status Indicator -->
+        <div id="scanStatus"
+          style="display:none; margin-top:20px; padding:16px; background:var(--glass-panel); border:2px solid var(--accent-primary); border-radius:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="spinner" style="width:24px; height:24px; margin:0;"></div>
+              <span id="scanStatusText" style="font-weight:600; color:var(--text-main); font-size:15px;">🔍 Scanning
+                website...</span>
+            </div>
+            <button onclick="stopScan()"
+              style="background:var(--accent-error); color:white; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:600; font-size:13px;">
+              ⏹ Stop Scan
+            </button>
+          </div>
+          <div style="font-size:13px; color:var(--text-muted);" id="scanProgress">Initializing scan...</div>
+        </div>
+
+        <div class="examples">
+          <span>Quick Load:</span>
+          <button class="example-btn" onclick="setUrl('https://www.cityofbowie.org')">City of Bowie</button>
+          <button class="example-btn" onclick="setUrl('https://www.maryland.gov')">Maryland.gov</button>
+          <button class="example-btn" onclick="setUrl('https://www.section508.gov')">Section508.gov</button>
+        </div>
+      </div>
+
+
+      <!-- Crawler Tab -->
+      <div id="crawlerTab" class="tab-content">
+        <div class="input-group">
+          <input type="url" id="crawlUrlInput" placeholder="Enter starting URL (e.g., https://www.cityofbowie.org)">
+          <input type="number" id="crawlMaxPages" placeholder="Max" value="50" style="width: 80px;" min="1" max="500">
+          <button class="primary" onclick="startCrawl()">Start Spider</button>
+        </div>
+        <p style="color:var(--text-muted); font-size:13px; margin-top:8px;">
+          ⚠️ <strong>Note:</strong> Crawling hundreds of pages takes time. Set a higher limit (e.g., 200) for broader
+          coverage.
+        </p>
+
+        <!-- Crawler Progress -->
+        <div id="crawlStatus" style="display:none; margin-top:24px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <span id="crawlStatusText" style="font-weight:600; color:var(--text-main)">Initializing...</span>
+            <span id="crawlProgressPercent" style="color:var(--accent-primary)">0%</span>
+          </div>
+          <div style="width:100%; height:8px; background:var(--input-bg); border-radius:4px; overflow:hidden;">
+            <div id="crawlProgressBar"
+              style="width:0%; height:100%; background:var(--primary-gradient); transition:width 0.3s;"></div>
+          </div>
+
+          <div style="margin-top:16px; display:flex; gap:12px;">
+            <button class="export-btn" id="crawlExportBtn" onclick="downloadCrawlCSV()"
+              style="display:none; width:100%">Download Full Site Audit (CSV)</button>
+          </div>
+        </div>
+
+        <div id="crawlResults" style="margin-top:24px;"></div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Loading State -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p id="loadingText" style="color: var(--text-muted); font-weight: 500;">Processing Request...</p>
+  </div>
+
+  <!-- Alert Box -->
+  <div id="alertMessage" style="display:none; text-align:center; margin-bottom:20px; padding:12px; border-radius:8px;">
+  </div>
+
+  <!-- Website Results -->
+  <div class="results" id="results">
+    <div class="page-info" id="pageInfo"></div>
+
+    <div class="summary-grid">
+      <div class="stat-card total" onclick="filterByStat('all')">
+        <div class="number" id="totalIssues">0</div>
+        <div class="label">Total Issues</div>
+      </div>
+      <div class="stat-card errors" onclick="filterByStat('error')">
+        <div class="number" id="totalErrors">0</div>
+        <div class="label">Critical Errors</div>
+      </div>
+      <div class="stat-card warnings" onclick="filterByStat('warning')">
+        <div class="number" id="totalWarnings">0</div>
+        <div class="label">Warnings</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2>Detected Issues & Recommendations</h2>
+      <div class="filters">
+        <select class="filter-select" id="filterType" onchange="applyFilters()">
+          <option value="all">All Issues</option>
+          <option value="error">Errors Only</option>
+          <option value="warning">Warnings Only</option>
+        </select>
+        <button class="export-btn" onclick="exportToCSV()">Export CSV</button>
+      </div>
+    </div>
+
+    <div id="categoryChart" style="display:none"></div>
+    <div class="issue-list" id="issueList"></div>
+  </div>
+
+  <!-- PDF Results -->
+  <div class="pdf-results-container" id="pdfResults">
+    <div class="pdf-results" id="pdfResultsContent"></div>
+  </div>
+
+  </div>
+
+  <script>
+    // --- Logic ---
+    let selectedFiles = [];
+    let currentTab = 'website';
+
+    // Theme Toggle
+    function toggleTheme() {
+      const body = document.body;
+      const btn = document.querySelector('.theme-toggle');
+      if (body.getAttribute('data-theme') === 'dark') {
+        body.setAttribute('data-theme', 'light');
+        btn.textContent = '🌙';
+      } else {
+        body.setAttribute('data-theme', 'dark');
+        btn.textContent = '☀️';
+      }
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      const buttons = document.querySelectorAll('.tab');
+      for (let btn of buttons) {
+        if (btn.getAttribute('onclick').includes(tab)) {
+          btn.classList.add('active');
+          break;
+        }
+      }
+
+      const content = document.getElementById(tab + 'Tab');
+      if (content) content.classList.add('active');
+      hideResults();
+    }
+
+    function setUrl(url) {
+      document.getElementById('urlInput').value = url;
+      scanWebsite();
+    }
+
+    // PDF-related code removed since PDF tab was deleted
+
+    function handleFiles(files) {
+      selectedFiles = Array.from(files).filter(f => f.type === 'application/pdf');
+      if (selectedFiles.length === 0) { showAlert('Please select PDF files only', 'error'); return; }
+      if (selectedFiles.length > 10) { showAlert('Maximum 10 files allowed', 'error'); selectedFiles = selectedFiles.slice(0, 10); }
+      displayFileList();
+      document.getElementById('scanPdfBtn').style.display = 'inline-block';
+    }
+
+    function displayFileList() {
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = selectedFiles.map((file, index) => `
+        <div class="file-item">
+          <span style="font-weight:500">📄 ${file.name}</span>
+          <span style="font-size:12px; opacity:0.7">${(file.size / 1024).toFixed(1)} KB</span>
+          <button onclick="removeFile(${index})">Remove</button>
+        </div>
+      `).join('');
+    }
+
+    function removeFile(index) {
+      selectedFiles.splice(index, 1);
+      if (selectedFiles.length === 0) {
+        document.getElementById('scanPdfBtn').style.display = 'none';
+      }
+      displayFileList();
+    }
+
+    let scanStartTime = null;
+    let scanTimerInterval = null;
+
+    async function scanWebsite() {
+      const urlInput = document.getElementById('urlInput');
+      const url = urlInput.value.trim();
+      if (!url) { showAlert('Please enter a URL', 'error'); return; }
+
+      let fullUrl = url;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) { fullUrl = 'https://' + url; }
+
+      console.log('🔍 [SCAN START] Initiating scan for:', fullUrl);
+
+      // Show scan status instead of generic loading
+      document.getElementById('scanStatus').style.display = 'block';
+      document.getElementById('scanStatusText').textContent = '🔍 Scanning website...';
+      document.getElementById('scanProgress').textContent = 'Analyzing page structure and accessibility...';
+      document.getElementById('scanBtn').disabled = true;
+      hideResults();
+
+      // Start timer
+      scanStartTime = Date.now();
+      scanTimerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - scanStartTime) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        document.getElementById('scanProgress').textContent = `Analyzing page structure and accessibility... (${timeStr})`;
+      }, 1000);
+
+      try {
+        console.log('📡 [SCAN] Sending request to /api/scan...');
+        const response = await fetch('/api/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: fullUrl })
+        });
+
+        console.log('📥 [SCAN] Response received, status:', response.status);
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error('❌ [SCAN ERROR] Server returned error:', data.message);
+          throw new Error(data.message || 'Scan failed');
+        }
+
+        console.log('✅ [SCAN SUCCESS] Scan completed, found', data.issues?.length || 0, 'issues');
+        document.getElementById('scanProgress').textContent = '✓ Scan complete! Generating report...';
+        displayWebsiteResults(data);
+        showAlert('Audit Complete', 'success');
+      } catch (error) {
+        console.error('❌ [SCAN FAILED]', error);
+        showAlert(`Scan failed: ${error.message}`, 'error');
+      } finally {
+        clearInterval(scanTimerInterval);
+        const totalTime = ((Date.now() - scanStartTime) / 1000).toFixed(1);
+        console.log(`⏱️ [SCAN END] Total scan time: ${totalTime}s`);
+        document.getElementById('scanStatus').style.display = 'none';
+        document.getElementById('scanBtn').disabled = false;
+      }
+    }
+
+    function stopScan() {
+      console.log('⏹ [SCAN STOPPED] User cancelled scan');
+      clearInterval(scanTimerInterval);
+      document.getElementById('scanStatus').style.display = 'none';
+      document.getElementById('scanBtn').disabled = false;
+      showAlert('Scan stopped', 'warning');
+      hideResults();
+    }
+
+    async function scanPDFs() {
+      if (selectedFiles.length === 0) { showAlert('Please select PDF files first', 'error'); return; }
+      showLoading(`Analyzing ${selectedFiles.length} Document(s)...`);
+      hideResults();
+
+      try {
+        const formData = new FormData();
+        selectedFiles.forEach(file => formData.append('pdfs', file));
+        const response = await fetch('/api/scan-pdf', { method: 'POST', body: formData });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'PDF scan failed');
+
+        displayPDFResults(data);
+        showAlert('Analysis Complete', 'success');
+      } catch (error) {
+        console.error('Error:', error);
+        showAlert(`PDF scan failed: ${error.message}`, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    let allIssuesData = [];
+    let currentFilters = { type: 'all', sort: 'count' };
+
+    function displayWebsiteResults(data) {
+      const { summary, detailedIssues, totalUniqueIssues } = data;
+      allIssuesData = detailedIssues;
+
+      document.getElementById('pageInfo').innerHTML = `
+        <div class="page-info-row"><strong>TARGET</strong> <span>${summary.title || 'Untitled'}</span></div>
+        <div class="page-info-row"><strong>URL</strong> <a href="${summary.url}" target="_blank">${summary.url}</a></div>
+        <div class="page-info-row"><strong>TIMESTAMP</strong> <span>${new Date(summary.timestamp).toLocaleTimeString()}</span></div>
+      `;
+
+      document.getElementById('totalIssues').textContent = summary.total;
+      document.getElementById('totalErrors').textContent = summary.errors;
+      document.getElementById('totalWarnings').textContent = summary.warnings;
+
+      renderIssueList(allIssuesData);
+      document.getElementById('results').classList.add('active');
+    }
+
+    function renderIssueList(issues) {
+      const issueList = document.getElementById('issueList');
+      issueList.innerHTML = '';
+
+      issues.forEach((issue, index) => {
+        const typeClass = issue.type === 'error' ? 'error' : 'warning';
+
+        let occurrencesHTML = '';
+        issue.occurrences.forEach((occ, occIndex) => {
+          const elementDesc = describeElement(occ.selector, occ.context);
+          occurrencesHTML += `
+            <div style="background:var(--code-bg); padding:16px; margin-top:12px; border-radius:8px; border:1px solid var(--glass-border);">
+              <div style="font-weight:600; font-size:14px; color:var(--text-main); margin-bottom:8px;">📍 Location ${occIndex + 1}: ${elementDesc}</div>
+              
+              <div style="margin-top:12px;">
+                  <span class="code-label">CSS Selector (Developer ID)</span>
+                  <div class="code-snippet">${occ.selector}</div>
+              </div>
+              <div style="margin-top:8px;">
+                   <span class="code-label">HTML Context</span>
+                   <div class="code-snippet">${escapeHtml(occ.context)}</div>
+              </div>
+            </div>
+          `;
+        });
+
+        issueList.innerHTML += `
+          <div class="issue-item ${typeClass}">
+            <div class="issue-header">
+              <span class="issue-badge ${typeClass}">${issue.type}</span>
+              <span style="color:var(--text-muted); font-size:12px; font-weight:600">${issue.count} LOCATION(S)</span>
+            </div>
+            
+            <div style="font-size:18px; font-weight:700; margin-bottom:8px; color:var(--text-main)">${issue.message}</div>
+            
+            <div class="plain-language">
+               <div class="what"><strong>💡 The Issue:</strong> ${getPlainLanguageExplanation(issue.code, issue.message).what}</div>
+               <div class="why" style="margin-top:8px;"><strong>⚡ Why Fix It:</strong> ${getPlainLanguageExplanation(issue.code, issue.message).why}</div>
+            </div>
+
+            <button onclick="toggleDetails(${index})" style="background:transparent; border:none; color:#818cf8; cursor:pointer; font-size:14px; margin-top:16px; font-weight:600; display:flex; align-items:center;">
+               View Technical Details & Locations (${issue.count}) ▼
+            </button>
+            <div id="details-${index}" style="display:none; margin-top:12px;">${occurrencesHTML}</div>
+          </div>
+        `;
+      });
+    }
+
+    function toggleDetails(index) {
+      const el = document.getElementById(`details-${index}`);
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+      // Toggle arrow eventually?
+    }
+
+    function describeElement(selector, context) {
+      // 1. Try to get semantic info from HTML context first (most accurate)
+      let tag = 'element';
+      let moreInfo = '';
+
+      if (context) {
+        // Match <tag ...
+        const tagMatch = context.match(/^<([a-z0-9]+)/i);
+        if (tagMatch) tag = tagMatch[1].toLowerCase();
+
+        // Extract ID
+        const idMatch = context.match(/id="([^"]+)"/);
+        if (idMatch) moreInfo += ` (#${idMatch[1]})`;
+
+        // Extract Class (if no ID, to not get too long)
+        if (!idMatch) {
+          const classMatch = context.match(/class="([^"]+)"/);
+          if (classMatch) {
+            // take first class only
+            const firstClass = classMatch[1].split(' ')[0];
+            if (firstClass) moreInfo += ` (.${firstClass})`;
+          }
+        }
+
+        // Extract Alt for images
+        if (tag === 'img') {
+          const altMatch = context.match(/alt="([^"]*)"/);
+          if (altMatch && altMatch[1]) moreInfo += ` (Alt: "${altMatch[1].substring(0, 15)}...")`;
+          else if (context.includes('alt=""')) moreInfo += ` (Empty Alt)`;
+          else moreInfo += ` (Missing Alt)`;
+        }
+      }
+
+      // 2. Map tags to friendly names
+      const map = {
+        'a': 'Link',
+        'button': 'Button',
+        'img': 'Image',
+        'input': 'Input Field',
+        'h1': 'Main Heading',
+        'h2': 'Section Heading',
+        'h3': 'Subsection Heading',
+        'p': 'Paragraph',
+        'div': 'Container (Div)',
+        'span': 'Text Span',
+        'ul': 'List',
+        'li': 'List Item',
+        'form': 'Form',
+        'nav': 'Navigation',
+        'footer': 'Footer',
+        'header': 'Header',
+        'main': 'Main Content'
+      };
+
+      let niceName = map[tag] || `Element <${tag}>`;
+
+      // 3. Fallback to selector if context failed
+      if (niceName.startsWith('Element') && selector) {
+        if (selector.includes('#')) { const m = selector.match(/#[a-zA-Z0-9_-]+/); if (m) niceName += ` ${m[0]}`; }
+        else if (selector.includes('.')) { const m = selector.match(/\.[a-zA-Z0-9_-]+/); if (m) niceName += ` ${m[0]}`; }
+      }
+
+      return `${niceName}${moreInfo}`;
+    }
+
+    // PDF Results Render
+    function displayPDFResults(data) {
+      const { summary, results } = data;
+      const container = document.getElementById('pdfResultsContent');
+      const modal = document.getElementById('htmlPreviewModal');
+      const modalContent = document.getElementById('htmlPreviewContent');
+
+      container.innerHTML = `
+            <div class="page-info">
+                <div class="page-info-row"><strong>FILES</strong> <span>${data.totalFiles}</span></div>
+                <div class="page-info-row"><strong>ISSUES</strong> <span>${summary.totalIssues}</span></div>
+            </div>
+        `;
+
+      results.forEach((res, index) => {
+        const hasIssues = res.issues.length > 0;
+        const hasWarnings = res.warnings.length > 0;
+        let statusBadge = '';
+
+        if (hasIssues) statusBadge = `<span class="status-pill error">Failed</span>`;
+        else if (hasWarnings) statusBadge = `<span class="status-pill warning">Warnings</span>`;
+        else statusBadge = `<span class="status-pill success">Passed</span>`;
+
+        // HTML Preview Button Logic
+        const previewBtn = res.htmlPreview
+          ? `<button onclick='showHtmlPreview(${index})' class="example-btn" style="margin-top:12px; display:inline-flex; align-items:center; gap:8px;">👁️ View as HTML Provider</button>`
+          : '';
+
+        // Store preview in a global so we can access it
+        window['pdfPreview_' + index] = res.htmlPreview;
+
+        container.innerHTML += `
+               <div class="pdf-card">
+                  <h3>
+                    <span>📄</span> ${res.filename}
+                    <span style="margin-left:auto">${statusBadge}</span>
+                  </h3>
+                  
+                  ${hasIssues ? `<span class="critical-header">CRITICAL ISSUES</span>` : ''}
+                  ${res.issues.map(i => `<div class="pdf-issue"><span style="color:var(--accent-error)">✖</span> ${i}</div>`).join('')}
+                  
+                  ${hasWarnings ? `<span class="warning-header">OPTIMIZATIONS</span>` : ''}
+                  ${res.warnings.map(w => `<div class="pdf-issue"><span style="color:var(--accent-warning)">⚠</span> ${w}</div>`).join('')}
+                  
+                   <div style="margin-top:16px; border-top:1px solid var(--glass-border); padding-top:16px;">
+                        ${previewBtn}
+                   </div>
+               </div>
+            `;
+      });
+
+      document.getElementById('results').classList.remove('active');
+      document.getElementById('pdfResults').classList.add('active');
+    }
+
+    // Global function for preview
+    let currentHtmlPreview = '';
+    function showHtmlPreview(index) {
+      const html = window['pdfPreview_' + index];
+      currentHtmlPreview = html;
+      const modal = document.getElementById('htmlPreviewModal');
+      const content = document.getElementById('htmlPreviewContent');
+      content.innerHTML = html;
+      modal.style.display = 'block';
+    }
+
+    function downloadHtmlPreview() {
+      // Fallback to DOM content if global is missing
+      let content = currentHtmlPreview;
+      if (!content) {
+        content = document.getElementById('htmlPreviewContent').innerHTML;
+      }
+      if (!content) { alert('No HTML content to download'); return; }
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/api/download-html';
+      form.style.display = 'none';
+
+      const inputHtml = document.createElement('input');
+      inputHtml.type = 'hidden';
+      inputHtml.name = 'html';
+      // Wait, standard form post is fine.
+      inputHtml.value = content;
+      form.appendChild(inputHtml);
+
+      const inputFilename = document.createElement('input');
+      inputFilename.type = 'hidden';
+      inputFilename.name = 'filename';
+      inputFilename.value = 'liberated-pdf.html';
+      form.appendChild(inputFilename);
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+    }
+
+    function filterByStat(type) {
+      const select = document.getElementById('filterType');
+      select.value = type;
+      applyFilters();
+      // Scroll to issues
+      document.querySelector('.section-header').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function applyFilters() {
+      const type = document.getElementById('filterType').value;
+      if (type === 'all') renderIssueList(allIssuesData);
+      else renderIssueList(allIssuesData.filter(i => i.type === type));
+    }
+
+    function showLoading(text) {
+      document.getElementById('loadingText').textContent = text;
+      document.getElementById('loading').classList.add('active');
+    }
+
+    function hideLoading() {
+      document.getElementById('loading').classList.remove('active');
+    }
+
+    function hideResults() {
+      const websiteResults = document.getElementById('results'); // Renamed from 'websiteResults' to 'results' to match existing ID
+      const pdfResults = document.getElementById('pdfResults');
+      const crawlResults = document.getElementById('crawlResults');
+      const alertMessage = document.getElementById('alertMessage'); // Added to handle alert message
+      const htmlPreviewModal = document.getElementById('htmlPreviewModal'); // Added to handle modal
+
+      if (websiteResults) websiteResults.classList.remove('active'); // Changed to classList.remove('active') to match original behavior
+      if (pdfResults) pdfResults.classList.remove('active'); // Changed to classList.remove('active') to match original behavior
+      if (crawlResults) crawlResults.innerHTML = ''; // This was not in the original, but added by instruction
+      if (alertMessage) alertMessage.style.display = 'none'; // Matches original behavior
+      if (htmlPreviewModal) htmlPreviewModal.style.display = 'none'; // Matches original behavior
+    }
+
+    function showAlert(msg, type) {
+      const al = document.getElementById('alertMessage');
+      al.style.display = 'block';
+      al.textContent = msg;
+
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      // Adjust alert colors based on theme if needed, but generic transparent works
+      al.style.background = type === 'error' ? 'rgba(248,113,113,0.2)' : 'rgba(52,211,153,0.2)';
+      al.style.color = type === 'error' ? '#fca5a5' : '#6ee7b7';
+      if (!isDark) al.style.color = type === 'error' ? '#b91c1c' : '#047857'; // Darker text for light mode
+
+      al.style.border = type === 'error' ? '1px solid currentColor' : '1px solid currentColor';
+      setTimeout(() => al.style.display = 'none', 4000);
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function getPlainLanguageExplanation(code, msg) {
+      // Simple map for common accessibility issues
+      const map = {
+        'color-contrast': { what: 'The text color is too similar to the background color.', why: 'People with low vision cannot read this text safely.' },
+        'alt-text': { what: 'An image is missing a text description.', why: 'Screen readers cannot describe this image to blind users.' },
+        'link-name': { what: 'A link does not have a clear name (e.g. empty or just an icon).', why: 'Users navigating by voice or keyboard won\'t know what this link does.' },
+        'label': { what: 'A form input is missing a label.', why: 'Users won\'t know what information to enter here.' },
+        'button-name': { what: 'A button is missing a text description.', why: 'Screen readers will just say "Button" without explaining its action.' }
+      };
+
+      // fuzzy match
+      for (const key in map) {
+        if (code.includes(key) || msg.toLowerCase().includes(key)) return map[key];
+      }
+
+      return { what: msg, why: 'This creates friction for users with disabilities and lowers your compliance score.' };
+    }
+
+    // Export Function preserved
+    function exportToCSV() {
+      if (!allIssuesData || allIssuesData.length === 0) { alert('No data'); return; }
+      let csv = 'Issue,Type,Message,Context\n';
+      allIssuesData.forEach(i => {
+        i.occurrences.forEach(o => {
+          csv += `"${i.code}",${i.type},"${i.message.replace(/"/g, '""')}","${o.context.replace(/"/g, '""')}"\n`;
+        });
+      });
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/api/download-csv';
+      form.style.display = 'none';
+
+      const inputCsv = document.createElement('input');
+      inputCsv.type = 'hidden';
+      inputCsv.name = 'csv';
+      inputCsv.value = '\uFEFF' + csv;
+      form.appendChild(inputCsv);
+
+      const inputFilename = document.createElement('input');
+      inputFilename.type = 'hidden';
+      inputFilename.name = 'filename';
+      inputFilename.value = `ada-scan-${new Date().toISOString().split('T')[0]}.csv`;
+      form.appendChild(inputFilename);
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+    }
+
+    // --- Crawler Logic ---
+    let currentCrawlId = null;
+    let crawlPollInterval = null;
+    let renderedScanIds = new Set(); // Track which scans have been rendered
+
+    async function startCrawl() {
+      const url = document.getElementById('crawlUrlInput').value;
+      const max = document.getElementById('crawlMaxPages').value || 50;
+
+      if (!url) { showAlert('Please enter a URL', 'error'); return; }
+
+      showLoading('Initializing Spider...');
+      document.getElementById('crawlStatus').style.display = 'block';
+      document.getElementById('crawlResults').innerHTML = '';
+      document.getElementById('crawlExportBtn').style.display = 'none';
+
+      try {
+        const formData = new FormData();
+        formData.append('url', url);
+        formData.append('maxPages', max);
+
+        const res = await fetch('/api/crawl/start', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.crawlId) {
+          currentCrawlId = data.crawlId;
+          renderedScanIds.clear(); // Clear previous crawl's rendered IDs
+          hideLoading();
+          pollCrawlStatus();
+        } else {
+          throw new Error(data.error || 'Failed to start');
+        }
+      } catch (e) {
+        console.error(e);
+        showAlert('Crawl failed: ' + e.message, 'error');
+        hideLoading();
+      }
+    }
+
+    function pollCrawlStatus() {
+      if (crawlPollInterval) clearInterval(crawlPollInterval);
+
+      crawlPollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/crawl/status/${currentCrawlId}`);
+          const data = await res.json();
+
+          // Update UI
+          const crawl = data.crawl;
+          const scans = data.scans || [];
+
+          const total = crawl.total_pages || 0;
+          const scanned = scans.length;
+          let statusText = `${crawl.status.toUpperCase()}: Scanned ${scanned} / ${total} pages`;
+
+          if (crawl.status === 'running' && total === 0) {
+            statusText = `DISCOVERING LINKS... (Found ${scanned} so far)`;
+          }
+
+          document.getElementById('crawlStatusText').textContent = statusText;
+
+          const pct = data.progress || 0;
+          document.getElementById('crawlProgressBar').style.width = pct + '%';
+          document.getElementById('crawlProgressPercent').textContent = pct + '%';
+
+          // Render table incrementally (smooth streaming)
+          renderCrawlTable(scans, crawl);
+
+          if (crawl.status === 'completed' || crawl.status === 'failed') {
+            clearInterval(crawlPollInterval);
+            document.getElementById('crawlExportBtn').style.display = 'block';
+          }
+        } catch (e) {
+          console.error('Poll error', e);
+        }
+      }, 2000);
+    }
+
+    function renderCrawlTable(scans, crawl) {
+      const container = document.getElementById('crawlResults');
+      if (scans.length === 0) return;
+
+      // Store scans for sort/filter functionality
+      allCrawlScans = scans;
+
+      // Use total_pages from crawl for accurate count
+      const totalPagesDiscovered = crawl && crawl.total_pages ? crawl.total_pages : scans.length;
+      const scannedCount = scans.length;
+
+      // Calculate executive metrics
+      const totalErrors = scans.reduce((sum, s) => sum + (s.errors || 0), 0);
+      const avgErrors = Math.round(totalErrors / scans.length);
+
+      // Calculate top issue types across all scans
+      const allIssueTypes = {};
+      scans.forEach(scan => {
+        try {
+          const issues = scan.detailed_json ? JSON.parse(scan.detailed_json) : [];
+          issues.forEach(issue => {
+            const key = issue.code;
+            if (!allIssueTypes[key]) {
+              allIssueTypes[key] = {
+                code: issue.code,
+                message: issue.message,
+                count: 0,
+                pagesAffected: new Set()
+              };
+            }
+            allIssueTypes[key].count++;
+            allIssueTypes[key].pagesAffected.add(scan.url);
+          });
+        } catch (e) { }
+      });
+
+      // Get top 3 issues
+      const topIssues = Object.values(allIssueTypes)
+        .map(issue => ({ ...issue, pagesAffected: issue.pagesAffected.size }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 3);
+
+      // Risk assessment
+      let riskLevel = 'LOW';
+      let riskColor = 'var(--accent-success)';
+      let complianceStatus = 'PASSING';
+      if (avgErrors > 20) { riskLevel = 'CRITICAL'; riskColor = 'var(--accent-error)'; complianceStatus = 'FAILING'; }
+      else if (avgErrors > 10) { riskLevel = 'HIGH'; riskColor = '#f97316'; complianceStatus = 'AT RISK'; }
+      else if (avgErrors > 5) { riskLevel = 'MEDIUM'; riskColor = 'var(--accent-warning)'; complianceStatus = 'NEEDS WORK'; }
+
+      // Check if this is first render
+      const isFirstRender = !document.getElementById('crawlTableBody');
+
+      if (isFirstRender) {
+        // First render: create full structure
+        renderedScanIds.clear();
+
+        // Build top issues HTML
+        let topIssuesHTML = '';
+        if (topIssues.length > 0) {
+          topIssuesHTML = '<div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--glass-border);">';
+          topIssuesHTML += '<div style="font-size:13px; font-weight:600; color:var(--text-main); margin-bottom:12px;">🎯 Top Issues Across All Pages</div>';
+          topIssues.forEach((issue, idx) => {
+            const explanation = getPlainLanguageExplanation(issue.code, issue.message);
+            topIssuesHTML += `
+              <div style="margin-bottom:8px; padding:10px; background:rgba(248,113,113,0.1); border-radius:6px; border-left:3px solid var(--accent-error);">
+                <div style="font-size:12px; font-weight:600; color:var(--text-main); margin-bottom:4px;">${idx + 1}. ${issue.code}</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">${explanation.what}</div>
+                <div style="font-size:10px; color:var(--accent-error); font-weight:600;">${issue.count} occurrences across ${issue.pagesAffected} pages</div>
+              </div>
+            `;
+          });
+          topIssuesHTML += '</div>';
+        }
+
+
+        // Calculate worst pages for specific recommendations
+        const worstPages = scans.slice().sort((a, b) => (b.errors || 0) - (a.errors || 0)).slice(0, 3);
+        const pagesOver20Errors = scans.filter(s => (s.errors || 0) > 20).length;
+
+        let html = `
+          <div id="executiveSummary" style="background:var(--glass-panel); border:2px solid ${riskColor}; border-radius:16px; padding:28px; margin-bottom:24px; animation:fadeIn 0.5s;">
+            
+            <!-- Bold Headline -->
+            <div style="margin-bottom:24px; padding-bottom:20px; border-bottom:2px solid var(--glass-border);">
+              <h2 style="margin:0 0 8px 0; font-size:28px; font-weight:900; color:${riskColor}; line-height:1.2;">
+                ${complianceStatus === 'FAILING' ? '⚠️ Your Website is Not ADA Compliant' :
+            complianceStatus === 'AT RISK' ? '⚠️ Significant Compliance Gaps Detected' :
+              '✓ Good Progress, But Work Remains'}
+              </h2>
+              <p style="margin:0; font-size:16px; color:var(--text-muted); line-height:1.5;">
+                ${complianceStatus === 'FAILING' ?
+            `We found <strong style="color:${riskColor};">${totalErrors} accessibility violations</strong> across ${scans.length} pages. This puts you at <strong>legal risk</strong> under ADA Title II.` :
+            complianceStatus === 'AT RISK' ?
+              `We found <strong style="color:${riskColor};">${totalErrors} accessibility violations</strong> that need immediate attention to avoid legal exposure.` :
+              `We found ${totalErrors} issues. You're close to compliance - let's finish strong.`}
+              </p>
+            </div>
+            
+            <!-- Key Metrics Grid -->
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:20px; margin-bottom:24px;">
+              <div style="text-align:center; padding:16px; background:rgba(0,0,0,0.2); border-radius:12px;">
+                <div style="font-size:36px; font-weight:900; color:${riskColor}; margin-bottom:4px;">${pagesOver20Errors}</div>
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">Critical Pages</div>
+              </div>
+              <div style="text-align:center; padding:16px; background:rgba(0,0,0,0.2); border-radius:12px;">
+                <div style="font-size:36px; font-weight:900; color:${riskColor}; margin-bottom:4px;">${totalErrors}</div>
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">Total Violations</div>
+              </div>
+              <div style="text-align:center; padding:16px; background:rgba(0,0,0,0.2); border-radius:12px;">
+                <div style="font-size:36px; font-weight:900; color:var(--text-main); margin-bottom:4px;">${scannedCount}</div>
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">Pages Scanned</div>
+              </div>
+            </div>
+            
+            <div id="topIssuesSection">${topIssuesHTML}</div>
+          </div>
+          
+          
+          <h3 id="resultsHeader" style="font-size:16px; font-weight:700; color:var(--text-main); margin-bottom:12px;">📊 Live Results (${scans.length} pages scanned)</h3>
+          
+          <!-- Sort and Filter Controls -->
+          <div style="display:flex; gap:12px; margin-bottom:16px; padding:12px; background:var(--glass-panel); border-radius:8px; border:1px solid var(--glass-border);">
+            <div style="flex:1;">
+              <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">Sort By:</label>
+              <select id="crawlSortBy" onchange="applyCrawlSort()" style="width:100%; padding:8px; background:var(--input-bg); border:1px solid var(--glass-border); border-radius:6px; color:var(--text-main); font-size:13px;">
+                <option value="issues-desc">Issues (High → Low)</option>
+                <option value="issues-asc">Issues (Low → High)</option>
+                <option value="url-asc">Page URL (A → Z)</option>
+                <option value="url-desc">Page URL (Z → A)</option>
+              </select>
+            </div>
+            <div style="flex:1;">
+              <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">Filter By Risk:</label>
+              <select id="crawlFilterRisk" onchange="applyCrawlSort()" style="width:100%; padding:8px; background:var(--input-bg); border:1px solid var(--glass-border); border-radius:6px; color:var(--text-main); font-size:13px;">
+                <option value="all">All Pages</option>
+                <option value="critical">🚨 Critical Only (20+ errors)</option>
+                <option value="high">⚠️ High Only (10-20 errors)</option>
+                <option value="medium">⚡ Medium Only (5-10 errors)</option>
+                <option value="low">✓ Low Only (<5 errors)</option>
+              </select>
+            </div>
+          </div>
+          
+          <table style="width:100%; border-collapse:collapse;">
+              <thead>
+                  <tr style="text-align:left; border-bottom:2px solid var(--glass-border); color:var(--text-muted); font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">
+                      <th style="padding:12px 8px;">Page</th>
+                      <th style="padding:12px 8px;">Issues</th>
+                      <th style="padding:12px 8px;">Risk</th>
+                  </tr>
+              </thead>
+              <tbody id="crawlTableBody"></tbody>
+          </table>
+          <div id="morePages" style="text-align:center; padding:16px; color:var(--text-muted); font-size:13px; font-style:italic; display:none;"></div>
+        `;
+        container.innerHTML = html;
+
+        // Add CSS animation if not already present
+        if (!document.getElementById('crawlAnimations')) {
+          const style = document.createElement('style');
+          style.id = 'crawlAnimations';
+          style.textContent = `
+            @keyframes slideIn {
+              from { opacity: 0; transform: translateY(-10px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+          `;
+        }
+      }
+
+
+      // Always update header count
+      const header = document.getElementById('resultsHeader');
+      if (header) header.textContent = `📊 Live Results (${scans.length} pages scanned)`;
+
+      // Update executive summary metrics live (if it exists)
+      const executiveSummary = document.getElementById('executiveSummary');
+      if (executiveSummary && !isFirstRender) {
+        // Recalculate metrics for live updates
+        const pagesOver20Errors = scans.filter(s => (s.errors || 0) > 20).length;
+
+        // Update the three metric boxes
+        const metricBoxes = executiveSummary.querySelectorAll('[style*="text-align:center"]');
+        if (metricBoxes.length >= 3) {
+          // Update Critical Pages
+          const criticalPagesNum = metricBoxes[0].querySelector('div[style*="font-size:36px"]');
+          if (criticalPagesNum) criticalPagesNum.textContent = pagesOver20Errors;
+
+          // Update Total Violations
+          const totalViolationsNum = metricBoxes[1].querySelector('div[style*="font-size:36px"]');
+          if (totalViolationsNum) totalViolationsNum.textContent = totalErrors;
+
+          // Update Pages Scanned
+          const pagesScannedNum = metricBoxes[2].querySelector('div[style*="font-size:36px"]');
+          if (pagesScannedNum) pagesScannedNum.textContent = scans.length;
+        }
+
+        // Update border color based on current risk
+        executiveSummary.style.borderColor = riskColor;
+      }
+
+      // Incremental row rendering (SMOOTH STREAMING)
+      const tbody = document.getElementById('crawlTableBody');
+      const sortedScans = [...scans].sort((a, b) => (b.errors || 0) - (a.errors || 0));
+
+      // Show all scans, not just top 10
+      sortedScans.forEach((s) => {
+        // Only render if not already rendered
+        if (!renderedScanIds.has(s.id)) {
+          const errorCount = s.errors || 0;
+          let badge = '';
+          let badgeColor = '';
+          if (errorCount > 20) { badge = '🚨 Critical'; badgeColor = 'var(--accent-error)'; }
+          else if (errorCount > 10) { badge = '⚠️ High'; badgeColor = '#f97316'; }
+          else if (errorCount > 5) { badge = '⚡ Medium'; badgeColor = 'var(--accent-warning)'; }
+          else { badge = '✓ Low'; badgeColor = 'var(--accent-success)'; }
+
+          // Truncate long URLs (especially those with query params)
+          let displayUrl = s.url;
+          try {
+            const urlObj = new URL(s.url);
+            const baseUrl = document.getElementById('crawlUrlInput').value;
+            displayUrl = s.url.replace(baseUrl, '') || '/';
+
+            // If URL is still too long (query params), truncate it
+            if (displayUrl.length > 80) {
+              const pathOnly = urlObj.pathname;
+              displayUrl = pathOnly + (urlObj.search ? '?...' : '');
+            }
+          } catch (e) {
+            // Fallback: just truncate if too long
+            if (displayUrl.length > 80) {
+              displayUrl = displayUrl.substring(0, 77) + '...';
+            }
+          }
+
+          const rowId = `spider-row-${s.id}`;
+
+          const tr = document.createElement('tr');
+          tr.id = rowId;
+          tr.style.borderBottom = '1px solid var(--glass-border)';
+          tr.style.animation = 'slideIn 0.4s ease-out';
+          tr.innerHTML = `
+                  <td style="padding:14px 8px; font-size:13px; max-width:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                      <a href="${s.url}" target="_blank" style="color:var(--accent-primary); text-decoration:none; font-weight:500;" title="${s.url}">${displayUrl}</a>
+                  </td>
+                  <td style="padding:14px 8px;">
+                      <span onclick="toggleSpiderIssues(${s.id})" style="background:rgba(248,113,113,0.15); color:var(--accent-error); padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; user-select:none;">${errorCount} errors ▼</span>
+                      <div id="issues-${s.id}" style="display:none; margin-top:12px; max-height:300px; overflow-y:auto; background:var(--code-bg); border:1px solid var(--glass-border); border-radius:8px; padding:12px;">
+                        <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Loading issues...</div>
+                      </div>
+                  </td>
+                  <td style="padding:14px 8px; font-weight:700; color:${badgeColor};">${badge}</td>
+          `;
+
+          tbody.appendChild(tr);
+          renderedScanIds.add(s.id);
+        }
+      });
+    }
+
+    function downloadCrawlCSV() {
+      if (!currentCrawlId) return;
+      window.location.href = `/api/report/crawl/${currentCrawlId}/csv`;
+    }
+
+    let allCrawlScans = []; // Store all scans for filtering/sorting
+
+    function applyCrawlSort() {
+      if (allCrawlScans.length === 0) return;
+
+      const sortBy = document.getElementById('crawlSortBy').value;
+      const filterRisk = document.getElementById('crawlFilterRisk').value;
+
+      // Filter scans by risk level
+      let filteredScans = [...allCrawlScans];
+      if (filterRisk !== 'all') {
+        filteredScans = filteredScans.filter(s => {
+          const errorCount = s.errors || 0;
+          if (filterRisk === 'critical') return errorCount > 20;
+          if (filterRisk === 'high') return errorCount > 10 && errorCount <= 20;
+          if (filterRisk === 'medium') return errorCount > 5 && errorCount <= 10;
+          if (filterRisk === 'low') return errorCount <= 5;
+          return true;
+        });
+      }
+
+      // Sort scans
+      filteredScans.sort((a, b) => {
+        if (sortBy === 'issues-desc') return (b.errors || 0) - (a.errors || 0);
+        if (sortBy === 'issues-asc') return (a.errors || 0) - (b.errors || 0);
+        if (sortBy === 'url-asc') return a.url.localeCompare(b.url);
+        if (sortBy === 'url-desc') return b.url.localeCompare(a.url);
+        return 0;
+      });
+
+      // Clear and re-render table
+      const tbody = document.getElementById('crawlTableBody');
+      if (tbody) {
+        tbody.innerHTML = '';
+        renderedScanIds.clear();
+
+        // Re-render with filtered/sorted scans
+        filteredScans.forEach(s => {
+          const errorCount = s.errors || 0;
+          let badge = '';
+          let badgeColor = '';
+          if (errorCount > 20) { badge = '🚨 Critical'; badgeColor = 'var(--accent-error)'; }
+          else if (errorCount > 10) { badge = '⚠️ High'; badgeColor = '#f97316'; }
+          else if (errorCount > 5) { badge = '⚡ Medium'; badgeColor = 'var(--accent-warning)'; }
+          else { badge = '✓ Low'; badgeColor = 'var(--accent-success)'; }
+
+          let displayUrl = s.url;
+          try {
+            const urlObj = new URL(s.url);
+            const baseUrl = document.getElementById('crawlUrlInput').value;
+            displayUrl = s.url.replace(baseUrl, '') || '/';
+            if (displayUrl.length > 80) {
+              const pathOnly = urlObj.pathname;
+              displayUrl = pathOnly + (urlObj.search ? '?...' : '');
+            }
+          } catch (e) {
+            if (displayUrl.length > 80) {
+              displayUrl = displayUrl.substring(0, 77) + '...';
+            }
+          }
+
+          const tr = document.createElement('tr');
+          tr.id = `spider-row-${s.id}`;
+          tr.style.borderBottom = '1px solid var(--glass-border)';
+          tr.innerHTML = `
+            <td style="padding:14px 8px; font-size:13px; max-width:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+              <a href="${s.url}" target="_blank" style="color:var(--accent-primary); text-decoration:none; font-weight:500;" title="${s.url}">${displayUrl}</a>
+            </td>
+            <td style="padding:14px 8px;">
+              <span onclick="toggleSpiderIssues(${s.id})" style="background:rgba(248,113,113,0.15); color:var(--accent-error); padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; user-select:none;">${errorCount} errors ▼</span>
+              <div id="issues-${s.id}" style="display:none; margin-top:12px; max-height:300px; overflow-y:auto; background:var(--code-bg); border:1px solid var(--glass-border); border-radius:8px; padding:12px;">
+                <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Loading issues...</div>
+              </div>
+            </td>
+            <td style="padding:14px 8px; font-weight:700; color:${badgeColor};">${badge}</td>
+          `;
+          tbody.appendChild(tr);
+          renderedScanIds.add(s.id);
+        });
+
+        // Update header count
+        const header = document.getElementById('resultsHeader');
+        if (header) {
+          header.textContent = `📊 Live Results (${filteredScans.length} of ${allCrawlScans.length} pages)`;
+        }
+      }
+    }
+
+    // Toggle issue details for a specific scan
+    async function toggleSpiderIssues(scanId) {
+      const container = document.getElementById(`issues-${scanId}`);
+      if (!container) return;
+
+      // Toggle visibility
+      if (container.style.display === 'none') {
+        container.style.display = 'block';
+
+        // Fetch issues if not already loaded
+        if (container.dataset.loaded !== 'true') {
+          try {
+            const res = await fetch(`/api/scan/${scanId}/issues`);
+            const data = await res.json();
+
+            if (data.issues && data.issues.length > 0) {
+              // Add page URL header
+              let html = '';
+              if (data.url) {
+                html += `<div style="margin-bottom:12px; padding:10px; background:rgba(56,189,248,0.1); border-radius:6px; border-left:3px solid var(--accent-primary);">
+                  <div style="font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:4px;">Page URL</div>
+                  <a href="${data.url}" target="_blank" style="font-size:12px; color:var(--accent-primary); text-decoration:none; font-weight:600; word-break:break-all;">${data.url} →</a>
+                </div>`;
+              }
+
+              // Group issues by code for better readability
+              const issueGroups = {};
+              data.issues.forEach(issue => {
+                const key = issue.code;
+                if (!issueGroups[key]) {
+                  issueGroups[key] = {
+                    code: issue.code,
+                    type: issue.type,
+                    message: issue.message,
+                    count: 0
+                  };
+                }
+                issueGroups[key].count++;
+              });
+
+              // Render grouped issues with executive details
+              Object.values(issueGroups).forEach(issue => {
+                const typeColor = issue.type === 'error' ? 'var(--accent-error)' : 'var(--accent-warning)';
+                const explanation = getPlainLanguageExplanation(issue.code, issue.message);
+                const remediation = getRemediationSteps(issue.code, issue.message);
+
+                html += `<div style="margin-bottom:14px; padding:12px; background:rgba(0,0,0,0.3); border-radius:8px; border-left:4px solid ${typeColor};">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <div style="font-size:11px; font-weight:700; color:${typeColor}; text-transform:uppercase; letter-spacing:0.5px;">${issue.code}</div>
+                    ${issue.count > 1 ? `<div style="font-size:10px; background:${typeColor}; color:white; padding:2px 8px; border-radius:10px; font-weight:600;">${issue.count}x</div>` : ''}
+                  </div>
+                  
+                  <div style="margin-bottom:10px;">
+                    <div style="font-size:12px; font-weight:600; color:var(--text-main); margin-bottom:6px;">💡 The Issue</div>
+                    <div style="font-size:11px; color:var(--text-muted); line-height:1.5;">${explanation.what}</div>
+                  </div>
+                  
+                  <div style="margin-bottom:10px;">
+                    <div style="font-size:12px; font-weight:600; color:var(--text-main); margin-bottom:6px;">⚡ Why Fix It</div>
+                    <div style="font-size:11px; color:var(--text-muted); line-height:1.5;">${explanation.why}</div>
+                  </div>
+                  
+                  <div>
+                    <div style="font-size:12px; font-weight:600; color:var(--text-main); margin-bottom:6px;">🔧 How to Fix</div>
+                    <div style="font-size:11px; color:var(--text-muted); line-height:1.5;">${remediation}</div>
+                  </div>
+                </div>`;
+              });
+
+              container.innerHTML = html;
+            } else {
+              container.innerHTML = '<div style="font-size:11px; color:var(--text-muted);">No detailed issues available</div>';
+            }
+            container.dataset.loaded = 'true';
+          } catch (e) {
+            container.innerHTML = '<div style="font-size:11px; color:var(--accent-error);">Failed to load issues</div>';
+          }
+        }
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
+    // Helper function to get remediation steps
+    function getRemediationSteps(code, msg) {
+      const lowerCode = code.toLowerCase();
+      const lowerMsg = msg.toLowerCase();
+
+      // Color contrast issues
+      if (lowerCode.includes('color-contrast') || lowerMsg.includes('contrast')) {
+        return 'Increase the contrast ratio between text and background to at least 4.5:1 for normal text or 3:1 for large text. Use a color contrast checker tool to verify.';
+      }
+
+      // Image alt text
+      if (lowerCode.includes('image-alt') || lowerCode.includes('alt') || lowerMsg.includes('alt')) {
+        return 'Add descriptive alt text to all images using the alt="" attribute. For decorative images, use alt="" (empty string). For informative images, describe what the image conveys.';
+      }
+
+      // Link names
+      if (lowerCode.includes('link-name') || lowerMsg.includes('link') && lowerMsg.includes('name')) {
+        return 'Ensure all links have descriptive text. Avoid generic phrases like "click here" or "read more". Use aria-label for icon-only links.';
+      }
+
+      // Form labels
+      if (lowerCode.includes('label') || lowerMsg.includes('label')) {
+        return 'Associate every form input with a <label> element using the for="" attribute, or wrap the input inside the label. Alternatively, use aria-label for inputs.';
+      }
+
+      // Button names
+      if (lowerCode.includes('button-name') || lowerMsg.includes('button')) {
+        return 'Add descriptive text or an aria-label to all buttons. Icon-only buttons must have aria-label="Description of action".';
+      }
+
+      // ARIA issues
+      if (lowerCode.includes('aria') || lowerMsg.includes('aria')) {
+        return 'Review ARIA attributes for correctness. Ensure roles are valid, required attributes are present, and values are appropriate. Refer to ARIA authoring practices guide.';
+      }
+
+      // Heading structure
+      if (lowerCode.includes('heading') || lowerMsg.includes('heading')) {
+        return 'Maintain proper heading hierarchy (h1 → h2 → h3). Don\'t skip levels. Use only one h1 per page. Headings should describe the content that follows.';
+      }
+
+      // Language
+      if (lowerCode.includes('lang') || lowerMsg.includes('language')) {
+        return 'Add lang="en" attribute to the <html> tag. For content in other languages, use lang="" on the specific element (e.g., <span lang="es">Hola</span>).';
+      }
+
+      // Duplicate IDs
+      if (lowerCode.includes('duplicate-id') || lowerMsg.includes('duplicate') && lowerMsg.includes('id')) {
+        return 'Ensure all ID attributes are unique on the page. IDs must not be repeated. Use classes for styling multiple elements instead.';
+      }
+
+      // Default fallback
+      return 'Review the element and apply WCAG 2.1 AA guidelines. Consult with your development team or an accessibility specialist for specific remediation steps.';
+    }
+
+  </script>
+</body>
+
+</html>
