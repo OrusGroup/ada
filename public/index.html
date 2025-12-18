@@ -852,6 +852,7 @@
     <div class="tabs">
       <button class="tab active" onclick="switchTab('website')">Website Audit</button>
       <button class="tab" onclick="switchTab('crawler')">Gap Analysis (Spider)</button>
+      <button class="tab" onclick="switchTab('documents')">Document Scanner</button>
     </div>
 
     <!-- Scanner Area -->
@@ -1015,6 +1016,106 @@
         </div>
 
       </div>
+
+      <!-- Document Scanner Tab -->
+      <div id="documentsTab" class="tab-content">
+        <div id="alertMessageDocs"
+          style="display:none; text-align:center; margin-bottom:20px; padding:12px; border-radius:8px;"></div>
+
+        <h2 style="font-size:20px; font-weight:700; color:var(--text-main); margin-bottom:8px;">📄 Bulk PDF
+          Accessibility Scanner</h2>
+        <p style="color:var(--text-muted); font-size:13px; margin-bottom:24px;">
+          Upload PDFs to identify accessibility issues. We'll pinpoint exactly what needs remediation.
+        </p>
+
+        <!-- Upload Area -->
+        <div id="pdfUploadArea" ondrop="handlePdfDrop(event)"
+          ondragover="event.preventDefault(); this.style.borderColor='var(--accent-primary)'"
+          ondragleave="this.style.borderColor='var(--glass-border)'"
+          onclick="document.getElementById('pdfFileInput').click()"
+          style="border:2px dashed var(--glass-border); border-radius:16px; padding:48px; text-align:center; cursor:pointer; transition:all 0.3s; background:var(--glass-panel);">
+          <div style="font-size:48px; margin-bottom:16px;">📤</div>
+          <div style="font-size:18px; font-weight:600; color:var(--text-main); margin-bottom:8px;">Drag & Drop PDFs Here
+          </div>
+          <div style="font-size:13px; color:var(--text-muted);">or click to browse (up to 50 files)</div>
+          <input type="file" id="pdfFileInput" accept=".pdf" multiple style="display:none"
+            onchange="handlePdfSelect(event)">
+        </div>
+
+        <!-- Selected Files List -->
+        <div id="pdfFileList" style="margin-top:16px;"></div>
+
+        <!-- Scan Button -->
+        <div id="pdfScanControls" style="display:none; margin-top:24px; text-align:center;">
+          <button class="primary" onclick="scanAllPdfs()" id="scanPdfsBtn" style="padding:14px 32px; font-size:16px;">
+            🔍 Scan All Documents
+          </button>
+        </div>
+
+        <!-- Progress -->
+        <div id="pdfScanProgress"
+          style="display:none; margin-top:24px; padding:20px; background:var(--glass-panel); border-radius:16px; border:1px solid var(--glass-border);">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div class="spinner" style="width:24px; height:24px; margin:0; border-width:2px;"></div>
+            <div>
+              <div id="pdfProgressText" style="font-weight:700; color:var(--text-main); font-size:16px;">Scanning
+                documents...</div>
+              <div id="pdfProgressCount" style="color:var(--text-muted); font-size:13px;">0 of 0 complete</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Dashboard -->
+        <div id="pdfResultsDashboard" style="display:none; margin-top:24px;">
+          <!-- Executive Summary -->
+          <div
+            style="background:linear-gradient(135deg, rgba(239,68,68,0.1), rgba(251,191,36,0.1)); border:1px solid var(--glass-border); border-radius:16px; padding:24px; margin-bottom:24px;">
+            <h3 style="font-size:18px; font-weight:700; color:var(--text-main); margin-bottom:16px;">📊 Executive
+              Summary</h3>
+            <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:16px;">
+              <div style="text-align:center; padding:16px; background:var(--glass-panel); border-radius:12px;">
+                <div id="pdfTotalFiles" style="font-size:36px; font-weight:800; color:var(--text-main);">0</div>
+                <div
+                  style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700;">
+                  Total Files</div>
+              </div>
+              <div style="text-align:center; padding:16px; background:var(--glass-panel); border-radius:12px;">
+                <div id="pdfFailingFiles" style="font-size:36px; font-weight:800; color:var(--accent-error);">0</div>
+                <div
+                  style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700;">
+                  With Issues</div>
+              </div>
+              <div style="text-align:center; padding:16px; background:var(--glass-panel); border-radius:12px;">
+                <div id="pdfPassingFiles" style="font-size:36px; font-weight:800; color:var(--accent-success);">0</div>
+                <div
+                  style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700;">
+                  Clean</div>
+              </div>
+              <div style="text-align:center; padding:16px; background:var(--glass-panel); border-radius:12px;">
+                <div id="pdfComplianceScore" style="font-size:36px; font-weight:800; color:var(--accent-warning);">0%
+                </div>
+                <div
+                  style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700;">
+                  Compliance</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Results Header -->
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 style="font-size:16px; font-weight:700; color:var(--text-main);">Document Issues</h3>
+            <button onclick="exportPdfReport()"
+              style="background:var(--accent-primary); color:white; border:none; padding:8px 16px; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer;">
+              📥 Export Report
+            </button>
+          </div>
+
+          <!-- Per-File Results -->
+          <div id="pdfResultsList"></div>
+        </div>
+
+      </div>
+
     </div>
 
   </div>
@@ -1105,6 +1206,257 @@
         document.getElementById('scanPdfBtn').style.display = 'none';
       }
       displayFileList();
+    }
+
+    // ============================================
+    // DOCUMENT SCANNER (Bulk PDF) FUNCTIONS
+    // ============================================
+    let pdfFilesToScan = [];
+    let pdfScanResults = [];
+
+    function handlePdfDrop(event) {
+      event.preventDefault();
+      document.getElementById('pdfUploadArea').style.borderColor = 'var(--glass-border)';
+      const files = Array.from(event.dataTransfer.files).filter(f => f.type === 'application/pdf');
+      addPdfFiles(files);
+    }
+
+    function handlePdfSelect(event) {
+      const files = Array.from(event.target.files).filter(f => f.type === 'application/pdf');
+      addPdfFiles(files);
+    }
+
+    function addPdfFiles(files) {
+      if (files.length === 0) {
+        showAlert('Please select PDF files only', 'error');
+        return;
+      }
+
+      // Add to list (max 50)
+      files.forEach(f => {
+        if (pdfFilesToScan.length < 50) {
+          pdfFilesToScan.push(f);
+        }
+      });
+
+      if (pdfFilesToScan.length > 50) {
+        pdfFilesToScan = pdfFilesToScan.slice(0, 50);
+        showAlert('Maximum 50 files - extra files removed', 'warning');
+      }
+
+      renderPdfFileList();
+      document.getElementById('pdfScanControls').style.display = 'block';
+    }
+
+    function renderPdfFileList() {
+      const container = document.getElementById('pdfFileList');
+      if (pdfFilesToScan.length === 0) {
+        container.innerHTML = '';
+        document.getElementById('pdfScanControls').style.display = 'none';
+        return;
+      }
+
+      container.innerHTML = `
+        <div style="background:var(--glass-panel); border-radius:12px; padding:16px; border:1px solid var(--glass-border);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <span style="font-weight:700; color:var(--text-main);">${pdfFilesToScan.length} file(s) selected</span>
+            <button onclick="clearPdfFiles()" style="background:transparent; border:1px solid var(--accent-error); color:var(--accent-error); padding:6px 12px; border-radius:6px; font-size:12px; cursor:pointer;">Clear All</button>
+          </div>
+          <div style="max-height:200px; overflow-y:auto;">
+            ${pdfFilesToScan.map((f, i) => `
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:var(--input-bg); border-radius:6px; margin-bottom:4px;">
+                <span style="font-size:13px; color:var(--text-main);">📄 ${f.name}</span>
+                <span style="font-size:11px; color:var(--text-muted);">${(f.size / 1024).toFixed(1)} KB</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function clearPdfFiles() {
+      pdfFilesToScan = [];
+      pdfScanResults = [];
+      renderPdfFileList();
+      document.getElementById('pdfResultsDashboard').style.display = 'none';
+      document.getElementById('pdfFileInput').value = '';
+    }
+
+    async function scanAllPdfs() {
+      if (pdfFilesToScan.length === 0) {
+        showAlert('Please select files first', 'error');
+        return;
+      }
+
+      // Show progress
+      document.getElementById('pdfScanProgress').style.display = 'block';
+      document.getElementById('pdfScanControls').style.display = 'none';
+      document.getElementById('pdfResultsDashboard').style.display = 'none';
+
+      pdfScanResults = [];
+      const total = pdfFilesToScan.length;
+
+      for (let i = 0; i < pdfFilesToScan.length; i++) {
+        const file = pdfFilesToScan[i];
+        document.getElementById('pdfProgressText').textContent = `Scanning: ${file.name}`;
+        document.getElementById('pdfProgressCount').textContent = `${i + 1} of ${total} complete`;
+
+        try {
+          const formData = new FormData();
+          formData.append('pdfs', file);
+
+          const res = await fetch('/api/scan-pdf', { method: 'POST', body: formData });
+          const data = await res.json();
+
+          if (data.results && data.results.length > 0) {
+            pdfScanResults.push({
+              filename: file.name,
+              size: file.size,
+              issues: data.results[0].issues || [],
+              warnings: data.results[0].warnings || [],
+              scannerNote: data.results[0].scannerNote || null
+            });
+          }
+        } catch (e) {
+          pdfScanResults.push({
+            filename: file.name,
+            size: file.size,
+            issues: ['Failed to scan this file'],
+            warnings: [],
+            scannerNote: 'Scan Error'
+          });
+        }
+      }
+
+      // Hide progress, show results
+      document.getElementById('pdfScanProgress').style.display = 'none';
+      renderPdfResults();
+    }
+
+    function renderPdfResults() {
+      const dashboard = document.getElementById('pdfResultsDashboard');
+      dashboard.style.display = 'block';
+
+      // Calculate stats
+      const total = pdfScanResults.length;
+      const failing = pdfScanResults.filter(r => r.issues.length > 0).length;
+      const passing = total - failing;
+      const compliance = total > 0 ? Math.round((passing / total) * 100) : 0;
+
+      // Update summary
+      document.getElementById('pdfTotalFiles').textContent = total;
+      document.getElementById('pdfFailingFiles').textContent = failing;
+      document.getElementById('pdfPassingFiles').textContent = passing;
+      document.getElementById('pdfComplianceScore').textContent = compliance + '%';
+
+      // Render per-file results
+      const listContainer = document.getElementById('pdfResultsList');
+      listContainer.innerHTML = pdfScanResults.map((result, idx) => {
+        const hasIssues = result.issues.length > 0;
+        const statusColor = hasIssues ? 'var(--accent-error)' : 'var(--accent-success)';
+        const statusText = hasIssues ? 'ISSUES FOUND' : 'CLEAN';
+        const statusBadge = hasIssues ?
+          `<span style="background:rgba(239,68,68,0.2); color:var(--accent-error); padding:4px 12px; border-radius:6px; font-size:11px; font-weight:700;">${result.issues.length} ISSUE(S)</span>` :
+          `<span style="background:rgba(34,197,94,0.2); color:var(--accent-success); padding:4px 12px; border-radius:6px; font-size:11px; font-weight:700;">✓ CLEAN</span>`;
+
+        // Build issues HTML in golden standard format
+        let issuesHtml = '';
+        if (hasIssues) {
+          result.issues.forEach((issue, i) => {
+            const explanation = getPdfIssueExplanation(issue);
+            issuesHtml += `
+              <div style="background:var(--code-bg); border:1px solid var(--glass-border); border-radius:8px; padding:16px; margin-top:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                  <span class="issue-badge error" style="font-size:10px;">ERROR</span>
+                </div>
+                <div style="font-weight:700; color:var(--text-main); font-size:14px; margin-bottom:8px;">${escapeHtml(issue)}</div>
+                <div style="border-left:2px solid var(--accent-error); padding-left:12px; margin-top:8px;">
+                  <div style="font-size:13px; margin-bottom:4px;"><strong>💡 The Issue:</strong> ${explanation.what}</div>
+                  <div style="font-size:13px;"><strong>⚡ Why Fix It:</strong> ${explanation.why}</div>
+                </div>
+              </div>
+            `;
+          });
+
+          // Add warnings
+          result.warnings.forEach(warn => {
+            issuesHtml += `
+              <div style="background:var(--code-bg); border:1px solid var(--glass-border); border-radius:8px; padding:12px; margin-top:8px;">
+                <span class="issue-badge warning" style="font-size:10px;">INFO</span>
+                <span style="margin-left:8px; font-size:13px; color:var(--text-muted);">${escapeHtml(warn)}</span>
+              </div>
+            `;
+          });
+        }
+
+        return `
+          <div style="background:var(--glass-panel); border:1px solid var(--glass-border); border-radius:12px; margin-bottom:12px; overflow:hidden;">
+            <div style="padding:16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="togglePdfDetail(${idx})">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-size:24px;">📄</span>
+                <div>
+                  <div style="font-weight:700; color:var(--text-main); font-size:14px;">${escapeHtml(result.filename)}</div>
+                  <div style="font-size:11px; color:var(--text-muted);">${(result.size / 1024).toFixed(1)} KB</div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                ${statusBadge}
+                <span style="color:var(--text-muted); font-size:12px;">▼</span>
+              </div>
+            </div>
+            <div id="pdfDetail-${idx}" style="display:none; padding:0 16px 16px 16px; border-top:1px solid var(--glass-border);">
+              ${hasIssues ? issuesHtml : '<div style="padding:16px; text-align:center; color:var(--accent-success);">✓ No accessibility issues detected</div>'}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function togglePdfDetail(idx) {
+      const el = document.getElementById(`pdfDetail-${idx}`);
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function getPdfIssueExplanation(issue) {
+      const lower = issue.toLowerCase();
+      if (lower.includes('tag') || lower.includes('structure')) {
+        return { what: 'This PDF lacks accessibility tags/structure.', why: 'Screen readers cannot navigate the document properly.' };
+      }
+      if (lower.includes('ocr') || lower.includes('scanned') || lower.includes('image')) {
+        return { what: 'This appears to be a scanned/image-only PDF.', why: 'The text cannot be read by assistive technology.' };
+      }
+      if (lower.includes('title') || lower.includes('metadata')) {
+        return { what: 'Document metadata is missing or incomplete.', why: 'Users cannot identify the document purpose.' };
+      }
+      if (lower.includes('language')) {
+        return { what: 'Document language is not specified.', why: 'Screen readers may mispronounce content.' };
+      }
+      return { what: issue, why: 'This creates barriers for users with disabilities.' };
+    }
+
+    function exportPdfReport() {
+      if (pdfScanResults.length === 0) {
+        showAlert('No results to export', 'error');
+        return;
+      }
+
+      // Build CSV
+      let csv = 'Filename,Size (KB),Status,Issues,Warnings\n';
+      pdfScanResults.forEach(r => {
+        const status = r.issues.length > 0 ? 'ISSUES FOUND' : 'CLEAN';
+        const issues = r.issues.join('; ').replace(/"/g, '""');
+        const warnings = r.warnings.join('; ').replace(/"/g, '""');
+        csv += `"${r.filename}",${(r.size / 1024).toFixed(1)},"${status}","${issues}","${warnings}"\n`;
+      });
+
+      // Download
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pdf-accessibility-report-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
     }
 
     // Scan control variables

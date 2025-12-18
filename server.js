@@ -84,11 +84,25 @@ app.post('/api/scan-pdf', upload.array('pdfs', 10), async (req, res) => {
         if (file.mimetype === 'application/pdf') {
           // 1. Tag Check (Basic Manual Check)
           const rawAndSimple = buffer.toString('latin1');
+
+          // CRITICAL: Check for structure tags
           if (!rawAndSimple.includes('/StructTreeRoot')) {
-            pdfResult.issues.push('PDF is not tagged (missing structure tree) - Critical for Screen Readers');
+            pdfResult.issues.push('PDF is not tagged (missing structure tree) - Screen readers cannot navigate this document');
           }
+
+          // Document language is required for ADA compliance
           if (!rawAndSimple.includes('/Lang')) {
-            pdfResult.warnings.push('PDF language metadata is missing');
+            pdfResult.issues.push('Document language is not specified - Screen readers may mispronounce content');
+          }
+
+          // Check for document title (required for accessibility)
+          if (!rawAndSimple.includes('/Title')) {
+            pdfResult.issues.push('Document title metadata is missing - Users cannot identify document purpose');
+          }
+
+          // Check for bookmarks/outlines (important for navigation)
+          if (!rawAndSimple.includes('/Outlines')) {
+            pdfResult.warnings.push('Document lacks bookmarks/navigation - Large documents need table of contents');
           }
 
           // 2. Content Analysis (Text Layer vs Scan)
@@ -114,11 +128,11 @@ app.post('/api/scan-pdf', upload.array('pdfs', 10), async (req, res) => {
           if (analysis.isScanned) {
             // Already handled in analysis.issues usually, but ensure note is set
             pdfResult.scannerNote = "Requires OCR";
-          } else {
-            pdfResult.warnings.push(`Text layer found (${analysis.textLength} chars). Document contains readable text.`);
-            if (analysis.metadata && analysis.metadata.Title) {
-              pdfResult.warnings.push(`Title Metadata found: "${analysis.metadata.Title}"`);
-            }
+          }
+
+          // Check if document has very little text (possible scan)
+          if (analysis.textLength < 50) {
+            pdfResult.issues.push('Document appears to be image-only or has minimal text content - May require OCR');
           }
 
         } else if (file.mimetype.startsWith('image/')) {
