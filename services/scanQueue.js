@@ -9,13 +9,16 @@ let activeWorkers = 0;
 const scanOptions = {
     standard: 'WCAG2AA',
     runners: ['axe'],
-    timeout: 60000,
-    wait: 1000,
-    chromeLaunchConfig: { args: ['--no-sandbox'] }
+    timeout: 90000, // Increased to 90s
+    wait: 2000, // Wait 2s for JS to settle
+    chromeLaunchConfig: {
+        headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    }
 };
 
-function addJob(url, crawlId) {
-    queue.push({ url, crawlId });
+function addJob(url, crawlId, scanId = null) {
+    queue.push({ url, crawlId, scanId });
     processQueue();
 }
 
@@ -28,7 +31,20 @@ async function processQueue() {
     console.log(`🔍 Scanning queued page: ${job.url}`);
 
     try {
-        const results = await pa11y(job.url, scanOptions);
+        // Enforce timeout via Promise.race
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Scan timed out after 95s')), 95000)
+        );
+
+        const results = await Promise.race([
+            pa11y(job.url, scanOptions),
+            timeoutPromise
+        ]);
+
+        // DEBUG: Log first issue to see structure
+        if (results.issues && results.issues.length > 0) {
+            console.log('📋 [DEBUG] Sample pa11y issue structure:', JSON.stringify(results.issues[0], null, 2));
+        }
 
         // Process results
         const summary = {
@@ -49,11 +65,12 @@ async function processQueue() {
             else categories.Other++; // Simplified for queue speed
         });
 
-        // Save to DB
+        // Save to DB (update existing if scanId provided, otherwise create new)
         await db.saveScan({
             summary: summary,
             detailedIssues: results.issues, // Full issues
-            crawlId: job.crawlId
+            crawlId: job.crawlId,
+            scanId: job.scanId // Will be null for old-style crawls, or a specific ID for split spider
         });
 
         // Check if all pages have been scanned and mark crawl as complete
@@ -70,11 +87,14 @@ async function processQueue() {
 
     } catch (error) {
         console.error(`❌ Failed to scan ${job.url}:`, error.message);
-        // Optionally save a "failed" record to DB so progress bar updates
+
+        // Save "failed" record to DB so UI updates from "Queueing" to "Failed"
         await db.saveScan({
             summary: { url: job.url, total: 0, errors: 0, warnings: 0, notices: 0 },
             detailedIssues: [],
-            crawlId: job.crawlId
+            crawlId: job.crawlId,
+            scanId: job.scanId,
+            status: 'failed' // NEW: Explicit failed status
         });
 
         // Check completion even for failed scans
@@ -90,8 +110,26 @@ async function processQueue() {
         });
     } finally {
         activeWorkers--;
-        processQueue();
+        // Process next job immediately
+        setImmediate(processQueue);
     }
 }
 
-module.exports = { addJob };
+
+function clear(crawlId) {
+    const initialLength = queue.length;
+    // Remove jobs matching this crawlId
+    // Note: This won't filter in-place easily with filter() if we want to mutate active queue reference,
+    // but since 'queue' is const array, we can't reassign it.
+    // We must splice it or use a different structure.
+    // Easier approach: iterate backwards and splice.
+    for (let i = queue.length - 1; i >= 0; i--) {
+        if (parseInt(queue[i].crawlId) === parseInt(crawlId)) {
+            queue.splice(i, 1);
+        }
+    }
+    console.log(`🛑 Cleared ${initialLength - queue.length} jobs for crawl ${crawlId}`);
+}
+
+module.exports = { addJob, clear };
+

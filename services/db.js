@@ -18,8 +18,16 @@ function init() {
       notices INTEGER,
       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
       crawl_id INTEGER,
-      detailed_json TEXT
+      detailed_json TEXT,
+      scan_status TEXT DEFAULT 'complete'
     )`);
+
+        // Add scan_status column if it doesn't exist (for existing databases)
+        db.run(`ALTER TABLE scans ADD COLUMN scan_status TEXT DEFAULT 'complete'`, (err) => {
+            if (err && !err.message.includes('duplicate column')) {
+                console.error('Error adding scan_status column:', err);
+            }
+        });
 
         // Crawls Table (Full Site)
         db.run(`CREATE TABLE IF NOT EXISTS crawls (
@@ -36,25 +44,47 @@ function init() {
 // Save a single scan result
 function saveScan(data) {
     return new Promise((resolve, reject) => {
-        const { summary, detailedIssues, crawlId } = data;
+        const { summary, detailedIssues, crawlId, scanId } = data;
         const score = Math.max(0, 100 - (summary.errors * 5) - (summary.warnings * 1));
 
-        const stmt = db.prepare(`INSERT INTO scans (url, score, total_issues, errors, warnings, notices, detailed_json, crawl_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`);
-        stmt.run(
-            summary.url,
-            score,
-            summary.total,
-            summary.errors,
-            summary.warnings,
-            summary.notices,
-            JSON.stringify(detailedIssues),
-            crawlId || null,
-            function (err) {
-                if (err) reject(err);
-                else resolve(this.lastID);
-            }
-        );
-        stmt.finalize();
+        // If scanId is provided, update existing scan record (split spider)
+        if (scanId) {
+            const stmt = db.prepare(`UPDATE scans SET score = ?, total_issues = ?, errors = ?, warnings = ?, notices = ?, detailed_json = ?, scan_status = ? WHERE id = ?`);
+            stmt.run(
+                score,
+                summary.total,
+                summary.errors,
+                summary.warnings,
+                summary.notices,
+                JSON.stringify(detailedIssues),
+                data.status || 'complete',
+                scanId,
+                function (err) {
+                    if (err) reject(err);
+                    else resolve(scanId);
+                }
+            );
+            stmt.finalize();
+        } else {
+            // Otherwise, create new scan record (old-style crawl)
+            const stmt = db.prepare(`INSERT INTO scans (url, score, total_issues, errors, warnings, notices, detailed_json, crawl_id, scan_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+            stmt.run(
+                summary.url,
+                score,
+                summary.total,
+                summary.errors,
+                summary.warnings,
+                summary.notices,
+                JSON.stringify(detailedIssues),
+                crawlId || null,
+                data.status || 'complete',
+                function (err) {
+                    if (err) reject(err);
+                    else resolve(this.lastID);
+                }
+            );
+            stmt.finalize();
+        }
     });
 }
 

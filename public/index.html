@@ -51,6 +51,7 @@
       --shadow-color: rgba(15, 23, 42, 0.15);
     }
 
+
     * {
       margin: 0;
       padding: 0;
@@ -66,6 +67,7 @@
       line-height: 1.5;
       transition: background 0.5s ease;
     }
+
 
     .container {
       max-width: 1200px;
@@ -187,6 +189,35 @@
       background: #0284c7;
       color: white;
       box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+    }
+
+    /* Tier Buttons */
+    .tier-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+    }
+
+    .tier-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+    }
+
+    .tier-btn.active {
+      background: var(--primary-gradient);
+      border: none;
+      color: white;
+    }
+
+    [data-theme="light"] .tier-btn {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+    }
+
+    [data-theme="light"] .tier-btn.active {
+      background: #0284c7;
+      color: white;
     }
 
     /* Scanner Box */
@@ -382,6 +413,19 @@
       cursor: pointer;
       font-size: 12px;
       font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    [data-theme="light"] .example-btn {
+      color: var(--text-main);
+      border: 1px solid #94a3b8;
+      /* Darker border */
+      background: white;
+    }
+
+    [data-theme="light"] .example-btn:hover {
+      background: #f1f5f9;
+      border-color: #64748b;
     }
 
     /* Results Dashboard */
@@ -405,6 +449,12 @@
       display: flex;
       flex-wrap: wrap;
       gap: 32px;
+    }
+
+    [data-theme="light"] .page-info {
+      border: 1px solid #94a3b8;
+      /* Darker border */
+      background: #f8fafc;
     }
 
     .page-info-row strong {
@@ -582,10 +632,24 @@
       border: 1px solid rgba(248, 113, 113, 0.3);
     }
 
+    /* Light Theme Contrast for Badge */
+    [data-theme="light"] .issue-badge.error {
+      border: 1px solid var(--accent-error);
+      /* Solid border */
+      background: rgba(248, 113, 113, 0.05);
+      /* Lighter background */
+    }
+
     .issue-badge.warning {
       background: rgba(251, 191, 36, 0.1);
       color: var(--accent-warning);
       border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    [data-theme="light"] .issue-badge.warning {
+      border: 1px solid var(--accent-warning);
+      /* Solid border */
+      background: rgba(251, 191, 36, 0.05);
     }
 
     .plain-language {
@@ -614,6 +678,21 @@
       font-size: 14px;
     }
 
+    /* Detailed Instance Box */
+    .detailed-instance {
+      background: var(--code-bg);
+      padding: 16px;
+      margin-top: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+    }
+
+    [data-theme="light"] .detailed-instance {
+      background: #f1f5f9;
+      border: 1px solid #94a3b8;
+      /* Darker border for visibility */
+    }
+
     /* Technical Snippets */
     .code-snippet {
       background: var(--code-bg);
@@ -627,6 +706,14 @@
       color: var(--code-text);
     }
 
+    [data-theme="light"] .code-snippet {
+      background: #ffffff;
+      border: 1px solid #94a3b8;
+      /* Darker border */
+      color: #0f172a;
+      /* Dark text */
+    }
+
     .code-label {
       font-size: 11px;
       text-transform: uppercase;
@@ -634,6 +721,11 @@
       font-weight: 700;
       margin-bottom: 4px;
       display: block;
+    }
+
+    [data-theme="light"] .code-label {
+      color: #334155;
+      /* Darker slate for labels */
     }
 
     /* PDF Report Cards */
@@ -767,6 +859,11 @@
 
       <!-- Website Tab -->
       <div id="websiteTab" class="tab-content active">
+        <!-- Alert Box Moved Here -->
+        <div id="alertMessage"
+          style="display:none; text-align:center; margin-bottom:20px; padding:12px; border-radius:8px;">
+        </div>
+
         <div class="input-group">
           <input type="url" id="urlInput" placeholder="Enter website URL (e.g., https://example.com)">
           <button class="primary" id="scanBtn" onclick="scanWebsite()">Initialize Scan</button>
@@ -775,16 +872,10 @@
         <!-- Scan Status Indicator -->
         <div id="scanStatus"
           style="display:none; margin-top:20px; padding:16px; background:var(--glass-panel); border:2px solid var(--accent-primary); border-radius:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <div class="spinner" style="width:24px; height:24px; margin:0;"></div>
-              <span id="scanStatusText" style="font-weight:600; color:var(--text-main); font-size:15px;">🔍 Scanning
-                website...</span>
-            </div>
-            <button onclick="stopScan()"
-              style="background:var(--accent-error); color:white; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:600; font-size:13px;">
-              ⏹ Stop Scan
-            </button>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+            <div class="spinner" style="width:24px; height:24px; margin:0;"></div>
+            <span id="scanStatusText" style="font-weight:600; color:var(--text-main); font-size:15px;">🔍 Scanning
+              website...</span>
           </div>
           <div style="font-size:13px; color:var(--text-muted);" id="scanProgress">Initializing scan...</div>
         </div>
@@ -794,6 +885,44 @@
           <button class="example-btn" onclick="setUrl('https://www.cityofbowie.org')">City of Bowie</button>
           <button class="example-btn" onclick="setUrl('https://www.maryland.gov')">Maryland.gov</button>
           <button class="example-btn" onclick="setUrl('https://www.section508.gov')">Section508.gov</button>
+          <button class="example-btn" onclick="setUrl('https://www.princegeorgescountymd.gov')">Prince George's
+            County</button>
+          <button class="example-btn" onclick="setUrl('https://www.montgomerycountymd.gov')">Montgomery County</button>
+          <button class="example-btn" onclick="setUrl('https://www.baltimorecity.gov')">Baltimore City</button>
+        </div>
+        <div class="results" id="results" style="margin-top:24px;">
+          <div class="page-info" id="pageInfo"></div>
+
+          <div class="summary-grid">
+            <div class="stat-card total" onclick="filterByStat('all')">
+              <div class="number" id="totalIssues">0</div>
+              <div class="label">Total Issues</div>
+            </div>
+            <div class="stat-card errors" onclick="filterByStat('error')">
+              <div class="number" id="totalErrors">0</div>
+              <div class="label">Errors</div>
+              <div id="apiStatusMessage" class="hidden api-status-message"></div>
+            </div>
+            <div class="stat-card warnings" onclick="filterByStat('warning')">
+              <div class="number" id="totalWarnings">0</div>
+              <div class="label">Warnings</div>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <h2>Detected Issues & Recommendations</h2>
+            <div class="filters">
+              <select class="filter-select" id="filterType" onchange="applyFilters()">
+                <option value="all">All Issues</option>
+                <option value="error">Errors Only</option>
+                <option value="warning">Warnings Only</option>
+              </select>
+              <button class="export-btn" onclick="exportCSV()">Export CSV</button>
+            </div>
+          </div>
+
+          <div id="categoryChart" style="display:none"></div>
+          <div class="issue-list" id="issueList"></div>
         </div>
       </div>
 
@@ -802,35 +931,93 @@
       <div id="crawlerTab" class="tab-content">
         <div class="input-group">
           <input type="url" id="crawlUrlInput" placeholder="Enter starting URL (e.g., https://www.cityofbowie.org)">
-          <input type="number" id="crawlMaxPages" placeholder="Max" value="50" style="width: 80px;" min="1" max="500">
-          <button class="primary" onclick="startCrawl()">Start Spider</button>
+          <button class="primary" id="discoverBtn" onclick="startDiscovery()">Discover Pages</button>
         </div>
-        <p style="color:var(--text-muted); font-size:13px; margin-top:8px;">
-          ⚠️ <strong>Note:</strong> Crawling hundreds of pages takes time. Set a higher limit (e.g., 200) for broader
-          coverage.
+        <p style="color:var(--text-muted); font-size:13px; margin-top:12px; margin-bottom:24px;">
+          <strong>Step 1:</strong> Discover all pages on the site. <strong>Step 2:</strong> Choose which pages to scan
+          for accessibility issues.
         </p>
 
-        <!-- Crawler Progress -->
-        <div id="crawlStatus" style="display:none; margin-top:24px;">
-          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-            <span id="crawlStatusText" style="font-weight:600; color:var(--text-main)">Initializing...</span>
-            <span id="crawlProgressPercent" style="color:var(--accent-primary)">0%</span>
+        <!-- Page Limit Tiers -->
+        <div style="margin-top:16px; margin-bottom:24px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+            <span style="color:var(--text-muted); font-size:13px; font-weight:600;">Page Limit:</span>
+            <div id="tierTabs" style="display:flex; gap:4px;">
+              <button class="tier-btn active" data-limit="50" onclick="selectTier(50)"
+                style="padding:6px 16px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s;">50
+                Pages</button>
+              <button class="tier-btn" data-limit="250" onclick="selectTier(250)"
+                style="padding:6px 16px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s;">250
+                Pages</button>
+              <button class="tier-btn" data-limit="500" onclick="selectTier(500)"
+                style="padding:6px 16px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s;">500
+                Pages</button>
+            </div>
           </div>
-          <div style="width:100%; height:8px; background:var(--input-bg); border-radius:4px; overflow:hidden;">
-            <div id="crawlProgressBar"
-              style="width:0%; height:100%; background:var(--primary-gradient); transition:width 0.3s;"></div>
-          </div>
-
-          <div style="margin-top:16px; display:flex; gap:12px;">
-            <button class="export-btn" id="crawlExportBtn" onclick="downloadCrawlCSV()"
-              style="display:none; width:100%">Download Full Site Audit (CSV)</button>
+          <div class="examples">
+            <span>Quick Load:</span>
+            <button class="example-btn"
+              onclick="document.getElementById('crawlUrlInput').value='https://www.maryland.gov'">Maryland.gov</button>
+            <button class="example-btn"
+              onclick="document.getElementById('crawlUrlInput').value='https://www.cityofbowie.org'">City of
+              Bowie</button>
+            <button class="example-btn"
+              onclick="document.getElementById('crawlUrlInput').value='https://www.section508.gov'">Section508.gov</button>
           </div>
         </div>
 
-        <div id="crawlResults" style="margin-top:24px;"></div>
-      </div>
+        <!-- Discovery Progress -->
+        <div id="discoveryStatus"
+          style="display:none; margin-top:24px; padding:20px; background:var(--glass-panel); border-radius:16px; border:1px solid var(--glass-border);">
+          <div style="display:flex; align-items:center; gap:16px; margin-bottom:12px;">
+            <div class="spinner" id="discoverySpinner" style="width:24px; height:24px; margin:0; border-width:2px;">
+            </div>
+            <div>
+              <div id="discoveryStatusText" style="font-weight:700; color:var(--text-main); font-size:16px;">🔍
+                Discovering pages...</div>
+              <div style="display:flex; gap:16px; align-items:center;">
+                <span id="discoveryCount" style="color:var(--text-muted); font-size:13px;">Found 0 pages</span>
+                <span id="discoveryTimer" style="color:var(--accent-primary); font-size:13px; font-weight:600;">⏱️
+                  0:00</span>
+              </div>
+            </div>
+            <!-- Stop button removed (integrated into main button) -->
+          </div>
+        </div>
 
+        <!-- Spider Actions (Scan All, etc) -->
+        <div id="spiderActions"
+          style="display:none; margin-top:24px; display:flex; gap:12px; align-items:center; justify-content:space-between; background:var(--input-bg); padding:16px; border-radius:12px;">
+          <div style="font-size:14px; color:var(--text-main); font-weight:600;">
+            <span id="pagesReadyCount">0</span> pages ready to scan
+          </div>
+          <div style="display:flex; gap:12px;">
+            <button class="primary" id="btnScanAll" onclick="scanAllPages()"
+              style="background:var(--accent-primary);">Scan All
+              Pages</button>
+          </div>
+        </div>
+
+        <!-- NEW Persistent Results Toolbar (Always visible when results are present) -->
+        <div id="resultsControls"
+          style="display:none; margin-top:24px; align-items:center; justify-content:space-between; gap:12px; background:var(--glass-panel); padding:12px 20px; border-radius:12px; border:1px solid var(--glass-border);">
+          <div style="font-size:13px; font-weight:600; color:var(--text-muted);">
+            <span id="resultsCountLabel">0 Pages Found</span>
+          </div>
+          <div style="display:flex; gap:12px;">
+            <button class="export-btn" onclick="downloadCrawlCSV()" style="padding:6px 12px; font-size:13px;">Export
+              List</button>
+          </div>
+        </div>
+
+        <div id="crawlResults" style="margin-top:16px;">
+          <!-- Page list will appear here -->
+        </div>
+
+      </div>
     </div>
+
+  </div>
   </div>
 
 
@@ -840,44 +1027,8 @@
     <p id="loadingText" style="color: var(--text-muted); font-weight: 500;">Processing Request...</p>
   </div>
 
-  <!-- Alert Box -->
-  <div id="alertMessage" style="display:none; text-align:center; margin-bottom:20px; padding:12px; border-radius:8px;">
-  </div>
 
-  <!-- Website Results -->
-  <div class="results" id="results">
-    <div class="page-info" id="pageInfo"></div>
 
-    <div class="summary-grid">
-      <div class="stat-card total" onclick="filterByStat('all')">
-        <div class="number" id="totalIssues">0</div>
-        <div class="label">Total Issues</div>
-      </div>
-      <div class="stat-card errors" onclick="filterByStat('error')">
-        <div class="number" id="totalErrors">0</div>
-        <div class="label">Critical Errors</div>
-      </div>
-      <div class="stat-card warnings" onclick="filterByStat('warning')">
-        <div class="number" id="totalWarnings">0</div>
-        <div class="label">Warnings</div>
-      </div>
-    </div>
-
-    <div class="section-header">
-      <h2>Detected Issues & Recommendations</h2>
-      <div class="filters">
-        <select class="filter-select" id="filterType" onchange="applyFilters()">
-          <option value="all">All Issues</option>
-          <option value="error">Errors Only</option>
-          <option value="warning">Warnings Only</option>
-        </select>
-        <button class="export-btn" onclick="exportToCSV()">Export CSV</button>
-      </div>
-    </div>
-
-    <div id="categoryChart" style="display:none"></div>
-    <div class="issue-list" id="issueList"></div>
-  </div>
 
   <!-- PDF Results -->
   <div class="pdf-results-container" id="pdfResults">
@@ -956,8 +1107,10 @@
       displayFileList();
     }
 
-    let scanStartTime = null;
+    // Scan control variables
     let scanTimerInterval = null;
+    let scanStartTime = 0;
+    let scanAbortController = null; // For canceling scans
 
     async function scanWebsite() {
       const urlInput = document.getElementById('urlInput');
@@ -969,22 +1122,28 @@
 
       console.log('🔍 [SCAN START] Initiating scan for:', fullUrl);
 
-      // Show scan status instead of generic loading
+      // Create abort controller for this scan
+      scanAbortController = new AbortController();
+
+      // Transform button to Stop Scan
+      const scanBtn = document.getElementById('scanBtn');
+      scanBtn.textContent = '⏹ Stop Scan';
+      scanBtn.onclick = stopScan;
+      scanBtn.style.background = 'var(--accent-error)';
+
+      // Show scan status
       document.getElementById('scanStatus').style.display = 'block';
       document.getElementById('scanStatusText').textContent = '🔍 Scanning website...';
       document.getElementById('scanProgress').textContent = 'Analyzing page structure and accessibility...';
-      document.getElementById('scanBtn').disabled = true;
+      // document.getElementById('scanBtn').disabled = true; // This line was removed in the diff
       hideResults();
 
       // Start timer
       scanStartTime = Date.now();
       scanTimerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - scanStartTime) / 1000);
-        const minutes = Math.floor(elapsed / 60);
-        const seconds = elapsed % 60;
-        const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        document.getElementById('scanProgress').textContent = `Analyzing page structure and accessibility... (${timeStr})`;
-      }, 1000);
+        const elapsed = ((Date.now() - scanStartTime) / 1000).toFixed(1);
+        document.getElementById('scanProgress').textContent = `⏱️ Elapsed time: ${elapsed}s - Analyzing accessibility...`;
+      }, 100);
 
       try {
         console.log('📡 [SCAN] Sending request to /api/scan...');
@@ -1008,21 +1167,47 @@
         showAlert('Audit Complete', 'success');
       } catch (error) {
         console.error('❌ [SCAN FAILED]', error);
-        showAlert(`Scan failed: ${error.message}`, 'error');
+
+        // Check if it was aborted by user
+        if (error.name === 'AbortError') {
+          console.log('⏹ [SCAN ABORTED] Scan was cancelled by user');
+          // Don't show error alert for user-initiated cancellation
+        } else {
+          showAlert(`Scan failed: ${error.message}`, 'error');
+        }
       } finally {
         clearInterval(scanTimerInterval);
         const totalTime = ((Date.now() - scanStartTime) / 1000).toFixed(1);
         console.log(`⏱️ [SCAN END] Total scan time: ${totalTime}s`);
+
+        // Transform button back to Initialize Scan
+        const scanBtn = document.getElementById('scanBtn');
+        scanBtn.textContent = 'Initialize Scan';
+        scanBtn.onclick = scanWebsite;
+        scanBtn.style.background = '';
+
         document.getElementById('scanStatus').style.display = 'none';
-        document.getElementById('scanBtn').disabled = false;
       }
     }
 
     function stopScan() {
       console.log('⏹ [SCAN STOPPED] User cancelled scan');
+
+      // Abort the fetch request
+      if (scanAbortController) {
+        scanAbortController.abort();
+        scanAbortController = null;
+      }
+
       clearInterval(scanTimerInterval);
+
+      // Transform button back to Initialize Scan
+      const scanBtn = document.getElementById('scanBtn');
+      scanBtn.textContent = 'Initialize Scan';
+      scanBtn.onclick = scanWebsite;
+      scanBtn.style.background = '';
+
       document.getElementById('scanStatus').style.display = 'none';
-      document.getElementById('scanBtn').disabled = false;
       showAlert('Scan stopped', 'warning');
       hideResults();
     }
@@ -1081,19 +1266,19 @@
         issue.occurrences.forEach((occ, occIndex) => {
           const elementDesc = describeElement(occ.selector, occ.context);
           occurrencesHTML += `
-            <div style="background:var(--code-bg); padding:16px; margin-top:12px; border-radius:8px; border:1px solid var(--glass-border);">
-              <div style="font-weight:600; font-size:14px; color:var(--text-main); margin-bottom:8px;">📍 Location ${occIndex + 1}: ${elementDesc}</div>
-              
-              <div style="margin-top:12px;">
-                  <span class="code-label">CSS Selector (Developer ID)</span>
-                  <div class="code-snippet">${occ.selector}</div>
-              </div>
-              <div style="margin-top:8px;">
-                   <span class="code-label">HTML Context</span>
-                   <div class="code-snippet">${escapeHtml(occ.context)}</div>
-              </div>
-            </div>
-          `;
+        <div class="detailed-instance">
+          <div style="font-weight:600; font-size:14px; color:var(--text-main); margin-bottom:8px;">📍 Location ${occIndex + 1}: ${elementDesc}</div>
+          
+          <div style="margin-top:12px;">
+              <span class="code-label">CSS SELECTOR (DEVELOPER ID)</span>
+              <div class="code-snippet">${occ.selector}</div>
+          </div>
+          <div style="margin-top:8px;">
+               <span class="code-label">HTML CONTEXT</span>
+               <div class="code-snippet">${escapeHtml(occ.context)}</div>
+          </div>
+        </div>
+      `;
         });
 
         issueList.innerHTML += `
@@ -1363,15 +1548,89 @@
     }
 
     // Export Function preserved
-    function exportToCSV() {
-      if (!allIssuesData || allIssuesData.length === 0) { alert('No data'); return; }
-      let csv = 'Issue,Type,Message,Context\n';
-      allIssuesData.forEach(i => {
-        i.occurrences.forEach(o => {
-          csv += `"${i.code}",${i.type},"${i.message.replace(/"/g, '""')}","${o.context.replace(/"/g, '""')}"\n`;
-        });
+    function exportCSV() {
+      if (!allIssuesData || allIssuesData.length === 0) {
+        showAlert('No issues to export', 'error');
+        return;
+      }
+
+      // Helper function to clean HTML and make text readable
+      function cleanText(text) {
+        if (!text) return '';
+        // Remove HTML tags
+        let cleaned = text.replace(/<[^>]*>/g, '');
+        // Decode HTML entities
+        cleaned = cleaned.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+        // Remove extra whitespace
+        cleaned = cleaned.replace(/\s+/g, ' ').trim();
+        // Remove quotes to prevent CSV issues
+        cleaned = cleaned.replace(/"/g, "'");
+        return cleaned;
+      }
+
+      // Helper function to get plain language explanation
+      function getSimpleExplanation(code, message) {
+        const explanations = {
+          'color-contrast': 'Text is hard to read due to poor color contrast',
+          'image-alt': 'Image is missing descriptive alt text',
+          'label': 'Form field is missing a label',
+          'link-name': 'Link text is not descriptive enough',
+          'button-name': 'Button is missing descriptive text',
+          'heading-order': 'Headings are not in logical order',
+          'landmark': 'Page is missing navigation landmarks',
+          'region': 'Content is not organized into regions',
+          'list': 'List structure is incorrect',
+          'aria': 'ARIA attributes are used incorrectly'
+        };
+
+        for (const [key, explanation] of Object.entries(explanations)) {
+          if (code.toLowerCase().includes(key)) {
+            return explanation;
+          }
+        }
+        return cleanText(message);
+      }
+
+      // Create CSV with clean, readable columns
+      const headers = ['Issue Type', 'Severity', 'What\'s Wrong', 'Location', 'Element'];
+
+      // Flatten issues - one row per occurrence
+      const rows = [];
+      allIssuesData.forEach(issue => {
+        if (issue.occurrences && issue.occurrences.length > 0) {
+          issue.occurrences.forEach(occurrence => {
+            const explanation = getSimpleExplanation(issue.code, issue.message);
+            const location = occurrence.selector || 'Page-level issue';
+            const element = cleanText(occurrence.context || '').substring(0, 200); // Show more of the element
+
+            rows.push([
+              issue.code || 'Unknown',
+              issue.type || 'error',
+              explanation.what || explanation,
+              location,
+              element
+            ]);
+          });
+        } else {
+          // Fallback for issues without occurrences
+          const explanation = getSimpleExplanation(issue.code, issue.message);
+          rows.push([
+            issue.code || 'Unknown',
+            issue.type || 'error',
+            explanation.what || explanation,
+            'Unknown',
+            ''
+          ]);
+        }
       });
 
+      // Build CSV
+      let csv = headers.join(',') + '\n';
+      rows.forEach(row => {
+        csv += row.map(cell => `"${cell}"`).join(',') + '\n';
+      });
+
+      // Download
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = '/api/download-csv';
@@ -1394,46 +1653,139 @@
       document.body.removeChild(form);
     }
 
-    // --- Crawler Logic ---
+    // --- Split Spider Logic ---
     let currentCrawlId = null;
     let crawlPollInterval = null;
-    let renderedScanIds = new Set(); // Track which scans have been rendered
+    let discoveryScans = []; // Store scans from discovery
+    let activeScanMode = 'IDLE'; // 'BATCH' or 'SINGLE'
+    let discoveryTimerInterval = null;
+    let discoveryStartTime = null;
+    let selectedPageLimit = 50; // Default tier
 
-    async function startCrawl() {
+    function selectTier(limit) {
+      selectedPageLimit = limit;
+      document.querySelectorAll('.tier-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.dataset.limit) === limit) {
+          btn.classList.add('active');
+        }
+      });
+    }
+
+    async function startDiscovery() {
       const url = document.getElementById('crawlUrlInput').value;
-      const max = document.getElementById('crawlMaxPages').value || 50;
+      // Default handled by backend (500)
 
       if (!url) { showAlert('Please enter a URL', 'error'); return; }
 
-      showLoading('Initializing Spider...');
-      document.getElementById('crawlStatus').style.display = 'block';
+      showLoading('Initializing Discovery...');
+
+      // TRANSFORM BUTTON
+      const btn = document.getElementById('discoverBtn');
+      btn.textContent = '🛑 Stop Discovery';
+      btn.onclick = stopDiscovery;
+      btn.style.background = 'rgba(239, 68, 68, 0.2)';
+      btn.style.color = '#f87171';
+      btn.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+
+      document.getElementById('discoveryStatus').style.display = 'flex';
+      document.getElementById('discoveryStatus').style.display = 'flex';
+      document.getElementById('spiderActions').style.display = 'none'; // Keep bulk actions hidden until done
+      document.getElementById('resultsControls').style.display = 'flex'; // Show filters IMMEDIATELY
       document.getElementById('crawlResults').innerHTML = '';
-      document.getElementById('crawlExportBtn').style.display = 'none';
+      document.getElementById('crawlResults').style.display = 'block';
+      document.getElementById('discoverySpinner').style.display = 'block';
+      document.getElementById('discoveryStatusText').textContent = '🔍 Discovering pages...';
+
+      // Reset discovery state flags
+      window.discoveryAutoStopped = false;
+      window.lastScanHash = '';
+      window.lastDiscoveryCount = 0;
+      window.lastDiscoveryTime = Date.now();
+
+      // Start Timer
+      discoveryStartTime = Date.now();
+      document.getElementById('discoveryTimer').textContent = '⏱️ 0:00';
+      if (discoveryTimerInterval) clearInterval(discoveryTimerInterval);
+      discoveryTimerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - discoveryStartTime) / 1000);
+        const mins = Math.floor(elapsed / 60);
+        const secs = elapsed % 60;
+        document.getElementById('discoveryTimer').textContent = `⏱️ ${mins}:${secs.toString().padStart(2, '0')}`;
+      }, 1000);
 
       try {
         const formData = new FormData();
         formData.append('url', url);
-        formData.append('maxPages', max);
+        formData.append('maxPages', selectedPageLimit);
 
-        const res = await fetch('/api/crawl/start', { method: 'POST', body: formData });
+        const res = await fetch('/api/crawl/discover', { method: 'POST', body: formData });
         const data = await res.json();
 
         if (data.crawlId) {
           currentCrawlId = data.crawlId;
-          renderedScanIds.clear(); // Clear previous crawl's rendered IDs
           hideLoading();
-          pollCrawlStatus();
+
+          // Setup Timer
+          document.getElementById('discoveryStatusText').textContent = '🔍 Discovering pages...';
+
+          pollDiscoveryStatus();
         } else {
           throw new Error(data.error || 'Failed to start');
         }
       } catch (e) {
         console.error(e);
-        showAlert('Crawl failed: ' + e.message, 'error');
+        showAlert('Discovery failed: ' + e.message, 'error');
         hideLoading();
+        // Reset button on failure
+        btn.textContent = 'Discover Pages';
+        btn.onclick = startDiscovery;
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.border = '';
       }
     }
 
-    function pollCrawlStatus() {
+
+    function stopDiscovery() {
+      // Stop Timer
+      if (discoveryTimerInterval) {
+        clearInterval(discoveryTimerInterval);
+        discoveryTimerInterval = null;
+      }
+
+      // Stop Spinner
+      document.getElementById('discoverySpinner').style.display = 'none';
+
+      // Update Status Text
+      const statusText = document.getElementById('discoveryStatusText');
+      if (statusText) statusText.textContent = '🛑 Discovery Stopped';
+
+      // Show Actions
+      document.getElementById('spiderActions').style.display = 'flex';
+
+      // RESET "Discover Pages" BUTTON
+      const btn = document.getElementById('discoverBtn');
+      if (btn) {
+        btn.textContent = 'Discover Pages';
+        btn.onclick = startDiscovery;
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.border = '';
+      }
+
+      // DO NOT overwrite crawlResults. Just ensure they are visible.
+      // If we have scans, re-render to be safe?
+      if (discoveryScans && discoveryScans.length > 0) {
+        renderDiscoveryResults(discoveryScans);
+      }
+      document.getElementById('crawlResults').style.display = 'block';
+
+      // DON'T clear the poll - we want to continue monitoring scan status updates
+      // DON'T nullify currentCrawlId - we need it for scan operations
+    }
+
+    function pollDiscoveryStatus() {
       if (crawlPollInterval) clearInterval(crawlPollInterval);
 
       crawlPollInterval = setInterval(async () => {
@@ -1441,35 +1793,288 @@
           const res = await fetch(`/api/crawl/status/${currentCrawlId}`);
           const data = await res.json();
 
-          // Update UI
           const crawl = data.crawl;
           const scans = data.scans || [];
+          discoveryScans = scans;
 
-          const total = crawl.total_pages || 0;
-          const scanned = scans.length;
-          let statusText = `${crawl.status.toUpperCase()}: Scanned ${scanned} / ${total} pages`;
+          // ANTI-STUTTER: Only re-render if scan data actually changed
+          const newScanHash = scans.map(s => `${s.id}:${s.scan_status}:${s.errors}`).join(',');
+          if (!window.lastScanHash) window.lastScanHash = '';
+          const hasChanged = (newScanHash !== window.lastScanHash);
+          window.lastScanHash = newScanHash;
 
-          if (crawl.status === 'running' && total === 0) {
-            statusText = `DISCOVERING LINKS... (Found ${scanned} so far)`;
+          // Update Status UI
+          document.getElementById('discoveryCount').textContent = `Found ${scans.length} pages`;
+
+          // STALENESS DETECTION - Auto-stop if no new pages for 60 seconds
+          if (!window.lastDiscoveryCount) window.lastDiscoveryCount = 0;
+          if (!window.lastDiscoveryTime) window.lastDiscoveryTime = Date.now();
+
+          if (scans.length === window.lastDiscoveryCount && scans.length > 0) {
+            // No new pages found since last poll
+            const staleDuration = (Date.now() - window.lastDiscoveryTime) / 1000;
+            if (staleDuration >= 60 && crawl.status !== 'discovered') {
+              console.log(`⚠️ Discovery stale for ${staleDuration}s - auto-stopping`);
+              stopDiscovery();
+              document.getElementById('discoveryStatusText').innerHTML = `⚠️ Discovery Stopped (No new pages for ${Math.round(staleDuration)}s)`;
+              window.lastDiscoveryCount = 0;
+              window.lastDiscoveryTime = null;
+              return;
+            }
+          } else {
+            // New pages found, reset staleness timer
+            window.lastDiscoveryCount = scans.length;
+            window.lastDiscoveryTime = Date.now();
           }
 
-          document.getElementById('crawlStatusText').textContent = statusText;
-
-          const pct = data.progress || 0;
-          document.getElementById('crawlProgressBar').style.width = pct + '%';
-          document.getElementById('crawlProgressPercent').textContent = pct + '%';
-
-          // Render table incrementally (smooth streaming)
-          renderCrawlTable(scans, crawl);
-
-          if (crawl.status === 'completed' || crawl.status === 'failed') {
-            clearInterval(crawlPollInterval);
-            document.getElementById('crawlExportBtn').style.display = 'block';
+          // AUTO-STOP Logic (Frontend Failsafe) - Stop when limit reached
+          if (scans.length >= selectedPageLimit && crawl.status !== 'discovered' && !window.discoveryAutoStopped) {
+            console.log(`🛑 Auto-stop triggered: ${scans.length} pages >= ${selectedPageLimit} limit`);
+            window.discoveryAutoStopped = true;
+            stopDiscovery();
+            document.getElementById('discoveryStatusText').innerHTML = `✅ Discovery Complete (${selectedPageLimit} page limit reached)`;
+            return; // Exit poll
           }
+
+          if (crawl.status === 'discovered') {
+            // DON'T clear interval - keep polling so scan status updates show in UI
+            // clearInterval(crawlPollInterval);
+
+            // STOP TIMER
+            if (discoveryTimerInterval) {
+              clearInterval(discoveryTimerInterval);
+              discoveryTimerInterval = null;
+            }
+
+            // FORCE STOP SPINNER
+            document.getElementById('discoverySpinner').style.display = 'none';
+            document.getElementById('discoveryStatusText').innerHTML = '✅ Discovery Complete';
+            document.getElementById('spiderActions').style.display = 'flex'; // Restore "Scan All" buttons
+
+            hideLoading();
+            const btn = document.getElementById('discoverBtn');
+            btn.textContent = 'Discover Pages';
+            btn.onclick = startDiscovery;
+            btn.style.background = '';
+            btn.style.color = '';
+            btn.style.border = '';
+
+          } else if (crawl.status === 'scanning' || crawl.status === 'completed') {
+            // If we reloaded and it's already scanning/done
+            document.getElementById('spiderActions').style.display = 'flex';
+            // Keep using this same poll - don't switch to pollScanProgress
+          }
+
+          // ANTI-STUTTER: Only re-render if something changed
+          if (hasChanged) {
+            renderDiscoveryResults(scans);
+          }
+
         } catch (e) {
           console.error('Poll error', e);
         }
-      }, 2000);
+      }, 1000);
+    }
+
+    async function scanAllPages() {
+      if (!currentCrawlId) return;
+
+      const btn = document.getElementById('btnScanAll');
+      if (btn) {
+        btn.textContent = '🛑 Stop Scanning';
+        btn.onclick = stopScanAll;
+        btn.style.background = 'rgba(239, 68, 68, 0.2)';
+        btn.style.color = '#f87171';
+        btn.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+      }
+
+      try {
+        activeScanMode = 'BATCH'; // Set mode to batch
+        const res = await fetch(`/api/scan/all/${currentCrawlId}`, { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success) {
+          showAlert('Started scanning all pages', 'success');
+          pollScanProgress();
+        }
+      } catch (e) {
+        showAlert('Failed to start scan', 'error');
+        resetScanAllButton();
+      }
+    }
+
+    async function stopScanAll() {
+      if (!currentCrawlId) return;
+      try {
+        const res = await fetch(`/api/scan/stop/${currentCrawlId}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          showAlert('Scan stopped', 'warning');
+          resetScanAllButton();
+          activeScanMode = 'IDLE';
+          // pollScanProgress handles the rest
+        }
+      } catch (e) {
+        showAlert('Failed to stop scan', 'error');
+      }
+    }
+
+    function resetScanAllButton() {
+      const btn = document.getElementById('btnScanAll');
+      if (btn) {
+        btn.textContent = 'Scan All Pages';
+        btn.onclick = scanAllPages;
+        btn.style.background = 'var(--accent-primary)';
+        btn.style.color = '#ffffff';
+        btn.style.border = 'none';
+      }
+    }
+
+    async function scanPage(scanId) {
+      try {
+        const btn = document.getElementById(`btn-scan-${scanId}`);
+        if (btn) {
+          btn.textContent = 'Queueing...';
+          btn.disabled = true;
+        }
+
+        // Don't change activeScanMode for single scans - let discovery poll continue
+        const res = await fetch(`/api/scan/page/${scanId}`, { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success) {
+          // Don't call pollScanProgress - the existing poll will pick up the change
+          // This prevents interrupting the discovery process
+        }
+      } catch (e) {
+        showAlert('Failed to scan page', 'error');
+      }
+    }
+
+    function pollScanProgress() {
+      if (crawlPollInterval) clearInterval(crawlPollInterval);
+
+      crawlPollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/crawl/status/${currentCrawlId}`);
+          const data = await res.json();
+
+          renderDiscoveryResults(data.scans);
+
+          const scanning = data.scans.filter(s => s.scan_status === 'scanning').length;
+          const completed = data.scans.filter(s => s.scan_status === 'complete').length;
+          const total = data.scans.length;
+
+          // Update Status Text ONLY if in BATCH mode
+          if (activeScanMode === 'BATCH') {
+            if (scanning > 0) {
+              document.getElementById('discoverySpinner').style.display = 'block';
+              document.getElementById('discoveryStatusText').textContent = `⏳ Scanning... (${scanning} active, ${completed} done)`;
+              // Update the Found Pages count to match total in case it drifted or was mismatched
+              document.getElementById('discoveryCount').textContent = `Found ${total} pages`;
+              document.getElementById('discoveryStatus').style.display = 'flex'; // Ensure visible
+            } else if (completed > 0) {
+              document.getElementById('discoverySpinner').style.display = 'none';
+              // Show actual found vs scanned, not 500
+              document.getElementById('discoveryStatusText').textContent = `✅ Scan Batch Complete (${completed}/${total} total scanned)`;
+              document.getElementById('discoveryCount').textContent = `Found ${total} pages`;
+              resetScanAllButton(); // Reset button when done
+              activeScanMode = 'IDLE';
+            }
+          } else {
+            // In SINGLE or IDLE mode, ensure top spinner is hidden and text is default
+            // But we want to preserve "Found X pages" if we are just idling
+            const spinner = document.getElementById('discoverySpinner');
+            if (spinner) spinner.style.display = 'none';
+
+            // Reset text if we are purely Idle? 
+            // Actually, let's just NOT update the text here for single mode, 
+            // relying on pollDiscovery to set "Found X pages" initially.
+            // But if we came from a batch, we might want to reset?
+            // For now, doing nothing here preserves the "Found X pages" state from pollDiscoveryStatus
+            // unless we overwrite it.
+            // Reverting text if it was "Scanning..." might be safely done by pollDiscoveryStatus?
+            // Let's force it to "Found X pages" style if we want? 
+            // No, current logic in pollDiscoveryStatus sets #discoveryCount.
+            // #discoveryStatusText is "Discovering pages..." initially.
+            // We will just HIDE the spinner.
+          }
+
+          // Update Summary Stats dynamically
+          const totalIssues = data.scans.reduce((sum, s) => sum + (s.total_issues || 0), 0);
+          const totalErrors = data.scans.reduce((sum, s) => sum + (s.errors || 0), 0);
+          const totalWarnings = data.scans.reduce((sum, s) => sum + (s.warnings || 0), 0);
+
+          document.getElementById('totalIssues').textContent = totalIssues;
+          document.getElementById('totalErrors').textContent = totalErrors;
+          document.getElementById('totalWarnings').textContent = totalWarnings;
+
+        } catch (e) { }
+      }, 2000); // Poll every 2s to be less aggressive
+    }
+
+    function downloadCrawlCSV() {
+      if (!currentCrawlId) return;
+      window.location.href = `/api/report/crawl/${currentCrawlId}/csv`;
+    }
+
+    function renderDiscoveryResults(scans) {
+      const container = document.getElementById('crawlResults');
+
+      let html = `<div style="display:flex; flex-direction:column; gap:8px;">`;
+
+      scans.forEach((scan, index) => {
+        let statusBadge = '';
+        let actionBtn = '';
+
+        switch (scan.scan_status) {
+          case 'pending':
+            statusBadge = `<span style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(255,255,255,0.1); color:var(--text-muted); border:1px solid var(--glass-border);">PENDING</span>`;
+            actionBtn = `<button id="btn-scan-${scan.id}" onclick="scanPage(${scan.id})" class="primary" style="padding:4px 12px; font-size:12px; min-width:80px;">Scan</button>`;
+            break;
+          case 'scanning':
+            statusBadge = `<span style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(59,130,246,0.1); color:#3b82f6; border:1px solid rgba(59,130,246,0.2);">SCANNING...</span>`;
+            // Spinner localized to this button/row
+            actionBtn = `<div class="spinner" style="width:16px; height:16px; border-width:2px; margin:0 auto;"></div>`;
+            break;
+          case 'complete':
+            const issueCount = scan.total_issues || 0;
+            const errCount = scan.errors || 0;
+            let color = issueCount === 0 ? 'var(--accent-success)' : (errCount > 0 ? 'var(--accent-error)' : 'var(--accent-warning)');
+            statusBadge = `<span style="font-size:10px; padding:2px 8px; border-radius:10px; background:${color}1a; color:${color}; border:1px solid ${color}40; font-weight:700;">${issueCount} ISSUES</span>`;
+            actionBtn = `<button onclick="toggleSpiderIssues(${scan.id})" style="font-size:12px; background:transparent; border:1px solid var(--glass-border); color:var(--text-main); padding:4px 12px; border-radius:8px; cursor:pointer;">View Results</button>`;
+            break;
+          case 'failed':
+            statusBadge = `<span style="font-size:10px; color:var(--accent-error);">FAILED</span>`;
+            actionBtn = `<button onclick="scanPage(${scan.id})" style="font-size:12px; color:var(--accent-error); background:transparent; border:1px solid var(--accent-error); padding:4px 8px; border-radius:6px; cursor:pointer;">Retry</button>`;
+            break;
+          default:
+            statusBadge = `<span style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(255,255,255,0.1); color:var(--text-muted); border:1px solid var(--glass-border);">PENDING</span>`;
+            actionBtn = `<button id="btn-scan-${scan.id}" onclick="scanPage(${scan.id})" class="primary" style="padding:4px 12px; font-size:12px; min-width:80px;">Scan</button>`;
+        }
+
+        html += `
+          <div style="background:var(--email-item-bg); border-radius:12px; padding:12px 16px; border:1px solid var(--glass-border);">
+             <div style="display:flex; justify-content:space-between; align-items:center;">
+               <div style="flex:1; overflow:hidden;">
+                 <div style="display:flex; gap:8px;">
+                    <span style="font-size:11px; color:var(--text-muted); font-weight:600; min-width:24px;">#${index + 1}</span>
+                    <a href="${scan.url}" target="_blank" style="color:var(--accent-primary); font-weight:500; text-decoration:none; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;">${scan.url}</a>
+                 </div>
+                 <div style="font-size:10px; color:var(--text-muted); margin-top:2px; margin-left:32px;">ID: ${scan.id}</div> 
+               </div>
+               <div style="display:flex; align-items:center; gap:12px; margin-left:16px; min-width:140px; justify-content:flex-end;">
+                 ${statusBadge}
+                 ${actionBtn}
+               </div>
+            </div>
+            <div id="issues-${scan.id}" style="display:none; margin-left:20px; border-left:2px solid var(--glass-border); padding-left:10px; margin-top:8px;"></div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      container.innerHTML = html;
     }
 
     function renderCrawlTable(scans, crawl) {
@@ -1514,13 +2119,30 @@
         .sort((a, b) => b.count - a.count)
         .slice(0, 3);
 
-      // Risk assessment
-      let riskLevel = 'LOW';
-      let riskColor = 'var(--accent-success)';
-      let complianceStatus = 'PASSING';
-      if (avgErrors > 20) { riskLevel = 'CRITICAL'; riskColor = 'var(--accent-error)'; complianceStatus = 'FAILING'; }
-      else if (avgErrors > 10) { riskLevel = 'HIGH'; riskColor = '#f97316'; complianceStatus = 'AT RISK'; }
-      else if (avgErrors > 5) { riskLevel = 'MEDIUM'; riskColor = 'var(--accent-warning)'; complianceStatus = 'NEEDS WORK'; }
+      // Risk assessment - ONLY show green for ZERO violations
+      let riskLevel = 'CRITICAL';
+      let riskColor = 'var(--accent-error)';
+      let complianceStatus = 'FAILING';
+
+      if (totalErrors === 0) {
+        // ONLY zero violations gets green/success
+        riskLevel = 'COMPLIANT';
+        riskColor = 'var(--accent-success)';
+        complianceStatus = 'PASSING';
+      } else if (avgErrors > 20) {
+        riskLevel = 'CRITICAL';
+        riskColor = 'var(--accent-error)';
+        complianceStatus = 'FAILING';
+      } else if (avgErrors > 10) {
+        riskLevel = 'HIGH';
+        riskColor = '#f97316';
+        complianceStatus = 'AT RISK';
+      } else {
+        // Any violations at all = needs work (yellow/orange)
+        riskLevel = 'MEDIUM';
+        riskColor = 'var(--accent-warning)';
+        complianceStatus = 'NEEDS WORK';
+      }
 
       // Check if this is first render
       const isFirstRender = !document.getElementById('crawlTableBody');
@@ -1558,16 +2180,19 @@
             <!-- Bold Headline -->
             <div style="margin-bottom:24px; padding-bottom:20px; border-bottom:2px solid var(--glass-border);">
               <h2 style="margin:0 0 8px 0; font-size:28px; font-weight:900; color:${riskColor}; line-height:1.2;">
-                ${complianceStatus === 'FAILING' ? '⚠️ Your Website is Not ADA Compliant' :
-            complianceStatus === 'AT RISK' ? '⚠️ Significant Compliance Gaps Detected' :
-              '✓ Good Progress, But Work Remains'}
+                ${complianceStatus === 'PASSING' ? '✓ Your Website is ADA Compliant!' :
+            complianceStatus === 'FAILING' ? '⚠️ Your Website is Not ADA Compliant' :
+              complianceStatus === 'AT RISK' ? '⚠️ Significant Compliance Gaps Detected' :
+                '⚠️ Accessibility Issues Found'}
               </h2>
               <p style="margin:0; font-size:16px; color:var(--text-muted); line-height:1.5;">
-                ${complianceStatus === 'FAILING' ?
-            `We found <strong style="color:${riskColor};">${totalErrors} accessibility violations</strong> across ${scans.length} pages. This puts you at <strong>legal risk</strong> under ADA Title II.` :
-            complianceStatus === 'AT RISK' ?
-              `We found <strong style="color:${riskColor};">${totalErrors} accessibility violations</strong> that need immediate attention to avoid legal exposure.` :
-              `We found ${totalErrors} issues. You're close to compliance - let's finish strong.`}
+                ${complianceStatus === 'PASSING' ?
+            `Congratulations! We found <strong style="color:${riskColor};">zero accessibility violations</strong> across ${scans.length} pages. Your site meets ADA Title II requirements.` :
+            complianceStatus === 'FAILING' ?
+              `We found <strong style="color:${riskColor};">${totalErrors} accessibility violations</strong> across ${scans.length} pages. This puts you at <strong>legal risk</strong> under ADA Title II.` :
+              complianceStatus === 'AT RISK' ?
+                `We found <strong style="color:${riskColor};">${totalErrors} accessibility violations</strong> that need immediate attention to avoid legal exposure.` :
+                `We found <strong style="color:${riskColor};">${totalErrors} accessibility violations</strong> that must be fixed to achieve compliance.`}
               </p>
             </div>
             
@@ -1744,174 +2369,280 @@
     }
 
     let allCrawlScans = []; // Store all scans for filtering/sorting
+    let openSpiderDetailIds = new Set(); // Track open details for persistence
 
-    function applyCrawlSort() {
-      if (allCrawlScans.length === 0) return;
+    function renderDiscoveryResults(scans) {
+      allCrawlScans = scans; // Update global list for sorting
+      const container = document.getElementById('crawlResults');
+      if (!container) return;
 
-      const sortBy = document.getElementById('crawlSortBy').value;
-      const filterRisk = document.getElementById('crawlFilterRisk').value;
+      // Don't wipe if we are just updating status? 
+      // No, we must re-render to show new items or status changes.
+      // But we must preserve scroll position? Browser handles scroll if we don't resize too much.
 
-      // Filter scans by risk level
-      let filteredScans = [...allCrawlScans];
+      // Apply Sort/Filter
+      const sortBy = document.getElementById('crawlSortBy') ? document.getElementById('crawlSortBy').value : 'url';
+      const filterRisk = document.getElementById('crawlFilterRisk') ? document.getElementById('crawlFilterRisk').value : 'all';
+
+      let displayScans = [...scans];
+
+      // FILTER
       if (filterRisk !== 'all') {
-        filteredScans = filteredScans.filter(s => {
-          const errorCount = s.errors || 0;
-          if (filterRisk === 'critical') return errorCount > 20;
-          if (filterRisk === 'high') return errorCount > 10 && errorCount <= 20;
-          if (filterRisk === 'medium') return errorCount > 5 && errorCount <= 10;
-          if (filterRisk === 'low') return errorCount <= 5;
+        displayScans = displayScans.filter(s => {
+          const err = s.errors || 0;
+          if (filterRisk === 'critical') return err > 20;
+          if (filterRisk === 'high') return err > 10;
+          if (filterRisk === 'medium') return err > 0;
           return true;
         });
       }
 
-      // Sort scans
-      filteredScans.sort((a, b) => {
-        if (sortBy === 'issues-desc') return (b.errors || 0) - (a.errors || 0);
-        if (sortBy === 'issues-asc') return (a.errors || 0) - (b.errors || 0);
-        if (sortBy === 'url-asc') return a.url.localeCompare(b.url);
-        if (sortBy === 'url-desc') return b.url.localeCompare(a.url);
-        return 0;
+      // SORT
+      displayScans.sort((a, b) => {
+        if (sortBy === 'issues') return (b.total_issues || 0) - (a.total_issues || 0);
+        return a.url.localeCompare(b.url);
       });
 
-      // Clear and re-render table
-      const tbody = document.getElementById('crawlTableBody');
-      if (tbody) {
-        tbody.innerHTML = '';
-        renderedScanIds.clear();
+      // Update Header Count
+      const pagesReady = document.getElementById('pagesReadyCount');
+      if (pagesReady) pagesReady.textContent = displayScans.length;
 
-        // Re-render with filtered/sorted scans
-        filteredScans.forEach(s => {
-          const errorCount = s.errors || 0;
-          let badge = '';
-          let badgeColor = '';
-          if (errorCount > 20) { badge = '🚨 Critical'; badgeColor = 'var(--accent-error)'; }
-          else if (errorCount > 10) { badge = '⚠️ High'; badgeColor = '#f97316'; }
-          else if (errorCount > 5) { badge = '⚡ Medium'; badgeColor = 'var(--accent-warning)'; }
-          else { badge = '✓ Low'; badgeColor = 'var(--accent-success)'; }
+      const resultsLabel = document.getElementById('resultsCountLabel');
+      if (resultsLabel) resultsLabel.textContent = `${displayScans.length} Pages Found`;
 
-          let displayUrl = s.url;
-          try {
-            const urlObj = new URL(s.url);
-            const baseUrl = document.getElementById('crawlUrlInput').value;
-            displayUrl = s.url.replace(baseUrl, '') || '/';
-            if (displayUrl.length > 80) {
-              const pathOnly = urlObj.pathname;
-              displayUrl = pathOnly + (urlObj.search ? '?...' : '');
-            }
-          } catch (e) {
-            if (displayUrl.length > 80) {
-              displayUrl = displayUrl.substring(0, 77) + '...';
-            }
+      container.innerHTML = '';
+
+      displayScans.forEach((scan, index) => {
+        const isComplete = scan.scan_status === 'complete';
+        const isScanning = scan.scan_status === 'scanning';
+        const isFailed = scan.scan_status === 'failed';
+        const hasIssues = (scan.errors || 0) > 0;
+
+        // Status Badge
+        let badge = '<span class="status-pill">Pending</span>';
+        let badgeColor = 'var(--text-muted)';
+        if (isScanning) {
+          badge = '<div class="spinner" style="width:16px; height:16px; border-width:2px; display:inline-block; vertical-align:middle; margin:0 8px 0 0;"></div> Scanning...';
+          badgeColor = 'var(--accent-primary)';
+        } else if (isFailed) {
+          badge = '<span class="status-pill error">Failed</span>';
+          badgeColor = 'var(--accent-error)';
+        } else if (isComplete) {
+          if (scan.errors > 0) {
+            badge = `<span class="status-pill error">${scan.errors} Issues</span>`;
+            badgeColor = 'var(--accent-error)';
+          } else {
+            badge = '<span class="status-pill success">Clean</span>';
+            badgeColor = 'var(--accent-success)';
           }
-
-          const tr = document.createElement('tr');
-          tr.id = `spider-row-${s.id}`;
-          tr.style.borderBottom = '1px solid var(--glass-border)';
-          tr.innerHTML = `
-            <td style="padding:14px 8px; font-size:13px; max-width:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-              <a href="${s.url}" target="_blank" style="color:var(--accent-primary); text-decoration:none; font-weight:500;" title="${s.url}">${displayUrl}</a>
-            </td>
-            <td style="padding:14px 8px;">
-              <span onclick="toggleSpiderIssues(${s.id})" style="background:rgba(248,113,113,0.15); color:var(--accent-error); padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; user-select:none;">${errorCount} errors ▼</span>
-              <div id="issues-${s.id}" style="display:none; margin-top:12px; max-height:300px; overflow-y:auto; background:var(--code-bg); border:1px solid var(--glass-border); border-radius:8px; padding:12px;">
-                <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Loading issues...</div>
-              </div>
-            </td>
-            <td style="padding:14px 8px; font-weight:700; color:${badgeColor};">${badge}</td>
-          `;
-          tbody.appendChild(tr);
-          renderedScanIds.add(s.id);
-        });
-
-        // Update header count
-        const header = document.getElementById('resultsHeader');
-        if (header) {
-          header.textContent = `📊 Live Results (${filteredScans.length} of ${allCrawlScans.length} pages)`;
         }
-      }
+
+        // Action Button
+        let actionBtn = '';
+        if (isComplete) {
+          actionBtn = `<button class="view-btn" onclick="toggleSpiderIssues(${scan.id})" style="background:transparent; border:1px solid var(--glass-border); padding:6px 12px; border-radius:8px; cursor:pointer; color:var(--text-main); font-size:12px;">View Results</button>`;
+        } else if (isScanning) {
+          actionBtn = `<button disabled style="opacity:0.5; background:transparent; border:none; color:var(--text-muted);">Scanning...</button>`;
+        } else if (isFailed) {
+          actionBtn = `<button class="primary" style="padding:6px 16px; font-size:12px; background:var(--accent-warning); color:black;" id="btn-scan-${scan.id}" onclick="scanPage(${scan.id})">Retry</button>`;
+        } else {
+          actionBtn = `<button class="primary" style="padding:6px 16px; font-size:12px;" id="btn-scan-${scan.id}" onclick="scanPage(${scan.id})">Scan</button>`;
+        }
+
+        // Check if details should be open
+        const isOpen = openSpiderDetailIds.has(scan.id);
+        // We need to re-fetch/render issues logic if open? 
+        // Or just let toggleSpiderIssues handle it if we auto-trigger it?
+        // Better: Render the container open/closed. 
+        // But the content is fetched async in toggleSpiderIssues.
+        // We can check 'scan.detailed_json' if available? 
+        // API /status returns scans but maybe not heavy JSON.
+        // Let's rely on toggleSpiderIssues to fetch if empty.
+
+        const div = document.createElement('div');
+        div.className = 'issue-item';
+        div.style.display = 'flex';
+        div.style.flexDirection = 'column';
+        div.style.gap = '0';
+        div.style.padding = '0';
+        div.style.overflow = 'hidden';
+
+        div.innerHTML = `
+            <div style="padding:16px 24px; display:flex; align-items:center; justify-content:space-between; background:var(--glass-panel);">
+                <div style="display:flex; align-items:center; gap:16px; flex:1; overflow:hidden;">
+                    <span style="font-size:12px; font-weight:700; color:var(--text-muted); min-width:30px;">#${index + 1}</span>
+                    <div style="flex:1; overflow:hidden;">
+                        <div style="font-weight:600; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${scan.url}">${scan.url}</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">ID: ${scan.id}</div>
+                    </div>
+                </div>
+                
+                <div style="display:flex; align-items:center; gap:16px; min-width:200px; justify-content:flex-end;">
+                     <div style="text-align:right;">${badge}</div>
+                     ${actionBtn}
+                </div>
+            </div>
+            
+            <div id="issues-${scan.id}" class="detailed-instance" style="display:${isOpen ? 'block' : 'none'}; border-top:1px solid var(--glass-border); margin:0; border-radius:0;">
+                ${isOpen ? '<div style="padding:20px; text-align:center; color:var(--text-muted);">Loading details...</div>' : ''}
+            </div>
+        `;
+
+        container.appendChild(div);
+
+        // If it was open, trigger the load immediately (async)
+        if (isOpen) {
+          // slight delay to ensure DOM is ready? No need.
+          loadSpiderIssues(scan.id);
+        }
+      });
     }
 
-    // Toggle issue details for a specific scan
+    // Split toggle into Toggle + Load
     async function toggleSpiderIssues(scanId) {
       const container = document.getElementById(`issues-${scanId}`);
       if (!container) return;
 
-      // Toggle visibility
-      if (container.style.display === 'none') {
-        container.style.display = 'block';
-
-        // Fetch issues if not already loaded
-        if (container.dataset.loaded !== 'true') {
-          try {
-            const res = await fetch(`/api/scan/${scanId}/issues`);
-            const data = await res.json();
-
-            if (data.issues && data.issues.length > 0) {
-              // Add page URL header
-              let html = '';
-              if (data.url) {
-                html += `<div style="margin-bottom:12px; padding:10px; background:rgba(56,189,248,0.1); border-radius:6px; border-left:3px solid var(--accent-primary);">
-                  <div style="font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:4px;">Page URL</div>
-                  <a href="${data.url}" target="_blank" style="font-size:12px; color:var(--accent-primary); text-decoration:none; font-weight:600; word-break:break-all;">${data.url} →</a>
-                </div>`;
-              }
-
-              // Group issues by code for better readability
-              const issueGroups = {};
-              data.issues.forEach(issue => {
-                const key = issue.code;
-                if (!issueGroups[key]) {
-                  issueGroups[key] = {
-                    code: issue.code,
-                    type: issue.type,
-                    message: issue.message,
-                    count: 0
-                  };
-                }
-                issueGroups[key].count++;
-              });
-
-              // Render grouped issues with executive details
-              Object.values(issueGroups).forEach(issue => {
-                const typeColor = issue.type === 'error' ? 'var(--accent-error)' : 'var(--accent-warning)';
-                const explanation = getPlainLanguageExplanation(issue.code, issue.message);
-                const remediation = getRemediationSteps(issue.code, issue.message);
-
-                html += `<div style="margin-bottom:14px; padding:12px; background:rgba(0,0,0,0.3); border-radius:8px; border-left:4px solid ${typeColor};">
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <div style="font-size:11px; font-weight:700; color:${typeColor}; text-transform:uppercase; letter-spacing:0.5px;">${issue.code}</div>
-                    ${issue.count > 1 ? `<div style="font-size:10px; background:${typeColor}; color:white; padding:2px 8px; border-radius:10px; font-weight:600;">${issue.count}x</div>` : ''}
-                  </div>
-                  
-                  <div style="margin-bottom:10px;">
-                    <div style="font-size:12px; font-weight:600; color:var(--text-main); margin-bottom:6px;">💡 The Issue</div>
-                    <div style="font-size:11px; color:var(--text-muted); line-height:1.5;">${explanation.what}</div>
-                  </div>
-                  
-                  <div style="margin-bottom:10px;">
-                    <div style="font-size:12px; font-weight:600; color:var(--text-main); margin-bottom:6px;">⚡ Why Fix It</div>
-                    <div style="font-size:11px; color:var(--text-muted); line-height:1.5;">${explanation.why}</div>
-                  </div>
-                  
-                  <div>
-                    <div style="font-size:12px; font-weight:600; color:var(--text-main); margin-bottom:6px;">🔧 How to Fix</div>
-                    <div style="font-size:11px; color:var(--text-muted); line-height:1.5;">${remediation}</div>
-                  </div>
-                </div>`;
-              });
-
-              container.innerHTML = html;
-            } else {
-              container.innerHTML = '<div style="font-size:11px; color:var(--text-muted);">No detailed issues available</div>';
-            }
-            container.dataset.loaded = 'true';
-          } catch (e) {
-            container.innerHTML = '<div style="font-size:11px; color:var(--accent-error);">Failed to load issues</div>';
-          }
-        }
-      } else {
+      if (openSpiderDetailIds.has(scanId)) {
+        // Close it
+        openSpiderDetailIds.delete(scanId);
         container.style.display = 'none';
+      } else {
+        // Open it
+        openSpiderDetailIds.add(scanId);
+        container.style.display = 'block';
+        loadSpiderIssues(scanId);
       }
+    }
+
+    async function loadSpiderIssues(scanId) {
+      const container = document.getElementById(`issues-${scanId}`);
+      if (!container) return;
+      if (container.dataset.loaded === 'true') return;
+
+      try {
+        const res = await fetch(`/api/scan/${scanId}/issues`);
+        const data = await res.json();
+
+        if (data.issues && data.issues.length > 0) {
+          // GROUP ISSUES (Gold Standard)
+          const grouped = groupIssues(data.issues);
+
+          // Show Top 5 Groups only (User Request)
+          const topIssues = grouped.slice(0, 5);
+          const hiddenCount = grouped.length - topIssues.length;
+
+          renderSpiderIssuesContent(container, topIssues, scanId, hiddenCount);
+          container.dataset.loaded = 'true';
+        } else {
+          container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted);">No detailed issues found.</div>';
+        }
+      } catch (e) {
+        container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--accent-error);">Failed to load issues.</div>';
+      }
+    }
+
+    function groupIssues(issues) {
+      const groups = {};
+      issues.forEach(i => {
+        const key = i.code;
+        if (!groups[key]) {
+          groups[key] = {
+            code: i.code,
+            message: i.message,
+            type: i.type,
+            count: 0,
+            occurrences: []
+          };
+        }
+        groups[key].count++;
+        // Limit occurrences stored to 10 to save memory in UI
+        if (groups[key].occurrences.length < 10) {
+          groups[key].occurrences.push({ selector: i.selector, context: i.context });
+        }
+      });
+      // Sort: errors first, then by count (highest first)
+      return Object.values(groups).sort((a, b) => {
+        if (a.type === 'error' && b.type !== 'error') return -1;
+        if (a.type !== 'error' && b.type === 'error') return 1;
+        return b.count - a.count; // Most occurrences first
+      });
+    }
+
+    function renderSpiderIssuesContent(container, issues, scanId, hiddenCount) {
+      let html = '';
+      issues.forEach((issue, idx) => {
+        const typeClass = issue.type === 'error' ? 'error' : 'warning';
+        const typeColor = issue.type === 'error' ? 'var(--accent-error)' : 'var(--accent-warning)';
+
+        // Build occurrences in GOLDEN STANDARD format
+        let occHtml = '';
+        // Show only 1 sample location (user request)
+        issue.occurrences.slice(0, 1).forEach((occ, i) => {
+          // Extract element ID from selector for display
+          const selectorMatch = occ.selector.match(/#([a-zA-Z0-9_-]+)/);
+          const elementId = selectorMatch ? selectorMatch[0] : describeElement(occ.selector, occ.context);
+
+          occHtml += `
+               <div style="background:var(--code-bg); padding:16px; margin-top:8px; border-radius:8px; border:1px solid var(--glass-border);">
+                   <div style="font-weight:700; color:${typeColor}; font-size:14px; margin-bottom:12px;">
+                       📍 Location ${i + 1}: Element ${elementId}
+                   </div>
+                   
+                   <div style="margin-bottom:12px;">
+                       <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700; margin-bottom:6px;">CSS SELECTOR (DEVELOPER ID)</div>
+                       <div style="background:var(--input-bg); padding:10px 12px; border-radius:6px; font-family:monospace; font-size:12px; color:var(--text-main); overflow-x:auto; word-break:break-all;">${escapeHtml(occ.selector)}</div>
+                   </div>
+                   
+                   <div>
+                       <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700; margin-bottom:6px;">HTML CONTEXT</div>
+                       <div style="background:var(--input-bg); padding:10px 12px; border-radius:6px; font-family:monospace; font-size:12px; color:var(--text-main); overflow-x:auto;">${occ.context ? escapeHtml(occ.context) : '<em style="color:var(--text-muted)">No context available</em>'}</div>
+                   </div>
+               </div>
+             `;
+        });
+
+        // Use getPlainLanguageExplanation
+        const explanation = getPlainLanguageExplanation(issue.code, issue.message);
+
+        html += `
+              <div class="issue-item ${typeClass}" style="margin-bottom:12px; border:1px solid var(--glass-border);">
+                <div class="issue-header">
+                  <span class="issue-badge ${typeClass}">${issue.type}</span>
+                  <span style="color:var(--text-muted); font-size:12px; font-weight:600">${issue.count} LOCATION(S)</span>
+                </div>
+                
+                <div style="font-size:15px; font-weight:700; margin-bottom:8px; color:var(--text-main); margin-top:8px;">${issue.message}</div>
+                
+                <div class="plain-language" style="border-left:2px solid ${typeColor}; padding-left:12px; margin-top:8px;">
+                   <div class="what" style="font-size:13px; margin-bottom:4px;"><strong>💡 The Issue:</strong> ${explanation.what}</div>
+                   <div class="why" style="font-size:13px;"><strong>⚡ Why Fix It:</strong> ${explanation.why}</div>
+                </div>
+
+                <div style="margin-top:12px;">
+                   <button onclick="document.getElementById('occ-${scanId}-${issue.code}').style.display = document.getElementById('occ-${scanId}-${issue.code}').style.display==='none'?'block':'none'" 
+                           style="background:transparent; border:none; color:var(--accent-primary); cursor:pointer; font-size:13px; font-weight:600; padding:0;">
+                      View Technical Details & Locations (${issue.count}) ▼
+                   </button>
+                   <div id="occ-${scanId}-${issue.code}" style="display:none; margin-top:8px;">${occHtml}</div>
+                </div>
+              </div>
+            `;
+      });
+
+      if (hiddenCount > 0) {
+        html += `<div style="text-align:center; padding:12px; color:var(--text-muted); font-size:13px; font-style:italic;">
+             + ${hiddenCount} other issue categories not shown (Top 5 displayed)
+          </div>`;
+      }
+
+      container.innerHTML = html;
+    }
+
+    // Stub for applyCrawlSort since we use renderDiscoveryResults directly now
+    function applyCrawlSort() {
+      // Just re-render with current global data
+      if (allCrawlScans) renderDiscoveryResults(allCrawlScans);
     }
 
     // Helper function to get remediation steps

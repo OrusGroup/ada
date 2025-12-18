@@ -288,18 +288,142 @@ app.post('/api/crawl/start', upload.none(), async (req, res) => {
   }
 });
 
+// File Logger
+function logError(msg, err) {
+  const log = `[${new Date().toISOString()}] ${msg} ${err ? (err.stack || err) : ''}\n`;
+  try { fs.appendFileSync('server_error.log', log); } catch (e) { }
+  console.error(msg, err);
+}
+
+// Discovery-Only Crawl (Phase 1 of Split Spider)
+app.post('/api/crawl/discover', upload.none(), async (req, res) => {
+  const { url, maxPages } = req.body;
+  if (!url) return res.status(400).json({ error: 'URL is required' });
+
+  logError(`[API] Starting discovery for ${url}`);
+  try {
+    const domain = new URL(url).hostname;
+
+    // Create Crawl Record with 'discovering' status
+    db.db.run("INSERT INTO crawls (domain, status, total_pages) VALUES (?, 'discovering', 0)", [domain], async function (err) {
+      if (err) return res.status(500).json({ error: 'DB Error' });
+
+      const crawlId = this.lastID;
+      res.json({ success: true, crawlId, status: 'discovering', message: 'Discovery started' });
+
+      // Start Background Discovery (Live Streaming)
+      try {
+        const limit = parseInt(maxPages) || 500;
+        const discoveredUrls = new Set();
+
+        // Callback for real-time DB insertion
+        const onDiscover = (u) => {
+          if (!u || discoveredUrls.has(u)) return;
+          discoveredUrls.add(u);
+
+          const stmt = db.db.prepare(`INSERT INTO scans (url, score, total_issues, errors, warnings, notices, detailed_json, crawl_id, scan_status) VALUES (?, 0, 0, 0, 0, 0, '[]', ?, 'pending')`);
+          stmt.run(u, crawlId, (err) => {
+            if (err) console.error('Error inserting live scan:', err.message);
+          });
+          stmt.finalize();
+        };
+
+        const urls = await crawler.crawl(url, limit, onDiscover);
+
+        console.log(`[API] Discovery finished. Unique pages found: ${discoveredUrls.size}`);
+        db.db.run("UPDATE crawls SET total_pages = ?, status = 'discovered' WHERE id = ?", [discoveredUrls.size, crawlId]);
+
+      } catch (e) {
+        logError('[API] Crawl failed', e);
+        db.db.run("UPDATE crawls SET status = 'failed' WHERE id = ?", [crawlId]);
+      }
+    });
+  } catch (e) {
+    logError('[API] Outer Discovery Error', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.get('/api/crawl/status/:id', (req, res) => {
   const crawlId = req.params.id;
   db.db.get("SELECT * FROM crawls WHERE id = ?", [crawlId], (err, crawl) => {
     if (err || !crawl) return res.status(404).json({ error: 'Not found' });
 
-    db.db.all("SELECT id, url, score, total_issues, errors, timestamp FROM scans WHERE crawl_id = ? ORDER BY timestamp DESC", [crawlId], (err, scans) => {
+    db.db.all("SELECT id, url, score, total_issues, errors, timestamp, scan_status FROM scans WHERE crawl_id = ? ORDER BY timestamp DESC", [crawlId], (err, scans) => {
       if (err) return res.status(500).json({ error: 'DB Error' });
 
       const progress = crawl.total_pages > 0 ? Math.round((scans.length / crawl.total_pages) * 100) : 0;
       res.json({ crawl, scans, progress });
     });
   });
+});
+
+// Scan a single pending page (Phase 2 of Split Spider)
+app.post('/api/scan/page/:scanId', async (req, res) => {
+  const scanId = req.params.scanId;
+
+  // Get the scan record
+  db.db.get("SELECT * FROM scans WHERE id = ?", [scanId], async (err, scan) => {
+    if (err || !scan) return res.status(404).json({ error: 'Scan not found' });
+    if (scan.scan_status !== 'pending') {
+      return res.status(400).json({ error: 'Page already scanned or in progress' });
+    }
+
+    // Update status to 'scanning'
+    db.db.run("UPDATE scans SET scan_status = 'scanning' WHERE id = ?", [scanId]);
+
+    res.json({ success: true, message: 'Scan started' });
+
+    // Queue the scan
+    scanQueue.addJob(scan.url, scan.crawl_id, scanId);
+  });
+});
+
+// Scan all pending pages in a crawl (Phase 2 of Split Spider)
+app.post('/api/scan/all/:crawlId', async (req, res) => {
+  const crawlId = req.params.crawlId;
+
+  // Get all pending scans for this crawl
+  db.db.all("SELECT * FROM scans WHERE crawl_id = ? AND scan_status = 'pending'", [crawlId], (err, scans) => {
+    if (err) return res.status(500).json({ error: 'DB Error' });
+
+    if (scans.length === 0) {
+      return res.json({ success: true, message: 'No pending pages to scan', totalPages: 0 });
+    }
+
+    // Update crawl status to 'scanning'
+    db.db.run("UPDATE crawls SET status = 'scanning' WHERE id = ?", [crawlId]);
+
+    // Queue all pending scans
+    scans.forEach(scan => {
+      db.db.run("UPDATE scans SET scan_status = 'scanning' WHERE id = ?", [scan.id]);
+      scanQueue.addJob(scan.url, crawlId, scan.id);
+    });
+
+    res.json({ success: true, message: `Queued ${scans.length} pages for scanning`, totalPages: scans.length });
+  });
+});
+
+// Stop scanning (Clear queue)
+app.post('/api/scan/stop/:crawlId', async (req, res) => {
+  const crawlId = req.params.crawlId;
+
+  console.log(`[API] Stopping scans for crawl ${crawlId}`);
+
+  // 1. Clear memory queue
+  scanQueue.clear(crawlId);
+
+  // 2. Update DB: Mark 'scanning' items as 'pending' (or 'stopped'?)
+  // Actually, let's mark the CRAWL as 'stopped'
+  db.db.run("UPDATE crawls SET status = 'stopped' WHERE id = ?", [crawlId]);
+
+  // 3. Mark any 'scanning' items that haven't finished as 'pending' (so they can be retried)
+  // Or stuck in 'scanning'? Pa11y might still be running for a few.
+  // Best to just leave them. The queue clear prevents NEW ones.
+  // We can updated 'scanning' to 'pending' if we want to reset them.
+  // But let's just accept that 'scanning' ones will finish or timeout.
+
+  res.json({ success: true, message: 'Scan stopped' });
 });
 
 // Get detailed issues for a specific scan
@@ -412,6 +536,30 @@ app.get('/api/reports/executive/:id', async (req, res) => {
   }
 });
 
+// API endpoint to get detailed issues for a specific scan
+app.get('/api/scan/:id/issues', (req, res) => {
+  const scanId = req.params.id;
+
+  db.db.get('SELECT detailed_json FROM scans WHERE id = ?', [scanId], (err, row) => {
+    if (err) {
+      console.error('Error fetching scan issues:', err);
+      return res.status(500).json({ error: 'Failed to fetch issues' });
+    }
+
+    if (!row) {
+      return res.status(404).json({ error: 'Scan not found' });
+    }
+
+    try {
+      const issues = row.detailed_json ? JSON.parse(row.detailed_json) : [];
+      res.json({ issues });
+    } catch (parseError) {
+      console.error('Error parsing issues JSON:', parseError);
+      res.status(500).json({ error: 'Failed to parse issues data' });
+    }
+  });
+});
+
 // Echo endpoint to force file download with correct name (CSV)
 app.post('/api/download-csv', (req, res) => {
   try {
@@ -442,8 +590,81 @@ app.post('/api/download-html', (req, res) => {
   }
 });
 
+// CSV Export for Crawl Results (Gap Analysis)
+app.get('/api/report/crawl/:id/csv', (req, res) => {
+  const crawlId = req.params.id;
+
+  db.db.all("SELECT url, scan_status, errors, warnings, total_issues, detailed_json FROM scans WHERE crawl_id = ? ORDER BY errors DESC", [crawlId], (err, scans) => {
+    if (err) {
+      console.error('CSV Export error:', err);
+      return res.status(500).json({ error: 'Failed to export' });
+    }
+
+    if (!scans || scans.length === 0) {
+      return res.status(404).json({ error: 'No scans found for this crawl' });
+    }
+
+    // Build CSV
+    const BOM = '\uFEFF'; // UTF-8 BOM for Excel compatibility
+    let csv = BOM + 'URL,Status,Errors,Warnings,Total Issues,Top Issue\n';
+
+    scans.forEach(scan => {
+      // Get top issue from detailed_json if available
+      let topIssue = '';
+      try {
+        const issues = JSON.parse(scan.detailed_json || '[]');
+        if (issues.length > 0) {
+          // Group and find most common
+          const counts = {};
+          issues.forEach(i => {
+            const code = i.code || 'unknown';
+            counts[code] = (counts[code] || 0) + 1;
+          });
+          const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+          if (sorted.length > 0) {
+            topIssue = sorted[0][0].replace(/,/g, ';'); // Escape commas
+          }
+        }
+      } catch (e) { }
+
+      // Escape URL for CSV
+      const url = scan.url.replace(/"/g, '""');
+      const status = scan.scan_status || 'pending';
+      const errors = scan.errors || 0;
+      const warnings = scan.warnings || 0;
+      const total = scan.total_issues || 0;
+
+      csv += `"${url}",${status},${errors},${warnings},${total},"${topIssue}"\n`;
+    });
+
+    // Send as download
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="gap-analysis-${crawlId}.csv"`);
+    res.send(csv);
+  });
+});
+
+// Graceful Shutdown
+function gracefulShutdown(signal) {
+  console.log(`\n[${signal}] Received. Closing HTTP server...`);
+  server.close(() => {
+    console.log('HTTP server closed.');
+    db.db.close((err) => {
+      if (err) {
+        console.error('Error closing database:', err);
+        process.exit(1);
+      }
+      console.log('Database connection closed.');
+      process.exit(0);
+    });
+  });
+}
+
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+
 // Start server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`\n🚀 ADA Scanner Server running at http://localhost:${PORT}`);
   console.log(`\nOpen your browser and visit: http://localhost:${PORT}\n`);
 });
