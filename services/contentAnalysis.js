@@ -1,4 +1,5 @@
 const fs = require('fs');
+const Tesseract = require('tesseract.js');
 // const Tesseract = require('tesseract.js');
 
 /**
@@ -130,7 +131,6 @@ async function analyzePDF(dataBuffer) {
  */
 async function analyzeImage(imageBuffer) {
     try {
-        /*
         const result = await Tesseract.recognize(
             imageBuffer,
             'eng',
@@ -141,12 +141,14 @@ async function analyzeImage(imageBuffer) {
             text: result.data.text.trim(),
             confidence: result.data.confidence
         };
-        */
+        /*
         console.warn("OCR Disabled in Cloud Mode");
         return { text: "[OCR Disabled]", confidence: 0 };
+        */
     } catch (error) {
         console.error("OCR Error:", error);
-        return { text: "", confidence: 0 };
+        // return { text: "", confidence: 0 };
+        throw new Error("Failed to perform OCR on image");
     }
 }
 
