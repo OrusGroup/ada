@@ -163,7 +163,7 @@ async function crawl(rawUrl, maxPages = Infinity, onDiscover = null, crawlId = n
     // FALLBACK TO PUPPETEER for deeper crawling
     let browser;
     try {
-        browser = await puppeteer.launch({
+        const launchOptions = {
             headless: 'new',
             args: [
                 '--no-sandbox',
@@ -173,7 +173,14 @@ async function crawl(rawUrl, maxPages = Infinity, onDiscover = null, crawlId = n
                 '--disable-gpu'
             ],
             ignoreHTTPSErrors: true
-        });
+        };
+
+        // Explicitly use the environment variable if set (critical for Docker/Cloud)
+        if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+            launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+        }
+
+        browser = await puppeteer.launch(launchOptions);
         const page = await browser.newPage();
         page.setDefaultNavigationTimeout(15000);
 
