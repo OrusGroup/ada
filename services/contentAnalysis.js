@@ -1,5 +1,5 @@
 const fs = require('fs');
-const Tesseract = require('tesseract.js');
+// const Tesseract = require('tesseract.js');
 
 /**
  * Analyzes a PDF buffer to determine if it has a text layer.
@@ -130,6 +130,7 @@ async function analyzePDF(dataBuffer) {
  */
 async function analyzeImage(imageBuffer) {
     try {
+        /*
         const result = await Tesseract.recognize(
             imageBuffer,
             'eng',
@@ -140,9 +141,12 @@ async function analyzeImage(imageBuffer) {
             text: result.data.text.trim(),
             confidence: result.data.confidence
         };
+        */
+        console.warn("OCR Disabled in Cloud Mode");
+        return { text: "[OCR Disabled]", confidence: 0 };
     } catch (error) {
         console.error("OCR Error:", error);
-        throw new Error("Failed to perform OCR on image");
+        return { text: "", confidence: 0 };
     }
 }
 
