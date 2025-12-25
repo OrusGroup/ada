@@ -1,6 +1,9 @@
-# City of Bowie ADA Compliance Scanner
+# ADA Compliance Scanner
 
 **Proof-of-Concept Website Accessibility Auditor**
+
+> **🚀 Live Cloud App**: [https://ejxwh47vsv.us-east-1.awsapprunner.com](https://ejxwh47vsv.us-east-1.awsapprunner.com)  
+> **📄 Architecture Docs**: [View Technical Stack](TECH-STACK.md)
 
 A Node.js-based tool that scans websites for WCAG 2.1 AA compliance issues using Pa11y and the Axe accessibility engine.
 

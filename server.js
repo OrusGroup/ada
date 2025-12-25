@@ -66,6 +66,107 @@ const upload = multer({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Support form submissions
 
+// --- AUTHENTICATION & USER PROVISIONING ---
+const ALLOWED_USERS = [
+  'khalil.lyons@orusgroup.com',
+  'gavin.stokes@orusgroup.com'
+];
+const DEFAULT_PASS = 'OrusGroup2025!';
+
+// Provision Users on Startup
+async function provisionUsers() {
+  if (!process.env.SUPABASE_URL) return;
+  console.log('🔐 Checking Authorized Users...');
+
+  // We need to use the Supabase Admin client (which we have via SERVICE_KEY)
+  const { db: { supabase } } = require('./services/db-supabase'); // Access raw client
+
+  for (const email of ALLOWED_USERS) {
+    // 1. Check if user exists (by trying to sign in with a dummy pass or list users if admin)
+    // Since we have SERVICE_KEY, we can list users or create directly.
+    // However, the JS client with Service Key is admin.
+
+    // Note: 'listUsers' is an admin function.
+    const { data: { users }, error } = await supabase.auth.admin.listUsers();
+
+    const exists = users?.find(u => u.email === email);
+
+    if (!exists) {
+      console.log(`👤 Creating user: ${email}`);
+      const { error: createError } = await supabase.auth.admin.createUser({
+        email: email,
+        password: DEFAULT_PASS,
+        email_confirm: true
+      });
+      if (createError) console.error(`Failed to create ${email}:`, createError.message);
+      else console.log(`✅ Created ${email} with default password.`);
+    } else {
+      console.log(`✅ User exists: ${email}`);
+    }
+  }
+}
+
+// Run provisioning slightly after db init
+setTimeout(provisionUsers, 2000);
+
+// LOGIN ENDPOINT
+app.post('/api/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!ALLOWED_USERS.includes(email)) {
+    return res.status(403).json({ error: 'Access Denied: User not authorized.' });
+  }
+
+  // Use the database adapter's client to sign in
+  // Note: We need a fresh client or use the existing one?
+  // signInWithPassword works on the public client, but we can verify credential via the admin one 
+  // or just proxy the request.
+
+  const { db: { supabase } } = require('./services/db-supabase');
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    return res.status(401).json({ error: error.message });
+  }
+
+  return res.json({ session: data.session });
+});
+
+// AUTH MIDDLEWARE
+const authMiddleware = async (req, res, next) => {
+  // Public Routes matching
+  if (req.path === '/api/login' || req.path.startsWith('/public') || !req.path.startsWith('/api')) {
+    return next();
+  }
+
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ error: 'Missing Authentication Token' });
+  }
+
+  const { db: { supabase } } = require('./services/db-supabase');
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+
+  if (error || !user) {
+    return res.status(401).json({ error: 'Invalid or Expired Token' });
+  }
+
+  // Check Whitelist again
+  if (!ALLOWED_USERS.includes(user.email)) {
+    return res.status(403).json({ error: 'Unauthorized User' });
+  }
+
+  req.user = user;
+  next();
+};
+
+app.use(authMiddleware);
+// ------------------------------------------
+
 // Cache-busting middleware - prevent browser from caching during development
 app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
