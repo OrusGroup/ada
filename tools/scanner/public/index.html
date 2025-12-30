@@ -2663,64 +2663,7 @@
       window.location.href = `/api/report/crawl/${currentCrawlId}/csv`;
     }
 
-    function renderDiscoveryResults(scans) {
-      const container = document.getElementById('crawlResults');
-
-      let html = `<div style="display:flex; flex-direction:column; gap:8px;">`;
-
-      scans.forEach((scan, index) => {
-        let statusBadge = '';
-        let actionBtn = '';
-
-        switch (scan.scan_status) {
-          case 'pending':
-            statusBadge = `<span style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(255,255,255,0.1); color:var(--text-muted); border:1px solid var(--glass-border);">PENDING</span>`;
-            actionBtn = `<button id="btn-scan-${scan.id}" onclick="scanPage(${scan.id})" class="primary" style="padding:4px 12px; font-size:12px; min-width:80px;">Scan</button>`;
-            break;
-          case 'scanning':
-            statusBadge = `<span style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(59,130,246,0.1); color:#3b82f6; border:1px solid rgba(59,130,246,0.2);">SCANNING...</span>`;
-            // Spinner localized to this button/row
-            actionBtn = `<div class="spinner" style="width:16px; height:16px; border-width:2px; margin:0 auto;"></div>`;
-            break;
-          case 'complete':
-            const issueCount = scan.total_issues || 0;
-            const errCount = scan.errors || 0;
-            let color = issueCount === 0 ? 'var(--accent-success)' : (errCount > 0 ? 'var(--accent-error)' : 'var(--accent-warning)');
-            statusBadge = `<span style="font-size:10px; padding:2px 8px; border-radius:10px; background:${color}1a; color:${color}; border:1px solid ${color}40; font-weight:700;">${issueCount} ISSUES</span>`;
-            actionBtn = `<button onclick="toggleSpiderIssues(${scan.id})" style="font-size:12px; background:transparent; border:1px solid var(--glass-border); color:var(--text-main); padding:4px 12px; border-radius:8px; cursor:pointer;">View Results</button>`;
-            break;
-          case 'failed':
-            statusBadge = `<span style="font-size:10px; color:var(--accent-error);">FAILED</span>`;
-            actionBtn = `<button onclick="scanPage(${scan.id})" style="font-size:12px; color:var(--accent-error); background:transparent; border:1px solid var(--accent-error); padding:4px 8px; border-radius:6px; cursor:pointer;">Retry</button>`;
-            break;
-          default:
-            statusBadge = `<span style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(255,255,255,0.1); color:var(--text-muted); border:1px solid var(--glass-border);">PENDING</span>`;
-            actionBtn = `<button id="btn-scan-${scan.id}" onclick="scanPage(${scan.id})" class="primary" style="padding:4px 12px; font-size:12px; min-width:80px;">Scan</button>`;
-        }
-
-        html += `
-          <div style="background:var(--email-item-bg); border-radius:12px; padding:12px 16px; border:1px solid var(--glass-border);">
-             <div style="display:flex; justify-content:space-between; align-items:center;">
-               <div style="flex:1; overflow:hidden;">
-                 <div style="display:flex; gap:8px;">
-                    <span style="font-size:11px; color:var(--text-muted); font-weight:600; min-width:24px;">#${index + 1}</span>
-                    <a href="${scan.url}" target="_blank" style="color:var(--accent-primary); font-weight:500; text-decoration:none; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;">${scan.url}</a>
-                 </div>
-                 <div style="font-size:10px; color:var(--text-muted); margin-top:2px; margin-left:32px;">ID: ${scan.id}</div> 
-               </div>
-               <div style="display:flex; align-items:center; gap:12px; margin-left:16px; min-width:140px; justify-content:flex-end;">
-                 ${statusBadge}
-                 ${actionBtn}
-               </div>
-            </div>
-            <div id="issues-${scan.id}" style="display:none; margin-left:20px; border-left:2px solid var(--glass-border); padding-left:10px; margin-top:8px;"></div>
-          </div>
-        `;
-      });
-
-      html += `</div>`;
-      container.innerHTML = html;
-    }
+    // [REMOVED DUPLICATE renderDiscoveryResults FUNCTION]
 
     function renderCrawlTable(scans, crawl) {
       const container = document.getElementById('crawlResults');
@@ -3169,7 +3112,10 @@
         const res = await fetch(`/api/scan/${scanId}/issues`);
         const data = await res.json();
 
-        if (data.issues && data.issues.length > 0) {
+
+        const hasIssues = data.issues && data.issues.length > 0;
+
+        if (hasIssues) {
           // GROUP ISSUES (Gold Standard)
           const grouped = groupIssues(data.issues);
 
@@ -3180,7 +3126,15 @@
           renderSpiderIssuesContent(container, topIssues, scanId, hiddenCount);
           container.dataset.loaded = 'true';
         } else {
-          container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted);">No detailed issues found.</div>';
+          // Check if we EXPECTED issues based on the badge count?
+          // We can't easily access the scan object here without looking it up
+          // But we can check if the response gives us a hint? No.
+          // Fallback: Generic message with export hint
+          container.innerHTML = `
+             <div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px;">
+               <div style="margin-bottom:8px;">No detailed issues payload found (or clean scan).</div>
+               <div style="font-size:11px; opacity:0.7;">If the summary indicates issues, please download the full CSV export for details.</div>
+             </div>`;
         }
       } catch (e) {
         container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--accent-error);">Failed to load issues.</div>';
@@ -3276,9 +3230,19 @@
       });
 
       if (hiddenCount > 0) {
-        html += `<div style="text-align:center; padding:12px; color:var(--text-muted); font-size:13px; font-style:italic;">
-             + ${hiddenCount} other issue categories not shown (Top 5 displayed)
-          </div>`;
+        html += `
+          <div style="margin-top:16px; text-align:center;">
+             <div style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:4px;">
+                + ${hiddenCount} more issue types hidden
+             </div>
+             <div style="font-size:11px; color:var(--text-muted); opacity:0.7;">
+                (Preview shows top 5 most frequent issues)
+             </div>
+             <button onclick="downloadCrawlCSV()" style="margin-top:10px; background:var(--glass-panel); border:1px solid var(--accent-primary); color:var(--accent-primary); padding:6px 16px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600;">
+                Download Full Export to View All
+             </button>
+          </div>
+        `;
       }
 
       container.innerHTML = html;
