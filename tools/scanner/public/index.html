@@ -1,0 +1,3688 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADA Compliance Scanner - Professional Edition</title>
+  <!-- Authentication Logic (Protects Page) -->
+  <script src="auth.js"></script>
+  <style>
+    :root {
+      /* Dark Theme (Default) */
+      --bg-dark: #0f172a;
+      --bg-gradient: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+      --glass-panel: rgba(30, 41, 59, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --primary-gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-inverse: #0f172a;
+      --accent-error: #f87171;
+      --accent-warning: #fbbf24;
+      --accent-success: #34d399;
+      --input-bg: rgba(0, 0, 0, 0.3);
+      --code-bg: rgba(0, 0, 0, 0.3);
+      --code-text: #ffffff;
+      --shadow-color: rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="light"] {
+      /* Light Theme - High Contrast */
+      --bg-dark: #f0f9ff;
+      --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+
+      /* Solid panels for better readability */
+      --glass-panel: #ffffff;
+      /* Darker, visible borders */
+      --glass-border: #334155;
+
+      --primary-gradient: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-inverse: #ffffff;
+
+      --accent-error: #dc2626;
+      --accent-warning: #d97706;
+      --accent-success: #15803d;
+
+      --input-bg: #f8fafc;
+      --code-bg: #f1f5f9;
+      --code-text: #0f172a;
+      /* Stronger drop shadows */
+      --shadow-color: rgba(15, 23, 42, 0.15);
+    }
+
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      color: var(--text-main);
+      padding: 40px 20px;
+      line-height: 1.5;
+      transition: background 0.5s ease;
+    }
+
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header & Toggle */
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 48px;
+      position: relative;
+    }
+
+    .header-content {
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      right: 0;
+      top: 0;
+      background: var(--glass-panel);
+      border: 2px solid var(--glass-border);
+      color: var(--text-main);
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      backdrop-filter: blur(8px);
+    }
+
+    .theme-toggle:hover {
+      transform: rotate(15deg);
+    }
+
+    .header h1 {
+      font-size: 48px;
+      font-weight: 800;
+      background: linear-gradient(to right, var(--text-main), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -1.5px;
+      margin-bottom: 12px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      /* Fallback for readability */
+    }
+
+    .header p {
+      font-size: 18px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Glass Components */
+    .glass-panel {
+      background: var(--glass-panel);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px -5px var(--shadow-color);
+      transition: all 0.3s ease;
+    }
+
+    [data-theme="light"] .glass-panel {
+      border: 2px solid #334155;
+      /* Even starker border for light mode */
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 32px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 6px;
+      border-radius: 16px;
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+      border: 1px solid var(--glass-border);
+    }
+
+    [data-theme="light"] .tabs {
+      background: #ffffff;
+      border: 2px solid #334155;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .tab {
+      padding: 10px 24px;
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .tab:hover {
+      color: var(--text-main);
+    }
+
+    .tab.active {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      box-shadow: 0 4px 12px var(--shadow-color);
+    }
+
+    [data-theme="light"] .tab.active {
+      background: #0284c7;
+      color: white;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+    }
+
+    /* Tier Buttons */
+    .tier-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+    }
+
+    .tier-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+    }
+
+    .tier-btn.active {
+      background: var(--primary-gradient);
+      border: none;
+      color: white;
+    }
+
+    [data-theme="light"] .tier-btn {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+    }
+
+    [data-theme="light"] .tier-btn.active {
+      background: #0284c7;
+      color: white;
+    }
+
+    /* Info Tooltip (Easter Eggs) */
+    .info-tooltip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .info-icon {
+      cursor: help;
+      opacity: 0.6;
+      transition: opacity 0.3s;
+      font-size: 16px;
+    }
+
+    .info-icon:hover {
+      opacity: 1;
+    }
+
+    .tooltip-content {
+      display: none;
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-left: 12px;
+      background: var(--bg-dark);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      width: 300px;
+      z-index: 1000;
+      color: var(--text-main);
+      font-size: 13px;
+      line-height: 1.6;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .info-tooltip:hover .tooltip-content {
+      display: block;
+    }
+
+    [data-theme="light"] .tooltip-content {
+      background: white;
+      border: 2px solid #334155;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Depth Stat Cards */
+    .depth-stat-card {
+      background: var(--glass-panel);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .depth-stat-card .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--accent-primary);
+      margin-bottom: 4px;
+    }
+
+    .depth-stat-card .stat-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    [data-theme="light"] .depth-stat-card {
+      background: white;
+      border: 2px solid #334155;
+    }
+
+    [data-theme="light"] .depth-stat-card .stat-label {
+      color: #334155;
+    }
+
+    /* Tree Node Styles */
+    .tree-node {
+      padding-left: 20px;
+      border-left: 1px dashed var(--glass-border);
+      margin-left: 8px;
+      font-size: 15px;
+    }
+
+    .tree-item {
+      padding: 6px 0;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .tree-item:hover {
+      color: var(--accent-primary);
+    }
+
+    .tree-toggle {
+      display: inline-block;
+      width: 20px;
+      color: var(--accent-primary);
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .tree-depth-badge {
+      display: inline-block;
+      background: var(--accent-primary);
+      color: white;
+      font-size: 13px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-right: 10px;
+      font-weight: 600;
+    }
+
+    /* Light mode tree/table fixes */
+    [data-theme="light"] .tree-node,
+    [data-theme="light"] .tree-item {
+      color: #1e293b;
+    }
+
+    [data-theme="light"] #depthTableBody td,
+    [data-theme="light"] #depthTableBody span {
+      color: #1e293b !important;
+    }
+
+    /* Export button styling */
+    .export-btn {
+      background: transparent;
+      border: 2px solid var(--accent-primary);
+      color: var(--accent-primary);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .export-btn:hover {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    /* Example/Control button styling (Site Map controls) */
+    .example-btn {
+      background: var(--glass-panel);
+      border: 2px solid var(--glass-border);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .example-btn:hover {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: white;
+    }
+
+    [data-theme="light"] .example-btn {
+      background: white;
+      border: 2px solid #334155;
+      color: #0f172a;
+    }
+
+    [data-theme="light"] .example-btn:hover {
+      background: #0284c7;
+      border-color: #0284c7;
+      color: white;
+    }
+
+    /* Scanner Box */
+    .scanner-box {
+      padding: 48px;
+      margin-bottom: 32px;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Inputs */
+    .input-group {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    input[type="url"],
+    select {
+      flex: 1;
+      background: var(--input-bg);
+      border: 1px solid var(--glass-border);
+      padding: 16px 24px;
+      border-radius: 12px;
+      color: var(--text-main);
+      font-size: 16px;
+      transition: all 0.3s;
+      font-family: inherit;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="light"] input[type="url"],
+    [data-theme="light"] select {
+      border: 2px solid #334155;
+      /* Thicker border for visibility */
+      background: #ffffff;
+      color: #0f172a;
+    }
+
+    [data-theme="light"] input[type="url"]::placeholder {
+      color: #94a3b8;
+    }
+
+    input[type="url"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2);
+    }
+
+    /* Buttons */
+    button.primary {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 0 32px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 10px 20px -5px rgba(56, 189, 248, 0.4);
+    }
+
+    button.primary:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    /* Quick Links */
+    .examples {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .examples span {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    /* Premium Glassmorphic Button Style */
+    .example-btn,
+    .export-btn,
+    .scan-btn,
+    .action-btn {
+      position: relative;
+      background: rgba(43, 55, 80, 0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(170, 202, 255, 0.2);
+      color: var(--text-main);
+      padding: 10px 20px;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow:
+        inset 0 0 0 1px rgba(170, 202, 255, 0.15),
+        inset 0 0 16px 0 rgba(170, 202, 255, 0.08),
+        inset 0 -3px 12px 0 rgba(170, 202, 255, 0.1),
+        0 2px 8px rgba(0, 0, 0, 0.25),
+        0 4px 16px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+    }
+
+    .example-btn::before,
+    .export-btn::before,
+    .scan-btn::before,
+    .action-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .example-btn:hover,
+    .export-btn:hover,
+    .scan-btn:hover,
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        inset 0 0 0 1px rgba(170, 202, 255, 0.25),
+        inset 0 0 20px 0 rgba(170, 202, 255, 0.15),
+        inset 0 -3px 16px 0 rgba(170, 202, 255, 0.15),
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        0 8px 24px rgba(0, 0, 0, 0.2),
+        0 0 20px rgba(100, 150, 255, 0.15);
+      border-color: rgba(170, 202, 255, 0.35);
+    }
+
+    .example-btn:active,
+    .export-btn:active,
+    .scan-btn:active,
+    .action-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    [data-theme="light"] .example-btn,
+    [data-theme="light"] .export-btn,
+    [data-theme="light"] .scan-btn,
+    [data-theme="light"] .action-btn {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      color: #1e293b;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        0 2px 8px rgba(0, 0, 0, 0.08),
+        0 4px 16px rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="light"] .example-btn:hover,
+    [data-theme="light"] .export-btn:hover,
+    [data-theme="light"] .scan-btn:hover,
+    [data-theme="light"] .action-btn:hover {
+      background: rgba(255, 255, 255, 1);
+      border-color: rgba(59, 130, 246, 0.5);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 1),
+        0 4px 12px rgba(59, 130, 246, 0.15),
+        0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Upload Area */
+    .upload-area {
+      border: 2px dashed var(--glass-border);
+      border-radius: 20px;
+      padding: 60px;
+      text-align: center;
+      transition: all 0.3s;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    [data-theme="light"] .upload-area {
+      background: white;
+      border-color: #cbd5e1;
+    }
+
+    .upload-area:hover,
+    .upload-area.dragover {
+      border-color: #818cf8;
+      background: rgba(129, 140, 248, 0.05);
+      transform: scale(1.01);
+    }
+
+    .upload-area .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .upload-area h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      background: var(--input-bg);
+      border-radius: 12px;
+      margin-top: 12px;
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+    }
+
+    [data-theme="light"] .file-item {
+      border-color: #cbd5e1;
+    }
+
+    .file-item button {
+      background: rgba(248, 113, 113, 0.2);
+      color: var(--accent-error);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    [data-theme="light"] .example-btn {
+      color: var(--text-main);
+      border: 1px solid #94a3b8;
+      /* Darker border */
+      background: white;
+    }
+
+    [data-theme="light"] .example-btn:hover {
+      background: #f1f5f9;
+      border-color: #64748b;
+    }
+
+    /* Results Dashboard */
+    .results,
+    .pdf-results-container {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .results.active,
+    .pdf-results-container.active {
+      display: block;
+    }
+
+    .page-info {
+      background: var(--glass-panel);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+    }
+
+    [data-theme="light"] .page-info {
+      border: 1px solid #94a3b8;
+      /* Darker border */
+      background: #f8fafc;
+    }
+
+    .page-info-row strong {
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .page-info-row span,
+    .page-info-row a {
+      font-size: 16px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--glass-panel);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      padding: 32px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px -10px var(--shadow-color);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px -5px var(--shadow-color);
+    }
+
+    [data-theme="light"] .stat-card {
+      border: 2px solid #334155;
+      background: white;
+    }
+
+    .stat-card .number {
+      font-size: 56px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+
+    .stat-card .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .stat-card.total .number {
+      color: var(--text-main);
+    }
+
+    .stat-card.errors .number {
+      color: var(--accent-error);
+    }
+
+    .stat-card.warnings .number {
+      color: var(--accent-warning);
+    }
+
+    /* Issue List */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .section-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .filters {
+      display: flex;
+      gap: 12px;
+    }
+
+    .filter-select {
+      background: var(--input-bg);
+      color: var(--text-main);
+      border: 1px solid var(--glass-border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+
+    [data-theme="light"] .filter-select {
+      border-color: #cbd5e1;
+      background: white;
+    }
+
+    .export-btn {
+      background: rgba(52, 211, 153, 0.1);
+      color: var(--accent-success);
+      border: 1px solid var(--accent-success);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .export-btn:hover {
+      background: var(--accent-success);
+      color: white;
+    }
+
+    .issue-item {
+      background: var(--glass-panel);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      transition: all 0.2s;
+    }
+
+    [data-theme="light"] .issue-item {
+      border-color: #cbd5e1;
+      background: white;
+    }
+
+    .issue-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 12px var(--shadow-color);
+    }
+
+    .issue-item.error {
+      border-left: 5px solid var(--accent-error);
+    }
+
+    .issue-item.warning {
+      border-left: 5px solid var(--accent-warning);
+    }
+
+    .issue-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .issue-badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .issue-badge.error {
+      background: rgba(248, 113, 113, 0.1);
+      color: var(--accent-error);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+
+    /* Light Theme Contrast for Badge */
+    [data-theme="light"] .issue-badge.error {
+      border: 1px solid var(--accent-error);
+      /* Solid border */
+      background: rgba(248, 113, 113, 0.05);
+      /* Lighter background */
+    }
+
+    .issue-badge.warning {
+      background: rgba(251, 191, 36, 0.1);
+      color: var(--accent-warning);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    [data-theme="light"] .issue-badge.warning {
+      border: 1px solid var(--accent-warning);
+      /* Solid border */
+      background: rgba(251, 191, 36, 0.05);
+    }
+
+    .plain-language {
+      background: var(--input-bg);
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 16px;
+      font-size: 15px;
+      border: 1px solid var(--glass-border);
+    }
+
+    [data-theme="light"] .plain-language {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+    }
+
+    .what {
+      color: var(--text-main);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .why {
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 14px;
+    }
+
+    /* Detailed Instance Box */
+    .detailed-instance {
+      background: var(--code-bg);
+      padding: 16px;
+      margin-top: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+    }
+
+    [data-theme="light"] .detailed-instance {
+      background: #f1f5f9;
+      border: 1px solid #94a3b8;
+      /* Darker border for visibility */
+    }
+
+    /* Technical Snippets */
+    .code-snippet {
+      background: var(--code-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Monaco', monospace;
+      font-size: 12px;
+      margin-top: 8px;
+      overflow-x: auto;
+      color: var(--code-text);
+    }
+
+    [data-theme="light"] .code-snippet {
+      background: #ffffff;
+      border: 1px solid #94a3b8;
+      /* Darker border */
+      color: #0f172a;
+      /* Dark text */
+    }
+
+    .code-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    [data-theme="light"] .code-label {
+      color: #334155;
+      /* Darker slate for labels */
+    }
+
+    /* PDF Report Cards */
+    .pdf-card {
+      background: var(--glass-panel);
+      border: 1px solid var(--glass-border);
+      padding: 32px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      color: var(--text-main);
+    }
+
+    [data-theme="light"] .pdf-card {
+      border: 2px solid #334155;
+      background: white;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15);
+    }
+
+    .pdf-card h3 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+
+    .status-pill {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 4px 12px;
+      border-radius: 12px;
+    }
+
+    .status-pill.error {
+      color: var(--accent-error);
+      background: rgba(248, 113, 113, 0.1);
+    }
+
+    .status-pill.success {
+      color: var(--accent-success);
+      background: rgba(52, 211, 153, 0.1);
+    }
+
+    .pdf-issue {
+      background: var(--input-bg);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-main);
+    }
+
+    [data-theme="light"] .pdf-issue {
+      border: 1px solid #334155;
+      background: #f1f5f9;
+    }
+
+    .critical-header {
+      color: var(--accent-error);
+      font-weight: 700;
+      margin: 16px 0 8px;
+      display: block;
+    }
+
+    .warning-header {
+      color: var(--accent-warning);
+      font-weight: 700;
+      margin: 16px 0 8px;
+      display: block;
+    }
+
+    /* Loading Spinner */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 60px;
+    }
+
+    .loading.active {
+      display: block;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top-color: #38bdf8;
+      animation: spin 0.8s ease-in-out infinite;
+      margin: 0 auto 24px;
+    }
+
+    [data-theme="light"] .spinner {
+      border-color: rgba(0, 0, 0, 0.1);
+      border-top-color: #0284c7;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <script src="client-config.js"></script>
+</head>
+
+<body data-theme="dark">
+  <div class="container">
+    <div class="header-row">
+      <div class="header-content">
+        <div class="header">
+          <h1 id="appTitle">ADA Compliance Scanner</h1>
+          <p id="appTagline">Professional Compliance Intelligence</p>
+        </div>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+        ☀️
+      </button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('website')">Website Audit</button>
+      <button class="tab" onclick="switchTab('crawler')">Compliance Scanner</button>
+      <button class="tab" onclick="switchTab('sitemap')">Site Map</button>
+      <button class="tab" onclick="switchTab('documents')">Document Scanner</button>
+    </div>
+
+    <!-- Scanner Area -->
+    <div class="glass-panel scanner-box">
+
+      <!-- Website Tab -->
+      <div id="websiteTab" class="tab-content active">
+        <!-- Alert Box Moved Here -->
+        <div id="alertMessage"
+          style="display:none; text-align:center; margin-bottom:20px; padding:12px; border-radius:8px;">
+        </div>
+
+        <div class="input-group">
+          <input type="url" id="urlInput" placeholder="Enter website URL (e.g., https://example.com)">
+          <button class="primary" id="scanBtn" onclick="scanWebsite()">Initialize Scan</button>
+        </div>
+
+        <!-- Scan Status Indicator -->
+        <div id="scanStatus"
+          style="display:none; margin-top:20px; padding:16px; background:var(--glass-panel); border:2px solid var(--accent-primary); border-radius:12px;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+            <div class="spinner" style="width:24px; height:24px; margin:0;"></div>
+            <span id="scanStatusText" style="font-weight:600; color:var(--text-main); font-size:15px;">🔍 Scanning
+              website...</span>
+          </div>
+          <div style="font-size:13px; color:var(--text-muted);" id="scanProgress">Initializing scan...</div>
+        </div>
+
+        <div class="examples">
+          <span>Quick Load:</span>
+          <button class="example-btn" onclick="setUrl('https://www.cityofbowie.org')">City of Bowie</button>
+        </div>
+        <div class="results" id="results" style="margin-top:24px;">
+          <div class="page-info" id="pageInfo"></div>
+
+          <div class="summary-grid">
+            <div class="stat-card total" onclick="filterByStat('all')">
+              <div class="number" id="totalIssues">0</div>
+              <div class="label">Total Issues</div>
+            </div>
+            <div class="stat-card errors" onclick="filterByStat('error')">
+              <div class="number" id="totalErrors">0</div>
+              <div class="label">ADA Non-Compliant Flags</div>
+              <div id="apiStatusMessage" class="hidden api-status-message"></div>
+            </div>
+            <div class="stat-card warnings" onclick="filterByStat('warning')">
+              <div class="number" id="totalWarnings">0</div>
+              <div class="label">Warnings</div>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <h2>Detected Issues & Recommendations</h2>
+            <div class="filters">
+              <select class="filter-select" id="filterType" onchange="applyFilters()">
+                <option value="all">All Issues</option>
+                <option value="error">ADA Non-Compliant Flags Only</option>
+                <option value="warning">Warnings Only</option>
+              </select>
+              <button class="export-btn" onclick="exportCSV()">Export CSV</button>
+            </div>
+          </div>
+
+          <div id="categoryChart" style="display:none"></div>
+          <div class="issue-list" id="issueList"></div>
+        </div>
+      </div>
+
+
+      <!-- Crawler Tab -->
+      <div id="crawlerTab" class="tab-content">
+        <div class="input-group">
+          <input type="url" id="crawlUrlInput" placeholder="Enter starting URL (e.g., https://www.cityofbowie.org)">
+          <button class="primary" id="discoverBtn" onclick="startDiscovery()">Discover Pages</button>
+        </div>
+        <p style="color:var(--text-muted); font-size:13px; margin-top:12px; margin-bottom:24px;">
+          <strong>Step 1:</strong> Discover all pages on the site. <strong>Step 2:</strong> Choose which pages to scan
+          for accessibility issues.
+        </p>
+
+        <!-- Quick Load -->
+        <div style="margin-top:16px; margin-bottom:24px;">
+          <div class="examples">
+            <span>Quick Load:</span>
+            <button class="example-btn"
+              onclick="document.getElementById('crawlUrlInput').value='https://www.cityofbowie.org'">City of
+              Bowie</button>
+          </div>
+        </div>
+
+        <!-- Discovery Progress -->
+        <div id="discoveryStatus"
+          style="display:none; margin-top:24px; padding:20px; background:var(--glass-panel); border-radius:16px; border:1px solid var(--glass-border);">
+          <div style="display:flex; align-items:center; gap:16px; margin-bottom:12px;">
+            <div class="spinner" id="discoverySpinner" style="width:24px; height:24px; margin:0; border-width:2px;">
+            </div>
+            <div>
+              <div id="discoveryStatusText" style="font-weight:700; color:var(--text-main); font-size:16px;">🔍
+                Discovering pages...</div>
+              <div style="display:flex; gap:16px; align-items:center;">
+                <span id="discoveryCount" style="color:var(--text-muted); font-size:13px;">Found 0 pages</span>
+                <span id="discoveryTimer" style="color:var(--accent-primary); font-size:13px; font-weight:600;">⏱️
+                  0:00</span>
+              </div>
+            </div>
+            <!-- Stop button removed (integrated into main button) -->
+          </div>
+        </div>
+
+        <!-- Spider Actions (Scan All, etc) -->
+        <div id="spiderActions"
+          style="display:none; margin-top:24px; display:flex; gap:12px; align-items:center; justify-content:space-between; background:var(--input-bg); padding:16px; border-radius:12px;">
+          <div style="font-size:14px; color:var(--text-main); font-weight:600;">
+            <span id="pagesReadyCount">0</span> pages ready to scan
+          </div>
+          <div style="display:flex; gap:12px;">
+            <button class="primary" id="btnScanAll" onclick="scanAllPages()"
+              style="background:var(--accent-primary);">Scan All
+              Pages</button>
+          </div>
+        </div>
+
+        <!-- NEW Persistent Results Toolbar (Always visible when results are present) -->
+        <div id="resultsControls"
+          style="display:none; margin-top:24px; align-items:center; justify-content:space-between; gap:12px; background:var(--glass-panel); padding:12px 20px; border-radius:12px; border:1px solid var(--glass-border);">
+          <div style="font-size:13px; font-weight:600; color:var(--text-muted);">
+            <span id="resultsCountLabel">0 Pages Found</span>
+          </div>
+          <div style="display:flex; gap:12px;">
+            <button class="export-btn" onclick="downloadCrawlCSV()" style="padding:6px 12px; font-size:13px;">Export
+              List</button>
+          </div>
+        </div>
+
+        <div id="crawlResults" style="margin-top:16px;">
+          <!-- Page list will appear here -->
+        </div>
+
+      </div>
+
+      <!-- Site Map Tab -->
+      <div id="sitemapTab" class="tab-content">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+          <h2 style="font-size:20px; font-weight:700; color:var(--text-main); margin:0;">🗺️ Site Architecture Map</h2>
+          <!-- Info Tooltip (Easter Egg) -->
+          <div class="info-tooltip">
+            <span class="info-icon">👁️</span>
+            <div class="tooltip-content">
+              <strong>How Discovery Works</strong><br><br>
+              This scanner uses <strong>Breadth-First Search (BFS)</strong> algorithm to systematically discover all
+              pages on a website.<br><br>
+              <strong>Level 0:</strong> Homepage (starting point)<br>
+              <strong>Level 1:</strong> Pages linked from homepage<br>
+              <strong>Level 2:</strong> Pages linked from Level 1<br>
+              <em>...and so on</em><br><br>
+              BFS ensures we discover pages closest to the homepage first, providing a complete picture of your site's
+              architecture.
+            </div>
+          </div>
+        </div>
+        <p style="color:var(--text-muted); font-size:13px; margin-bottom:24px;">
+          Visualize your website's structure and see how deep the crawler explored. Run a <strong>Compliance
+            Scanner</strong> discovery first to populate this view.
+        </p>
+
+        <!-- Depth Statistics Summary (Simplified) -->
+        <div id="depthStats" style="display:none; margin-bottom:24px;">
+          <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; max-width:400px;">
+            <div class="depth-stat-card">
+              <div class="stat-value" id="totalPagesDiscovered">0</div>
+              <div class="stat-label">Total Pages</div>
+            </div>
+            <div class="depth-stat-card">
+              <div class="stat-value" id="maxDepthReached">0</div>
+              <div class="stat-label">Max Depth</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tree View Controls -->
+        <div id="treeControls"
+          style="display:none; margin-bottom:16px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+          <button class="example-btn" onclick="loadSiteMapData()"
+            style="background:var(--accent-primary); color:white;">🔄 Refresh</button>
+          <button class="example-btn" onclick="expandAllTree()">➕ Expand All</button>
+          <button class="example-btn" onclick="collapseAllTree()">➖ Collapse All</button>
+          <div style="margin-left:auto; display:flex; gap:8px;">
+            <button class="export-btn" onclick="exportSiteMapCSV()">📊 Export CSV</button>
+            <button class="export-btn" onclick="exportSiteMapPDF()">📄 Export PDF</button>
+          </div>
+        </div>
+
+        <!-- Tree Container -->
+        <div id="siteTreeContainer"
+          style="background:var(--glass-panel); border:1px solid var(--glass-border); border-radius:16px; padding:24px; min-height:300px;">
+          <div id="siteTreeEmpty" style="text-align:center; padding:48px; color:var(--text-muted);">
+            <div style="font-size:48px; margin-bottom:16px;">🌲</div>
+            <div style="font-size:16px; font-weight:600;">No Site Data Available</div>
+            <div style="font-size:13px; margin-top:8px;">Run a <strong>Compliance Scanner</strong> discovery to see your
+              site's tree structure.</div>
+          </div>
+          <div id="siteTree" style="display:none; font-family:monospace; font-size:13px; line-height:1.8;"></div>
+        </div>
+
+        <!-- Depth Breakdown Table -->
+        <div id="depthBreakdown" style="display:none; margin-top:24px;">
+          <h3 style="font-size:16px; font-weight:700; color:var(--text-main); margin-bottom:12px;">📊 Depth Breakdown
+          </h3>
+          <div
+            style="background:var(--glass-panel); border:1px solid var(--glass-border); border-radius:12px; overflow:hidden;">
+            <table id="depthTable" style="width:100%; border-collapse:collapse;">
+              <thead>
+                <tr style="background:var(--input-bg);">
+                  <th style="padding:12px 16px; text-align:left; font-weight:600; color:var(--text-main);">Depth Level
+                  </th>
+                  <th style="padding:12px 16px; text-align:right; font-weight:600; color:var(--text-main);">Pages</th>
+                  <th style="padding:12px 16px; text-align:left; font-weight:600; color:var(--text-main);">Distribution
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="depthTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Document Scanner Tab -->
+      <div id="documentsTab" class="tab-content">
+        <div id="alertMessageDocs"
+          style="display:none; text-align:center; margin-bottom:20px; padding:12px; border-radius:8px;"></div>
+
+        <h2 style="font-size:20px; font-weight:700; color:var(--text-main); margin-bottom:8px;">📄 Bulk PDF
+          Accessibility Scanner</h2>
+        <p style="color:var(--text-muted); font-size:13px; margin-bottom:24px;">
+          Upload PDFs to identify accessibility issues. We'll pinpoint exactly what needs remediation.
+        </p>
+
+        <!-- Upload Area -->
+        <div id="pdfUploadArea" ondrop="handlePdfDrop(event)"
+          ondragover="event.preventDefault(); this.style.borderColor='var(--accent-primary)'"
+          ondragleave="this.style.borderColor='var(--glass-border)'"
+          onclick="document.getElementById('pdfFileInput').click()"
+          style="border:2px dashed var(--glass-border); border-radius:16px; padding:48px; text-align:center; cursor:pointer; transition:all 0.3s; background:var(--glass-panel);">
+          <div style="font-size:48px; margin-bottom:16px;">📤</div>
+          <div style="font-size:18px; font-weight:600; color:var(--text-main); margin-bottom:8px;">Drag & Drop PDFs Here
+          </div>
+          <div style="font-size:13px; color:var(--text-muted);">or click to browse</div>
+          <input type="file" id="pdfFileInput" accept=".pdf" multiple style="display:none"
+            onchange="handlePdfSelect(event)">
+        </div>
+
+        <!-- Selected Files List -->
+        <div id="pdfFileList" style="margin-top:16px;"></div>
+
+        <!-- Scan Button -->
+        <div id="pdfScanControls" style="display:none; margin-top:24px; text-align:center;">
+          <button class="primary" onclick="scanAllPdfs()" id="scanPdfsBtn" style="padding:14px 32px; font-size:16px;">
+            🔍 Scan All Documents
+          </button>
+        </div>
+
+        <!-- Progress -->
+        <div id="pdfScanProgress"
+          style="display:none; margin-top:24px; padding:20px; background:var(--glass-panel); border-radius:16px; border:1px solid var(--glass-border);">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div class="spinner" style="width:24px; height:24px; margin:0; border-width:2px;"></div>
+            <div>
+              <div id="pdfProgressText" style="font-weight:700; color:var(--text-main); font-size:16px;">Scanning
+                documents...</div>
+              <div id="pdfProgressCount" style="color:var(--text-muted); font-size:13px;">0 of 0 complete</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Dashboard -->
+        <div id="pdfResultsDashboard" style="display:none; margin-top:24px;">
+          <!-- Executive Summary -->
+          <div
+            style="background:linear-gradient(135deg, rgba(239,68,68,0.1), rgba(251,191,36,0.1)); border:1px solid var(--glass-border); border-radius:16px; padding:24px; margin-bottom:24px;">
+            <h3 style="font-size:18px; font-weight:700; color:var(--text-main); margin-bottom:16px;">📊 Executive
+              Summary</h3>
+            <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:16px;">
+              <div style="text-align:center; padding:16px; background:var(--glass-panel); border-radius:12px;">
+                <div id="pdfTotalFiles" style="font-size:36px; font-weight:800; color:var(--text-main);">0</div>
+                <div
+                  style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700;">
+                  Total Files</div>
+              </div>
+              <div style="text-align:center; padding:16px; background:var(--glass-panel); border-radius:12px;">
+                <div id="pdfFailingFiles" style="font-size:36px; font-weight:800; color:var(--accent-error);">0</div>
+                <div
+                  style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700;">
+                  With Issues</div>
+              </div>
+              <div style="text-align:center; padding:16px; background:var(--glass-panel); border-radius:12px;">
+                <div id="pdfPassingFiles" style="font-size:36px; font-weight:800; color:var(--accent-success);">0</div>
+                <div
+                  style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700;">
+                  Clean</div>
+              </div>
+              <div style="text-align:center; padding:16px; background:var(--glass-panel); border-radius:12px;">
+                <div id="pdfComplianceScore" style="font-size:36px; font-weight:800; color:var(--accent-warning);">0%
+                </div>
+                <div
+                  style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700;">
+                  Compliance</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Results Header -->
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 style="font-size:16px; font-weight:700; color:var(--text-main);">Document Issues</h3>
+            <button onclick="exportPdfReport()"
+              style="background:var(--accent-primary); color:white; border:none; padding:8px 16px; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer;">
+              📥 Export Report
+            </button>
+          </div>
+
+          <!-- Per-File Results -->
+          <div id="pdfResultsList"></div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+  </div>
+
+
+  <!-- Loading State -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p id="loadingText" style="color: var(--text-muted); font-weight: 500;">Processing Request...</p>
+  </div>
+
+
+
+
+  <!-- PDF Results -->
+  <div class="pdf-results-container" id="pdfResults">
+    <div class="pdf-results" id="pdfResultsContent"></div>
+  </div>
+
+  </div>
+
+  <script>
+    // --- Logic ---
+    let selectedFiles = [];
+    let currentTab = 'website';
+
+    // Theme Toggle
+    function toggleTheme() {
+      const body = document.body;
+      const btn = document.querySelector('.theme-toggle');
+      if (body.getAttribute('data-theme') === 'dark') {
+        body.setAttribute('data-theme', 'light');
+        btn.textContent = '🌙';
+      } else {
+        body.setAttribute('data-theme', 'dark');
+        btn.textContent = '☀️';
+      }
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      const buttons = document.querySelectorAll('.tab');
+      for (let btn of buttons) {
+        if (btn.getAttribute('onclick').includes(tab)) {
+          btn.classList.add('active');
+          break;
+        }
+      }
+
+      const content = document.getElementById(tab + 'Tab');
+      if (content) content.classList.add('active');
+      // Results now persist when switching tabs - no hideResults() call
+    }
+
+    function setUrl(url) {
+      document.getElementById('urlInput').value = url;
+      scanWebsite();
+    }
+
+    // PDF-related code removed since PDF tab was deleted
+
+    function handleFiles(files) {
+      selectedFiles = Array.from(files).filter(f => f.type === 'application/pdf');
+      if (selectedFiles.length === 0) { showAlert('Please select PDF files only', 'error'); return; }
+      if (selectedFiles.length > 10) { showAlert('Maximum 10 files allowed', 'error'); selectedFiles = selectedFiles.slice(0, 10); }
+      displayFileList();
+      document.getElementById('scanPdfBtn').style.display = 'inline-block';
+    }
+
+    function displayFileList() {
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = selectedFiles.map((file, index) => `
+        <div class="file-item">
+          <span style="font-weight:500">📄 ${file.name}</span>
+          <span style="font-size:12px; opacity:0.7">${(file.size / 1024).toFixed(1)} KB</span>
+          <button onclick="removeFile(${index})">Remove</button>
+        </div>
+      `).join('');
+    }
+
+    function removeFile(index) {
+      selectedFiles.splice(index, 1);
+      if (selectedFiles.length === 0) {
+        document.getElementById('scanPdfBtn').style.display = 'none';
+      }
+      displayFileList();
+    }
+
+    // ============================================
+    // DOCUMENT SCANNER (Bulk PDF) FUNCTIONS
+    // ============================================
+    let pdfFilesToScan = [];
+    let pdfScanResults = [];
+
+    function handlePdfDrop(event) {
+      event.preventDefault();
+      document.getElementById('pdfUploadArea').style.borderColor = 'var(--glass-border)';
+      const files = Array.from(event.dataTransfer.files).filter(f => f.type === 'application/pdf');
+      addPdfFiles(files);
+    }
+
+    function handlePdfSelect(event) {
+      const files = Array.from(event.target.files).filter(f => f.type === 'application/pdf');
+      addPdfFiles(files);
+    }
+
+    function addPdfFiles(files) {
+      if (files.length === 0) {
+        showAlert('Please select PDF files only', 'error');
+        return;
+      }
+
+      // Add to list (max 50)
+      files.forEach(f => {
+        if (pdfFilesToScan.length < 50) {
+          pdfFilesToScan.push(f);
+        }
+      });
+
+      if (pdfFilesToScan.length > 50) {
+        pdfFilesToScan = pdfFilesToScan.slice(0, 50);
+        showAlert('Maximum 50 files - extra files removed', 'warning');
+      }
+
+      renderPdfFileList();
+      document.getElementById('pdfScanControls').style.display = 'block';
+    }
+
+    function renderPdfFileList() {
+      const container = document.getElementById('pdfFileList');
+      if (pdfFilesToScan.length === 0) {
+        container.innerHTML = '';
+        document.getElementById('pdfScanControls').style.display = 'none';
+        return;
+      }
+
+      container.innerHTML = `
+        <div style="background:var(--glass-panel); border-radius:12px; padding:16px; border:1px solid var(--glass-border);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <span style="font-weight:700; color:var(--text-main);">${pdfFilesToScan.length} file(s) selected</span>
+            <button onclick="clearPdfFiles()" style="background:transparent; border:1px solid var(--accent-error); color:var(--accent-error); padding:6px 12px; border-radius:6px; font-size:12px; cursor:pointer;">Clear All</button>
+          </div>
+          <div style="max-height:200px; overflow-y:auto;">
+            ${pdfFilesToScan.map((f, i) => `
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:var(--input-bg); border-radius:6px; margin-bottom:4px;">
+                <span style="font-size:13px; color:var(--text-main);">📄 ${f.name}</span>
+                <span style="font-size:11px; color:var(--text-muted);">${(f.size / 1024).toFixed(1)} KB</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function clearPdfFiles() {
+      pdfFilesToScan = [];
+      pdfScanResults = [];
+      renderPdfFileList();
+      document.getElementById('pdfResultsDashboard').style.display = 'none';
+      document.getElementById('pdfFileInput').value = '';
+    }
+
+    async function scanAllPdfs() {
+      if (pdfFilesToScan.length === 0) {
+        showAlert('Please select files first', 'error');
+        return;
+      }
+
+      // Show progress
+      document.getElementById('pdfScanProgress').style.display = 'block';
+      document.getElementById('pdfScanControls').style.display = 'none';
+      document.getElementById('pdfResultsDashboard').style.display = 'none';
+
+      pdfScanResults = [];
+      const total = pdfFilesToScan.length;
+
+      for (let i = 0; i < pdfFilesToScan.length; i++) {
+        const file = pdfFilesToScan[i];
+        document.getElementById('pdfProgressText').textContent = `Scanning: ${file.name}`;
+        document.getElementById('pdfProgressCount').textContent = `${i + 1} of ${total} complete`;
+
+        try {
+          const formData = new FormData();
+          formData.append('pdfs', file);
+
+          const res = await fetch('/api/scan-pdf', { method: 'POST', body: formData });
+          const data = await res.json();
+
+          if (data.results && data.results.length > 0) {
+            pdfScanResults.push({
+              filename: file.name,
+              size: file.size,
+              issues: data.results[0].issues || [],
+              warnings: data.results[0].warnings || [],
+              scannerNote: data.results[0].scannerNote || null
+            });
+          }
+        } catch (e) {
+          pdfScanResults.push({
+            filename: file.name,
+            size: file.size,
+            issues: ['Failed to scan this file'],
+            warnings: [],
+            scannerNote: 'Scan Error'
+          });
+        }
+      }
+
+      // Hide progress, show results
+      document.getElementById('pdfScanProgress').style.display = 'none';
+      renderPdfResults();
+    }
+
+    function renderPdfResults() {
+      const dashboard = document.getElementById('pdfResultsDashboard');
+      dashboard.style.display = 'block';
+
+      // Calculate stats
+      const total = pdfScanResults.length;
+      const failing = pdfScanResults.filter(r => r.issues.length > 0).length;
+      const passing = total - failing;
+      const compliance = total > 0 ? Math.round((passing / total) * 100) : 0;
+
+      // Update summary
+      document.getElementById('pdfTotalFiles').textContent = total;
+      document.getElementById('pdfFailingFiles').textContent = failing;
+      document.getElementById('pdfPassingFiles').textContent = passing;
+      document.getElementById('pdfComplianceScore').textContent = compliance + '%';
+
+      // Render per-file results
+      const listContainer = document.getElementById('pdfResultsList');
+      listContainer.innerHTML = pdfScanResults.map((result, idx) => {
+        const hasIssues = result.issues.length > 0;
+        const statusColor = hasIssues ? 'var(--accent-error)' : 'var(--accent-success)';
+        const statusText = hasIssues ? 'ISSUES FOUND' : 'CLEAN';
+        const statusBadge = hasIssues ?
+          `<span style="background:rgba(239,68,68,0.2); color:var(--accent-error); padding:4px 12px; border-radius:6px; font-size:11px; font-weight:700;">${result.issues.length} ISSUE(S)</span>` :
+          `<span style="background:rgba(34,197,94,0.2); color:var(--accent-success); padding:4px 12px; border-radius:6px; font-size:11px; font-weight:700;">✓ CLEAN</span>`;
+
+        // Build issues HTML in golden standard format
+        let issuesHtml = '';
+        if (hasIssues) {
+          result.issues.forEach((issue, i) => {
+            const explanation = getPdfIssueExplanation(issue);
+            issuesHtml += `
+              <div style="background:var(--code-bg); border:1px solid var(--glass-border); border-radius:8px; padding:16px; margin-top:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                  <span class="issue-badge error" style="font-size:10px;">ADA NON-COMPLIANT FLAG</span>
+                </div>
+                <div style="font-weight:700; color:var(--text-main); font-size:14px; margin-bottom:8px;">${escapeHtml(issue)}</div>
+                <div style="border-left:2px solid var(--accent-error); padding-left:12px; margin-top:8px;">
+                  <div style="font-size:13px; margin-bottom:4px;"><strong>💡 The Issue:</strong> ${explanation.what}</div>
+                  <div style="font-size:13px;"><strong>⚡ Why Fix It:</strong> ${explanation.why}</div>
+                </div>
+              </div>
+            `;
+          });
+
+          // Add warnings
+          result.warnings.forEach(warn => {
+            issuesHtml += `
+              <div style="background:var(--code-bg); border:1px solid var(--glass-border); border-radius:8px; padding:12px; margin-top:8px;">
+                <span class="issue-badge warning" style="font-size:10px;">INFO</span>
+                <span style="margin-left:8px; font-size:13px; color:var(--text-muted);">${escapeHtml(warn)}</span>
+              </div>
+            `;
+          });
+        }
+
+        return `
+          <div style="background:var(--glass-panel); border:1px solid var(--glass-border); border-radius:12px; margin-bottom:12px; overflow:hidden;">
+            <div style="padding:16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="togglePdfDetail(${idx})">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-size:24px;">📄</span>
+                <div>
+                  <div style="font-weight:700; color:var(--text-main); font-size:14px;">${escapeHtml(result.filename)}</div>
+                  <div style="font-size:11px; color:var(--text-muted);">${(result.size / 1024).toFixed(1)} KB</div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                ${statusBadge}
+                <span style="color:var(--text-muted); font-size:12px;">▼</span>
+              </div>
+            </div>
+            <div id="pdfDetail-${idx}" style="display:none; padding:0 16px 16px 16px; border-top:1px solid var(--glass-border);">
+              ${hasIssues ? issuesHtml : '<div style="padding:16px; text-align:center; color:var(--accent-success);">✓ No accessibility issues detected</div>'}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function togglePdfDetail(idx) {
+      const el = document.getElementById(`pdfDetail-${idx}`);
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function getPdfIssueExplanation(issue) {
+      const lower = issue.toLowerCase();
+      if (lower.includes('tag') || lower.includes('structure')) {
+        return { what: 'This PDF lacks accessibility tags/structure.', why: 'Screen readers cannot navigate the document properly.' };
+      }
+      if (lower.includes('ocr') || lower.includes('scanned') || lower.includes('image')) {
+        return { what: 'This appears to be a scanned/image-only PDF.', why: 'The text cannot be read by assistive technology.' };
+      }
+      if (lower.includes('title') || lower.includes('metadata')) {
+        return { what: 'Document metadata is missing or incomplete.', why: 'Users cannot identify the document purpose.' };
+      }
+      if (lower.includes('language')) {
+        return { what: 'Document language is not specified.', why: 'Screen readers may mispronounce content.' };
+      }
+      return { what: issue, why: 'This creates barriers for users with disabilities.' };
+    }
+
+    function exportPdfReport() {
+      if (pdfScanResults.length === 0) {
+        showAlert('No results to export', 'error');
+        return;
+      }
+
+      // Build CSV
+      let csv = 'Filename,Size (KB),Status,Issues,Warnings\n';
+      pdfScanResults.forEach(r => {
+        const status = r.issues.length > 0 ? 'ISSUES FOUND' : 'CLEAN';
+        const issues = r.issues.join('; ').replace(/"/g, '""');
+        const warnings = r.warnings.join('; ').replace(/"/g, '""');
+        csv += `"${r.filename}",${(r.size / 1024).toFixed(1)},"${status}","${issues}","${warnings}"\n`;
+      });
+
+      // Download
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pdf-accessibility-report-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Scan control variables
+    let scanTimerInterval = null;
+    let scanStartTime = 0;
+    let scanAbortController = null; // For canceling scans
+
+    async function scanWebsite() {
+      const urlInput = document.getElementById('urlInput');
+      const url = urlInput.value.trim();
+      if (!url) { showAlert('Please enter a URL', 'error'); return; }
+
+      let fullUrl = url;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) { fullUrl = 'https://' + url; }
+
+      console.log('🔍 [SCAN START] Initiating scan for:', fullUrl);
+
+      // Create abort controller for this scan
+      scanAbortController = new AbortController();
+
+      // Transform button to Stop Scan
+      const scanBtn = document.getElementById('scanBtn');
+      scanBtn.textContent = '⏹ Stop Scan';
+      scanBtn.onclick = stopScan;
+      scanBtn.style.background = 'var(--accent-error)';
+
+      // Show scan status
+      document.getElementById('scanStatus').style.display = 'block';
+      document.getElementById('scanStatusText').textContent = '🔍 Scanning website...';
+      document.getElementById('scanProgress').textContent = 'Analyzing page structure and accessibility...';
+      // document.getElementById('scanBtn').disabled = true; // This line was removed in the diff
+      hideResults();
+
+      // Start timer
+      scanStartTime = Date.now();
+      scanTimerInterval = setInterval(() => {
+        const elapsed = ((Date.now() - scanStartTime) / 1000).toFixed(1);
+        document.getElementById('scanProgress').textContent = `⏱️ Elapsed time: ${elapsed}s - Analyzing accessibility...`;
+      }, 100);
+
+      try {
+        console.log('📡 [SCAN] Sending request to /api/scan...');
+        const response = await fetch('/api/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: fullUrl })
+        });
+
+        console.log('📥 [SCAN] Response received, status:', response.status);
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error('❌ [SCAN ERROR] Server returned error:', data.message);
+          throw new Error(data.message || 'Scan failed');
+        }
+
+        console.log('✅ [SCAN SUCCESS] Scan completed, found', data.issues?.length || 0, 'issues');
+        document.getElementById('scanProgress').textContent = '✓ Scan complete! Generating report...';
+        displayWebsiteResults(data);
+        showAlert('Audit Complete', 'success');
+      } catch (error) {
+        console.error('❌ [SCAN FAILED]', error);
+
+        // Check if it was aborted by user
+        if (error.name === 'AbortError') {
+          console.log('⏹ [SCAN ABORTED] Scan was cancelled by user');
+          // Don't show error alert for user-initiated cancellation
+        } else {
+          showAlert(`Scan failed: ${error.message}`, 'error');
+        }
+      } finally {
+        clearInterval(scanTimerInterval);
+        const totalTime = ((Date.now() - scanStartTime) / 1000).toFixed(1);
+        console.log(`⏱️ [SCAN END] Total scan time: ${totalTime}s`);
+
+        // Transform button back to Initialize Scan
+        const scanBtn = document.getElementById('scanBtn');
+        scanBtn.textContent = 'Initialize Scan';
+        scanBtn.onclick = scanWebsite;
+        scanBtn.style.background = '';
+
+        document.getElementById('scanStatus').style.display = 'none';
+      }
+    }
+
+    function stopScan() {
+      console.log('⏹ [SCAN STOPPED] User cancelled scan');
+
+      // Abort the fetch request
+      if (scanAbortController) {
+        scanAbortController.abort();
+        scanAbortController = null;
+      }
+
+      clearInterval(scanTimerInterval);
+
+      // Transform button back to Initialize Scan
+      const scanBtn = document.getElementById('scanBtn');
+      scanBtn.textContent = 'Initialize Scan';
+      scanBtn.onclick = scanWebsite;
+      scanBtn.style.background = '';
+
+      document.getElementById('scanStatus').style.display = 'none';
+      showAlert('Scan stopped', 'warning');
+      hideResults();
+    }
+
+    async function scanPDFs() {
+      if (selectedFiles.length === 0) { showAlert('Please select PDF files first', 'error'); return; }
+      showLoading(`Analyzing ${selectedFiles.length} Document(s)...`);
+      hideResults();
+
+      try {
+        const formData = new FormData();
+        selectedFiles.forEach(file => formData.append('pdfs', file));
+        const response = await fetch('/api/scan-pdf', { method: 'POST', body: formData });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'PDF scan failed');
+
+        displayPDFResults(data);
+        showAlert('Analysis Complete', 'success');
+      } catch (error) {
+        console.error('Error:', error);
+        showAlert(`PDF scan failed: ${error.message}`, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    let allIssuesData = [];
+    let currentFilters = { type: 'all', sort: 'count' };
+
+    function displayWebsiteResults(data) {
+      const { summary, detailedIssues, totalUniqueIssues } = data;
+      allIssuesData = detailedIssues;
+
+      document.getElementById('pageInfo').innerHTML = `
+        <div class="page-info-row"><strong>TARGET</strong> <span>${summary.title || 'Untitled'}</span></div>
+        <div class="page-info-row"><strong>URL</strong> <a href="${summary.url}" target="_blank">${summary.url}</a></div>
+        <div class="page-info-row"><strong>TIMESTAMP</strong> <span>${new Date(summary.timestamp).toLocaleTimeString()}</span></div>
+      `;
+
+      document.getElementById('totalIssues').textContent = summary.total;
+      document.getElementById('totalErrors').textContent = summary.errors;
+      document.getElementById('totalWarnings').textContent = summary.warnings;
+
+      renderIssueList(allIssuesData);
+      document.getElementById('results').classList.add('active');
+    }
+
+    function renderIssueList(issues) {
+      const issueList = document.getElementById('issueList');
+      issueList.innerHTML = '';
+
+      issues.forEach((issue, index) => {
+        const typeClass = issue.type === 'error' ? 'error' : 'warning';
+
+        let occurrencesHTML = '';
+        issue.occurrences.forEach((occ, occIndex) => {
+          const elementDesc = describeElement(occ.selector, occ.context);
+          occurrencesHTML += `
+        <div class="detailed-instance">
+          <div style="font-weight:600; font-size:14px; color:var(--text-main); margin-bottom:8px;">📍 Location ${occIndex + 1}: ${elementDesc}</div>
+          
+          <div style="margin-top:12px;">
+              <span class="code-label">CSS SELECTOR (DEVELOPER ID)</span>
+              <div class="code-snippet">${occ.selector}</div>
+          </div>
+          <div style="margin-top:8px;">
+               <span class="code-label">HTML CONTEXT</span>
+               <div class="code-snippet">${escapeHtml(occ.context)}</div>
+          </div>
+        </div>
+      `;
+        });
+
+        issueList.innerHTML += `
+          <div class="issue-item ${typeClass}">
+            <div class="issue-header">
+              <span class="issue-badge ${typeClass}">${issue.type === 'error' ? 'ADA Non-Compliant Flag' : issue.type}</span>
+              <span style="color:var(--text-muted); font-size:12px; font-weight:600">${issue.count} LOCATION(S)</span>
+            </div>
+            
+            <div style="font-size:18px; font-weight:700; margin-bottom:8px; color:var(--text-main)">${issue.message}</div>
+            
+            <div class="plain-language">
+               <div class="what"><strong>💡 The Issue:</strong> ${getPlainLanguageExplanation(issue.code, issue.message).what}</div>
+               <div class="why" style="margin-top:8px;"><strong>⚡ Why Fix It:</strong> ${getPlainLanguageExplanation(issue.code, issue.message).why}</div>
+            </div>
+
+            <button onclick="toggleDetails(${index})" style="background:transparent; border:none; color:#818cf8; cursor:pointer; font-size:14px; margin-top:16px; font-weight:600; display:flex; align-items:center;">
+               View Technical Details & Locations (${issue.count}) ▼
+            </button>
+            <div id="details-${index}" style="display:none; margin-top:12px;">${occurrencesHTML}</div>
+          </div>
+        `;
+      });
+    }
+
+    function toggleDetails(index) {
+      const el = document.getElementById(`details-${index}`);
+      if (!el) return;
+
+      // Use getComputedStyle for reliable check (handles both inline and CSS styles)
+      const isHidden = window.getComputedStyle(el).display === 'none';
+      el.style.display = isHidden ? 'block' : 'none';
+    }
+
+    function describeElement(selector, context) {
+      // 1. Try to get semantic info from HTML context first (most accurate)
+      let tag = 'element';
+      let moreInfo = '';
+
+      if (context) {
+        // Match <tag ...
+        const tagMatch = context.match(/^<([a-z0-9]+)/i);
+        if (tagMatch) tag = tagMatch[1].toLowerCase();
+
+        // Extract ID
+        const idMatch = context.match(/id="([^"]+)"/);
+        if (idMatch) moreInfo += ` (#${idMatch[1]})`;
+
+        // Extract Class (if no ID, to not get too long)
+        if (!idMatch) {
+          const classMatch = context.match(/class="([^"]+)"/);
+          if (classMatch) {
+            // take first class only
+            const firstClass = classMatch[1].split(' ')[0];
+            if (firstClass) moreInfo += ` (.${firstClass})`;
+          }
+        }
+
+        // Extract Alt for images
+        if (tag === 'img') {
+          const altMatch = context.match(/alt="([^"]*)"/);
+          if (altMatch && altMatch[1]) moreInfo += ` (Alt: "${altMatch[1].substring(0, 15)}...")`;
+          else if (context.includes('alt=""')) moreInfo += ` (Empty Alt)`;
+          else moreInfo += ` (Missing Alt)`;
+        }
+      }
+
+      // 2. Map tags to friendly names
+      const map = {
+        'a': 'Link',
+        'button': 'Button',
+        'img': 'Image',
+        'input': 'Input Field',
+        'h1': 'Main Heading',
+        'h2': 'Section Heading',
+        'h3': 'Subsection Heading',
+        'p': 'Paragraph',
+        'div': 'Container (Div)',
+        'span': 'Text Span',
+        'ul': 'List',
+        'li': 'List Item',
+        'form': 'Form',
+        'nav': 'Navigation',
+        'footer': 'Footer',
+        'header': 'Header',
+        'main': 'Main Content'
+      };
+
+      let niceName = map[tag] || `Element <${tag}>`;
+
+      // 3. Fallback to selector if context failed
+      if (niceName.startsWith('Element') && selector) {
+        if (selector.includes('#')) { const m = selector.match(/#[a-zA-Z0-9_-]+/); if (m) niceName += ` ${m[0]}`; }
+        else if (selector.includes('.')) { const m = selector.match(/\.[a-zA-Z0-9_-]+/); if (m) niceName += ` ${m[0]}`; }
+      }
+
+      return `${niceName}${moreInfo}`;
+    }
+
+    // PDF Results Render
+    function displayPDFResults(data) {
+      const { summary, results } = data;
+      const container = document.getElementById('pdfResultsContent');
+      const modal = document.getElementById('htmlPreviewModal');
+      const modalContent = document.getElementById('htmlPreviewContent');
+
+      container.innerHTML = `
+            <div class="page-info">
+                <div class="page-info-row"><strong>FILES</strong> <span>${data.totalFiles}</span></div>
+                <div class="page-info-row"><strong>ISSUES</strong> <span>${summary.totalIssues}</span></div>
+            </div>
+        `;
+
+      results.forEach((res, index) => {
+        const hasIssues = res.issues.length > 0;
+        const hasWarnings = res.warnings.length > 0;
+        let statusBadge = '';
+
+        if (hasIssues) statusBadge = `<span class="status-pill error">Failed</span>`;
+        else if (hasWarnings) statusBadge = `<span class="status-pill warning">Warnings</span>`;
+        else statusBadge = `<span class="status-pill success">Passed</span>`;
+
+        // HTML Preview Button Logic
+        const previewBtn = res.htmlPreview
+          ? `<button onclick='showHtmlPreview(${index})' class="example-btn" style="margin-top:12px; display:inline-flex; align-items:center; gap:8px;">👁️ View as HTML Provider</button>`
+          : '';
+
+        // Store preview in a global so we can access it
+        window['pdfPreview_' + index] = res.htmlPreview;
+
+        container.innerHTML += `
+               <div class="pdf-card">
+                  <h3>
+                    <span>📄</span> ${res.filename}
+                    <span style="margin-left:auto">${statusBadge}</span>
+                  </h3>
+                  
+                  ${hasIssues ? `<span class="critical-header">CRITICAL ISSUES</span>` : ''}
+                  ${res.issues.map(i => `<div class="pdf-issue"><span style="color:var(--accent-error)">✖</span> ${i}</div>`).join('')}
+                  
+                  ${hasWarnings ? `<span class="warning-header">OPTIMIZATIONS</span>` : ''}
+                  ${res.warnings.map(w => `<div class="pdf-issue"><span style="color:var(--accent-warning)">⚠</span> ${w}</div>`).join('')}
+                  
+                   <div style="margin-top:16px; border-top:1px solid var(--glass-border); padding-top:16px;">
+                        ${previewBtn}
+                   </div>
+               </div>
+            `;
+      });
+
+      document.getElementById('results').classList.remove('active');
+      document.getElementById('pdfResults').classList.add('active');
+    }
+
+    // Global function for preview
+    let currentHtmlPreview = '';
+    function showHtmlPreview(index) {
+      const html = window['pdfPreview_' + index];
+      currentHtmlPreview = html;
+      const modal = document.getElementById('htmlPreviewModal');
+      const content = document.getElementById('htmlPreviewContent');
+      content.innerHTML = html;
+      modal.style.display = 'block';
+    }
+
+    function downloadHtmlPreview() {
+      // Fallback to DOM content if global is missing
+      let content = currentHtmlPreview;
+      if (!content) {
+        content = document.getElementById('htmlPreviewContent').innerHTML;
+      }
+      if (!content) { alert('No HTML content to download'); return; }
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/api/download-html';
+      form.style.display = 'none';
+
+      const inputHtml = document.createElement('input');
+      inputHtml.type = 'hidden';
+      inputHtml.name = 'html';
+      // Wait, standard form post is fine.
+      inputHtml.value = content;
+      form.appendChild(inputHtml);
+
+      const inputFilename = document.createElement('input');
+      inputFilename.type = 'hidden';
+      inputFilename.name = 'filename';
+      inputFilename.value = 'liberated-pdf.html';
+      form.appendChild(inputFilename);
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+    }
+
+    function filterByStat(type) {
+      const select = document.getElementById('filterType');
+      select.value = type;
+      applyFilters();
+      // Scroll to issues
+      document.querySelector('.section-header').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function applyFilters() {
+      const type = document.getElementById('filterType').value;
+      if (type === 'all') renderIssueList(allIssuesData);
+      else renderIssueList(allIssuesData.filter(i => i.type === type));
+    }
+
+    function showLoading(text) {
+      document.getElementById('loadingText').textContent = text;
+      document.getElementById('loading').classList.add('active');
+    }
+
+    function hideLoading() {
+      document.getElementById('loading').classList.remove('active');
+    }
+
+    function hideResults() {
+      const websiteResults = document.getElementById('results'); // Renamed from 'websiteResults' to 'results' to match existing ID
+      const pdfResults = document.getElementById('pdfResults');
+      const crawlResults = document.getElementById('crawlResults');
+      const alertMessage = document.getElementById('alertMessage'); // Added to handle alert message
+      const htmlPreviewModal = document.getElementById('htmlPreviewModal'); // Added to handle modal
+
+      if (websiteResults) websiteResults.classList.remove('active'); // Changed to classList.remove('active') to match original behavior
+      if (pdfResults) pdfResults.classList.remove('active'); // Changed to classList.remove('active') to match original behavior
+      // Don't clear crawlResults - preserve data when switching tabs
+      if (alertMessage) alertMessage.style.display = 'none'; // Matches original behavior
+      if (htmlPreviewModal) htmlPreviewModal.style.display = 'none'; // Matches original behavior
+    }
+
+    function showAlert(msg, type) {
+      const al = document.getElementById('alertMessage');
+      al.style.display = 'block';
+      al.textContent = msg;
+
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      // Adjust alert colors based on theme if needed, but generic transparent works
+      al.style.background = type === 'error' ? 'rgba(248,113,113,0.2)' : 'rgba(52,211,153,0.2)';
+      al.style.color = type === 'error' ? '#fca5a5' : '#6ee7b7';
+      if (!isDark) al.style.color = type === 'error' ? '#b91c1c' : '#047857'; // Darker text for light mode
+
+      al.style.border = type === 'error' ? '1px solid currentColor' : '1px solid currentColor';
+      setTimeout(() => al.style.display = 'none', 4000);
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function getPlainLanguageExplanation(code, msg) {
+      // Simple map for common accessibility issues
+      const map = {
+        'color-contrast': { what: 'The text color is too similar to the background color.', why: 'People with low vision cannot read this text safely.' },
+        'alt-text': { what: 'An image is missing a text description.', why: 'Screen readers cannot describe this image to blind users.' },
+        'link-name': { what: 'A link does not have a clear name (e.g. empty or just an icon).', why: 'Users navigating by voice or keyboard won\'t know what this link does.' },
+        'label': { what: 'A form input is missing a label.', why: 'Users won\'t know what information to enter here.' },
+        'button-name': { what: 'A button is missing a text description.', why: 'Screen readers will just say "Button" without explaining its action.' }
+      };
+
+      // fuzzy match
+      for (const key in map) {
+        if (code.includes(key) || msg.toLowerCase().includes(key)) return map[key];
+      }
+
+      return { what: msg, why: 'This creates friction for users with disabilities and lowers your compliance score.' };
+    }
+
+    // Export Function preserved
+    function exportCSV() {
+      if (!allIssuesData || allIssuesData.length === 0) {
+        showAlert('No issues to export', 'error');
+        return;
+      }
+
+      // Helper function to clean HTML and make text readable
+      function cleanText(text) {
+        if (!text) return '';
+        // Remove HTML tags
+        let cleaned = text.replace(/<[^>]*>/g, '');
+        // Decode HTML entities
+        cleaned = cleaned.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+        // Remove extra whitespace
+        cleaned = cleaned.replace(/\s+/g, ' ').trim();
+        // Remove quotes to prevent CSV issues
+        cleaned = cleaned.replace(/"/g, "'");
+        return cleaned;
+      }
+
+      // Helper function to get plain language explanation
+      function getSimpleExplanation(code, message) {
+        const explanations = {
+          'color-contrast': 'Text is hard to read due to poor color contrast',
+          'image-alt': 'Image is missing descriptive alt text',
+          'label': 'Form field is missing a label',
+          'link-name': 'Link text is not descriptive enough',
+          'button-name': 'Button is missing descriptive text',
+          'heading-order': 'Headings are not in logical order',
+          'landmark': 'Page is missing navigation landmarks',
+          'region': 'Content is not organized into regions',
+          'list': 'List structure is incorrect',
+          'aria': 'ARIA attributes are used incorrectly'
+        };
+
+        for (const [key, explanation] of Object.entries(explanations)) {
+          if (code.toLowerCase().includes(key)) {
+            return explanation;
+          }
+        }
+        return cleanText(message);
+      }
+
+      // Create CSV with clean, readable columns
+      const headers = ['Issue Type', 'Severity', 'What\'s Wrong', 'Location', 'Element'];
+
+      // Flatten issues - one row per occurrence
+      const rows = [];
+      allIssuesData.forEach(issue => {
+        if (issue.occurrences && issue.occurrences.length > 0) {
+          issue.occurrences.forEach(occurrence => {
+            const explanation = getSimpleExplanation(issue.code, issue.message);
+            const location = occurrence.selector || 'Page-level issue';
+            const element = cleanText(occurrence.context || '').substring(0, 200); // Show more of the element
+
+            rows.push([
+              issue.code || 'Unknown',
+              issue.type || 'error',
+              explanation.what || explanation,
+              location,
+              element
+            ]);
+          });
+        } else {
+          // Fallback for issues without occurrences
+          const explanation = getSimpleExplanation(issue.code, issue.message);
+          rows.push([
+            issue.code || 'Unknown',
+            issue.type || 'error',
+            explanation.what || explanation,
+            'Unknown',
+            ''
+          ]);
+        }
+      });
+
+      // Build CSV
+      let csv = headers.join(',') + '\n';
+      rows.forEach(row => {
+        csv += row.map(cell => `"${cell}"`).join(',') + '\n';
+      });
+
+      // Download
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/api/download-csv';
+      form.style.display = 'none';
+
+      const inputCsv = document.createElement('input');
+      inputCsv.type = 'hidden';
+      inputCsv.name = 'csv';
+      inputCsv.value = '\uFEFF' + csv;
+      form.appendChild(inputCsv);
+
+      const inputFilename = document.createElement('input');
+      inputFilename.type = 'hidden';
+      inputFilename.name = 'filename';
+      inputFilename.value = `ada-scan-${new Date().toISOString().split('T')[0]}.csv`;
+      form.appendChild(inputFilename);
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+    }
+
+    // --- Split Spider Logic ---
+    let currentCrawlId = null;
+    let crawlPollInterval = null;
+    let discoveryScans = []; // Store scans from discovery
+    let activeScanMode = 'IDLE'; // 'BATCH' or 'SINGLE'
+    let discoveryTimerInterval = null;
+    let discoveryStartTime = null;
+    // No page limit - scan until complete
+
+    // Tier selection removed - unlimited scanning
+
+    async function startDiscovery() {
+      const url = document.getElementById('crawlUrlInput').value;
+      // Default handled by backend (500)
+
+      if (!url) { showAlert('Please enter a URL', 'error'); return; }
+
+      showLoading('Initializing Discovery...');
+
+      // TRANSFORM BUTTON
+      const btn = document.getElementById('discoverBtn');
+      btn.textContent = '🛑 Stop Discovery';
+      btn.onclick = stopDiscovery;
+      btn.style.background = 'rgba(239, 68, 68, 0.2)';
+      btn.style.color = '#f87171';
+      btn.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+
+      document.getElementById('discoveryStatus').style.display = 'flex';
+      document.getElementById('discoveryStatus').style.display = 'flex';
+      document.getElementById('spiderActions').style.display = 'none'; // Keep bulk actions hidden until done
+      document.getElementById('resultsControls').style.display = 'flex'; // Show filters IMMEDIATELY
+      document.getElementById('crawlResults').innerHTML = '';
+      document.getElementById('crawlResults').style.display = 'block';
+      document.getElementById('discoverySpinner').style.display = 'block';
+      document.getElementById('discoveryStatusText').textContent = '🔍 Discovering pages...';
+
+      // Reset discovery state flags
+      window.discoveryAutoStopped = false;
+      window.lastScanHash = '';
+      window.lastDiscoveryCount = 0;
+      window.lastDiscoveryTime = Date.now();
+
+      // Start Timer
+      discoveryStartTime = Date.now();
+      document.getElementById('discoveryTimer').textContent = '⏱️ 0:00';
+      if (discoveryTimerInterval) clearInterval(discoveryTimerInterval);
+      discoveryTimerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - discoveryStartTime) / 1000);
+        const mins = Math.floor(elapsed / 60);
+        const secs = elapsed % 60;
+        document.getElementById('discoveryTimer').textContent = `⏱️ ${mins}:${secs.toString().padStart(2, '0')}`;
+      }, 1000);
+
+      try {
+        const formData = new FormData();
+        formData.append('url', url);
+        // No page limit - discover all pages
+
+        const res = await fetch('/api/crawl/discover', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.crawlId) {
+          currentCrawlId = data.crawlId;
+          hideLoading();
+
+          // Setup Timer
+          document.getElementById('discoveryStatusText').textContent = '🔍 Discovering pages...';
+
+          pollDiscoveryStatus();
+        } else {
+          throw new Error(data.error || 'Failed to start');
+        }
+      } catch (e) {
+        console.error(e);
+        showAlert('Discovery failed: ' + e.message, 'error');
+        hideLoading();
+        // Reset button on failure
+        btn.textContent = 'Discover Pages';
+        btn.onclick = startDiscovery;
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.border = '';
+      }
+    }
+
+
+    async function stopDiscovery() {
+      // CALL SERVER TO STOP THE CRAWLER
+      if (currentCrawlId) {
+        try {
+          await fetch(`/api/crawl/stop/${currentCrawlId}`, { method: 'POST' });
+          console.log('🛑 Discovery stop signal sent to server');
+        } catch (e) {
+          console.error('Failed to stop discovery:', e);
+        }
+      }
+
+      // Stop Timer
+      if (discoveryTimerInterval) {
+        clearInterval(discoveryTimerInterval);
+        discoveryTimerInterval = null;
+      }
+
+      // Stop polling
+      if (crawlPollInterval) {
+        clearInterval(crawlPollInterval);
+        crawlPollInterval = null;
+      }
+
+      // Stop Spinner
+      document.getElementById('discoverySpinner').style.display = 'none';
+
+      // Update Status Text
+      const statusText = document.getElementById('discoveryStatusText');
+      if (statusText) statusText.textContent = '🛑 Discovery Stopped';
+
+      // Show Actions
+      document.getElementById('spiderActions').style.display = 'flex';
+
+      // RESET "Discover Pages" BUTTON
+      const btn = document.getElementById('discoverBtn');
+      if (btn) {
+        btn.textContent = 'Discover Pages';
+        btn.onclick = startDiscovery;
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.border = '';
+      }
+
+      // DO NOT overwrite crawlResults. Just ensure they are visible.
+      // If we have scans, re-render to be safe?
+      if (discoveryScans && discoveryScans.length > 0) {
+        renderDiscoveryResults(discoveryScans);
+      }
+      document.getElementById('crawlResults').style.display = 'block';
+    }
+
+    function pollDiscoveryStatus() {
+      if (crawlPollInterval) clearInterval(crawlPollInterval);
+
+      crawlPollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/crawl/status/${currentCrawlId}`);
+          const data = await res.json();
+
+          const crawl = data.crawl;
+          const scans = data.scans || [];
+          discoveryScans = scans;
+
+          // ANTI-STUTTER: Only re-render if scan data actually changed
+          const newScanHash = scans.map(s => `${s.id}:${s.scan_status}:${s.errors}`).join(',');
+          if (!window.lastScanHash) window.lastScanHash = '';
+          const hasChanged = (newScanHash !== window.lastScanHash);
+          window.lastScanHash = newScanHash;
+
+          // Update Status UI
+          document.getElementById('discoveryCount').textContent = `Found ${scans.length} pages`;
+
+          // STALENESS DETECTION - Auto-stop if no new pages for 60 seconds
+          if (!window.lastDiscoveryCount) window.lastDiscoveryCount = 0;
+          if (!window.lastDiscoveryTime) window.lastDiscoveryTime = Date.now();
+
+          if (scans.length === window.lastDiscoveryCount && scans.length > 0) {
+            // No new pages found since last poll
+            const staleDuration = (Date.now() - window.lastDiscoveryTime) / 1000;
+            if (staleDuration >= 60 && crawl.status !== 'discovered') {
+              console.log(`⚠️ Discovery stale for ${staleDuration}s - auto-stopping`);
+              stopDiscovery();
+              document.getElementById('discoveryStatusText').innerHTML = `⚠️ Discovery Stopped (No new pages for ${Math.round(staleDuration)}s)`;
+              window.lastDiscoveryCount = 0;
+              window.lastDiscoveryTime = null;
+              return;
+            }
+          } else {
+            // New pages found, reset staleness timer
+            window.lastDiscoveryCount = scans.length;
+            window.lastDiscoveryTime = Date.now();
+          }
+
+          // Page limit auto-stop removed - now scans until discovery is complete
+
+          if (crawl.status === 'discovered') {
+            // DON'T clear interval - keep polling so scan status updates show in UI
+            // clearInterval(crawlPollInterval);
+
+            // STOP TIMER
+            if (discoveryTimerInterval) {
+              clearInterval(discoveryTimerInterval);
+              discoveryTimerInterval = null;
+            }
+
+            // FORCE STOP SPINNER
+            document.getElementById('discoverySpinner').style.display = 'none';
+            document.getElementById('discoveryStatusText').innerHTML = '✅ Discovery Complete';
+            document.getElementById('spiderActions').style.display = 'flex'; // Restore "Scan All" buttons
+
+            hideLoading();
+            const btn = document.getElementById('discoverBtn');
+            btn.textContent = 'Discover Pages';
+            btn.onclick = startDiscovery;
+            btn.style.background = '';
+            btn.style.color = '';
+            btn.style.border = '';
+
+          } else if (crawl.status === 'scanning' || crawl.status === 'completed') {
+            // If we reloaded and it's already scanning/done
+            document.getElementById('spiderActions').style.display = 'flex';
+            // Keep using this same poll - don't switch to pollScanProgress
+          }
+
+          // ANTI-STUTTER: Only re-render if something changed
+          if (hasChanged) {
+            renderDiscoveryResults(scans);
+          }
+
+        } catch (e) {
+          console.error('Poll error', e);
+        }
+      }, 1000);
+    }
+
+    async function scanAllPages() {
+      if (!currentCrawlId) return;
+
+      const btn = document.getElementById('btnScanAll');
+      if (btn) {
+        btn.textContent = '🛑 Stop Scanning';
+        btn.onclick = stopScanAll;
+        btn.style.background = 'rgba(239, 68, 68, 0.2)';
+        btn.style.color = '#f87171';
+        btn.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+      }
+
+      try {
+        activeScanMode = 'BATCH'; // Set mode to batch
+        const res = await fetch(`/api/scan/all/${currentCrawlId}`, { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success) {
+          showAlert('Started scanning all pages', 'success');
+          pollScanProgress();
+        }
+      } catch (e) {
+        showAlert('Failed to start scan', 'error');
+        resetScanAllButton();
+      }
+    }
+
+    async function stopScanAll() {
+      if (!currentCrawlId) return;
+      try {
+        const res = await fetch(`/api/scan/stop/${currentCrawlId}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          showAlert('Scan stopped', 'warning');
+          resetScanAllButton();
+          activeScanMode = 'IDLE';
+          // pollScanProgress handles the rest
+        }
+      } catch (e) {
+        showAlert('Failed to stop scan', 'error');
+      }
+    }
+
+    function resetScanAllButton() {
+      const btn = document.getElementById('btnScanAll');
+      if (btn) {
+        btn.textContent = 'Scan All Pages';
+        btn.onclick = scanAllPages;
+        btn.style.background = 'var(--accent-primary)';
+        btn.style.color = '#ffffff';
+        btn.style.border = 'none';
+      }
+    }
+
+    async function scanPage(scanId) {
+      try {
+        const btn = document.getElementById(`btn-scan-${scanId}`);
+        if (btn) {
+          btn.textContent = 'Queueing...';
+          btn.disabled = true;
+        }
+
+        // Don't change activeScanMode for single scans - let discovery poll continue
+        const res = await fetch(`/api/scan/page/${scanId}`, { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success) {
+          // Don't call pollScanProgress - the existing poll will pick up the change
+          // This prevents interrupting the discovery process
+        }
+      } catch (e) {
+        showAlert('Failed to scan page', 'error');
+      }
+    }
+
+    function pollScanProgress() {
+      if (crawlPollInterval) clearInterval(crawlPollInterval);
+
+      crawlPollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/crawl/status/${currentCrawlId}`);
+          const data = await res.json();
+
+          renderDiscoveryResults(data.scans);
+
+          const scanning = data.scans.filter(s => s.scan_status === 'scanning').length;
+          const completed = data.scans.filter(s => s.scan_status === 'complete').length;
+          const total = data.scans.length;
+
+          // Update Status Text ONLY if in BATCH mode
+          if (activeScanMode === 'BATCH') {
+            if (scanning > 0) {
+              document.getElementById('discoverySpinner').style.display = 'block';
+              document.getElementById('discoveryStatusText').textContent = `⏳ Scanning... (${scanning} active, ${completed} done)`;
+              // Update the Found Pages count to match total in case it drifted or was mismatched
+              document.getElementById('discoveryCount').textContent = `Found ${total} pages`;
+              document.getElementById('discoveryStatus').style.display = 'flex'; // Ensure visible
+            } else if (completed > 0) {
+              document.getElementById('discoverySpinner').style.display = 'none';
+              // Show actual found vs scanned, not 500
+              document.getElementById('discoveryStatusText').textContent = `✅ Scan Batch Complete (${completed}/${total} total scanned)`;
+              document.getElementById('discoveryCount').textContent = `Found ${total} pages`;
+              resetScanAllButton(); // Reset button when done
+              activeScanMode = 'IDLE';
+            }
+          } else {
+            // In SINGLE or IDLE mode, ensure top spinner is hidden and text is default
+            // But we want to preserve "Found X pages" if we are just idling
+            const spinner = document.getElementById('discoverySpinner');
+            if (spinner) spinner.style.display = 'none';
+
+            // Reset text if we are purely Idle? 
+            // Actually, let's just NOT update the text here for single mode, 
+            // relying on pollDiscovery to set "Found X pages" initially.
+            // But if we came from a batch, we might want to reset?
+            // For now, doing nothing here preserves the "Found X pages" state from pollDiscoveryStatus
+            // unless we overwrite it.
+            // Reverting text if it was "Scanning..." might be safely done by pollDiscoveryStatus?
+            // Let's force it to "Found X pages" style if we want? 
+            // No, current logic in pollDiscoveryStatus sets #discoveryCount.
+            // #discoveryStatusText is "Discovering pages..." initially.
+            // We will just HIDE the spinner.
+          }
+
+          // DON'T update totalIssues/totalErrors/totalWarnings here!
+          // Those IDs belong to Website Audit tab and would be overwritten by Compliance Scanner data.
+          // Compliance Scanner has its own summary in renderCrawlTable.
+
+        } catch (e) { }
+      }, 2000); // Poll every 2s to be less aggressive
+    }
+
+    function downloadCrawlCSV() {
+      if (!currentCrawlId) return;
+      window.location.href = `/api/report/crawl/${currentCrawlId}/csv`;
+    }
+
+    function renderDiscoveryResults(scans) {
+      const container = document.getElementById('crawlResults');
+
+      let html = `<div style="display:flex; flex-direction:column; gap:8px;">`;
+
+      scans.forEach((scan, index) => {
+        let statusBadge = '';
+        let actionBtn = '';
+
+        switch (scan.scan_status) {
+          case 'pending':
+            statusBadge = `<span style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(255,255,255,0.1); color:var(--text-muted); border:1px solid var(--glass-border);">PENDING</span>`;
+            actionBtn = `<button id="btn-scan-${scan.id}" onclick="scanPage(${scan.id})" class="primary" style="padding:4px 12px; font-size:12px; min-width:80px;">Scan</button>`;
+            break;
+          case 'scanning':
+            statusBadge = `<span style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(59,130,246,0.1); color:#3b82f6; border:1px solid rgba(59,130,246,0.2);">SCANNING...</span>`;
+            // Spinner localized to this button/row
+            actionBtn = `<div class="spinner" style="width:16px; height:16px; border-width:2px; margin:0 auto;"></div>`;
+            break;
+          case 'complete':
+            const issueCount = scan.total_issues || 0;
+            const errCount = scan.errors || 0;
+            let color = issueCount === 0 ? 'var(--accent-success)' : (errCount > 0 ? 'var(--accent-error)' : 'var(--accent-warning)');
+            statusBadge = `<span style="font-size:10px; padding:2px 8px; border-radius:10px; background:${color}1a; color:${color}; border:1px solid ${color}40; font-weight:700;">${issueCount} ISSUES</span>`;
+            actionBtn = `<button onclick="toggleSpiderIssues(${scan.id})" style="font-size:12px; background:transparent; border:1px solid var(--glass-border); color:var(--text-main); padding:4px 12px; border-radius:8px; cursor:pointer;">View Results</button>`;
+            break;
+          case 'failed':
+            statusBadge = `<span style="font-size:10px; color:var(--accent-error);">FAILED</span>`;
+            actionBtn = `<button onclick="scanPage(${scan.id})" style="font-size:12px; color:var(--accent-error); background:transparent; border:1px solid var(--accent-error); padding:4px 8px; border-radius:6px; cursor:pointer;">Retry</button>`;
+            break;
+          default:
+            statusBadge = `<span style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(255,255,255,0.1); color:var(--text-muted); border:1px solid var(--glass-border);">PENDING</span>`;
+            actionBtn = `<button id="btn-scan-${scan.id}" onclick="scanPage(${scan.id})" class="primary" style="padding:4px 12px; font-size:12px; min-width:80px;">Scan</button>`;
+        }
+
+        html += `
+          <div style="background:var(--email-item-bg); border-radius:12px; padding:12px 16px; border:1px solid var(--glass-border);">
+             <div style="display:flex; justify-content:space-between; align-items:center;">
+               <div style="flex:1; overflow:hidden;">
+                 <div style="display:flex; gap:8px;">
+                    <span style="font-size:11px; color:var(--text-muted); font-weight:600; min-width:24px;">#${index + 1}</span>
+                    <a href="${scan.url}" target="_blank" style="color:var(--accent-primary); font-weight:500; text-decoration:none; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;">${scan.url}</a>
+                 </div>
+                 <div style="font-size:10px; color:var(--text-muted); margin-top:2px; margin-left:32px;">ID: ${scan.id}</div> 
+               </div>
+               <div style="display:flex; align-items:center; gap:12px; margin-left:16px; min-width:140px; justify-content:flex-end;">
+                 ${statusBadge}
+                 ${actionBtn}
+               </div>
+            </div>
+            <div id="issues-${scan.id}" style="display:none; margin-left:20px; border-left:2px solid var(--glass-border); padding-left:10px; margin-top:8px;"></div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+
+    function renderCrawlTable(scans, crawl) {
+      const container = document.getElementById('crawlResults');
+      if (scans.length === 0) return;
+
+      // Store scans for sort/filter functionality
+      allCrawlScans = scans;
+
+      // Use total_pages from crawl for accurate count
+      const totalPagesDiscovered = crawl && crawl.total_pages ? crawl.total_pages : scans.length;
+      const scannedCount = scans.length;
+
+      // Calculate executive metrics
+      const totalErrors = scans.reduce((sum, s) => sum + (s.errors || 0), 0);
+      const avgErrors = Math.round(totalErrors / scans.length);
+
+      // Calculate top issue types across all scans
+      const allIssueTypes = {};
+      scans.forEach(scan => {
+        try {
+          const issues = scan.detailed_json ? JSON.parse(scan.detailed_json) : [];
+          issues.forEach(issue => {
+            const key = issue.code;
+            if (!allIssueTypes[key]) {
+              allIssueTypes[key] = {
+                code: issue.code,
+                message: issue.message,
+                count: 0,
+                pagesAffected: new Set()
+              };
+            }
+            allIssueTypes[key].count++;
+            allIssueTypes[key].pagesAffected.add(scan.url);
+          });
+        } catch (e) { }
+      });
+
+      // Get top 3 issues
+      const topIssues = Object.values(allIssueTypes)
+        .map(issue => ({ ...issue, pagesAffected: issue.pagesAffected.size }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 3);
+
+      // Risk assessment - ONLY show green for ZERO violations
+      let riskLevel = 'CRITICAL';
+      let riskColor = 'var(--accent-error)';
+      let complianceStatus = 'FAILING';
+
+      if (totalErrors === 0) {
+        // ONLY zero violations gets green/success
+        riskLevel = 'COMPLIANT';
+        riskColor = 'var(--accent-success)';
+        complianceStatus = 'PASSING';
+      } else if (avgErrors > 20) {
+        riskLevel = 'CRITICAL';
+        riskColor = 'var(--accent-error)';
+        complianceStatus = 'FAILING';
+      } else if (avgErrors > 10) {
+        riskLevel = 'HIGH';
+        riskColor = '#f97316';
+        complianceStatus = 'AT RISK';
+      } else {
+        // Any violations at all = needs work (yellow/orange)
+        riskLevel = 'MEDIUM';
+        riskColor = 'var(--accent-warning)';
+        complianceStatus = 'NEEDS WORK';
+      }
+
+      // Check if this is first render
+      const isFirstRender = !document.getElementById('crawlTableBody');
+
+      if (isFirstRender) {
+        // First render: create full structure
+        renderedScanIds.clear();
+
+        // Build top issues HTML
+        let topIssuesHTML = '';
+        if (topIssues.length > 0) {
+          topIssuesHTML = '<div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--glass-border);">';
+          topIssuesHTML += '<div style="font-size:13px; font-weight:600; color:var(--text-main); margin-bottom:12px;">🎯 Top Issues Across All Pages</div>';
+          topIssues.forEach((issue, idx) => {
+            const explanation = getPlainLanguageExplanation(issue.code, issue.message);
+            topIssuesHTML += `
+              <div style="margin-bottom:8px; padding:10px; background:rgba(248,113,113,0.1); border-radius:6px; border-left:3px solid var(--accent-error);">
+                <div style="font-size:12px; font-weight:600; color:var(--text-main); margin-bottom:4px;">${idx + 1}. ${issue.code}</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">${explanation.what}</div>
+                <div style="font-size:10px; color:var(--accent-error); font-weight:600;">${issue.count} occurrences across ${issue.pagesAffected} pages</div>
+              </div>
+            `;
+          });
+          topIssuesHTML += '</div>';
+        }
+
+
+        // Calculate worst pages for specific recommendations
+        const worstPages = scans.slice().sort((a, b) => (b.errors || 0) - (a.errors || 0)).slice(0, 3);
+        const pagesOver20Errors = scans.filter(s => (s.errors || 0) > 20).length;
+
+        let html = `
+          <div id="executiveSummary" style="background:var(--glass-panel); border:2px solid ${riskColor}; border-radius:16px; padding:28px; margin-bottom:24px; animation:fadeIn 0.5s;">
+            
+            <!-- Bold Headline -->
+            <div style="margin-bottom:24px; padding-bottom:20px; border-bottom:2px solid var(--glass-border);">
+              <h2 style="margin:0 0 8px 0; font-size:28px; font-weight:900; color:${riskColor}; line-height:1.2;">
+                ${complianceStatus === 'PASSING' ? '✓ Your Website is ADA Compliant!' :
+            complianceStatus === 'FAILING' ? '⚠️ Your Website is Not ADA Compliant' :
+              complianceStatus === 'AT RISK' ? '⚠️ Significant Compliance Gaps Detected' :
+                '⚠️ Accessibility Issues Found'}
+              </h2>
+              <p style="margin:0; font-size:16px; color:var(--text-muted); line-height:1.5;">
+                ${complianceStatus === 'PASSING' ?
+            `Congratulations! We found <strong style="color:${riskColor};">zero accessibility violations</strong> across ${scans.length} pages. Your site meets ADA Title II requirements.` :
+            complianceStatus === 'FAILING' ?
+              `We found <strong style="color:${riskColor};">${totalErrors} accessibility violations</strong> across ${scans.length} pages. This puts you at <strong>legal risk</strong> under ADA Title II.` :
+              complianceStatus === 'AT RISK' ?
+                `We found <strong style="color:${riskColor};">${totalErrors} accessibility violations</strong> that need immediate attention to avoid legal exposure.` :
+                `We found <strong style="color:${riskColor};">${totalErrors} accessibility violations</strong> that must be fixed to achieve compliance.`}
+              </p>
+            </div>
+            
+            <!-- Key Metrics Grid -->
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:20px; margin-bottom:24px;">
+              <div style="text-align:center; padding:16px; background:rgba(0,0,0,0.2); border-radius:12px;">
+                <div style="font-size:36px; font-weight:900; color:${riskColor}; margin-bottom:4px;">${pagesOver20Errors}</div>
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">Critical Pages</div>
+              </div>
+              <div style="text-align:center; padding:16px; background:rgba(0,0,0,0.2); border-radius:12px;">
+                <div style="font-size:36px; font-weight:900; color:${riskColor}; margin-bottom:4px;">${totalErrors}</div>
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">Total Violations</div>
+              </div>
+              <div style="text-align:center; padding:16px; background:rgba(0,0,0,0.2); border-radius:12px;">
+                <div style="font-size:36px; font-weight:900; color:var(--text-main); margin-bottom:4px;">${scannedCount}</div>
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">Pages Scanned</div>
+              </div>
+            </div>
+            
+            <div id="topIssuesSection">${topIssuesHTML}</div>
+          </div>
+          
+          
+          <h3 id="resultsHeader" style="font-size:16px; font-weight:700; color:var(--text-main); margin-bottom:12px;">📊 Live Results (${scans.length} pages scanned)</h3>
+          
+          <!-- Sort and Filter Controls -->
+          <div style="display:flex; gap:12px; margin-bottom:16px; padding:12px; background:var(--glass-panel); border-radius:8px; border:1px solid var(--glass-border);">
+            <div style="flex:1;">
+              <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">Sort By:</label>
+              <select id="crawlSortBy" onchange="applyCrawlSort()" style="width:100%; padding:8px; background:var(--input-bg); border:1px solid var(--glass-border); border-radius:6px; color:var(--text-main); font-size:13px;">
+                <option value="issues-desc">Issues (High → Low)</option>
+                <option value="issues-asc">Issues (Low → High)</option>
+                <option value="url-asc">Page URL (A → Z)</option>
+                <option value="url-desc">Page URL (Z → A)</option>
+              </select>
+            </div>
+            <div style="flex:1;">
+              <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">Filter By Risk:</label>
+              <select id="crawlFilterRisk" onchange="applyCrawlSort()" style="width:100%; padding:8px; background:var(--input-bg); border:1px solid var(--glass-border); border-radius:6px; color:var(--text-main); font-size:13px;">
+                <option value="all">All Pages</option>
+                <option value="critical">🚨 Critical Only (20+ errors)</option>
+                <option value="high">⚠️ High Only (10-20 errors)</option>
+                <option value="medium">⚡ Medium Only (5-10 errors)</option>
+                <option value="low">✓ Low Only (<5 errors)</option>
+              </select>
+            </div>
+          </div>
+          
+          <table style="width:100%; border-collapse:collapse;">
+              <thead>
+                  <tr style="text-align:left; border-bottom:2px solid var(--glass-border); color:var(--text-muted); font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">
+                      <th style="padding:12px 8px;">Page</th>
+                      <th style="padding:12px 8px;">Issues</th>
+                      <th style="padding:12px 8px;">Risk</th>
+                  </tr>
+              </thead>
+              <tbody id="crawlTableBody"></tbody>
+          </table>
+          <div id="morePages" style="text-align:center; padding:16px; color:var(--text-muted); font-size:13px; font-style:italic; display:none;"></div>
+        `;
+        container.innerHTML = html;
+
+        // Add CSS animation if not already present
+        if (!document.getElementById('crawlAnimations')) {
+          const style = document.createElement('style');
+          style.id = 'crawlAnimations';
+          style.textContent = `
+            @keyframes slideIn {
+              from { opacity: 0; transform: translateY(-10px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+          `;
+        }
+      }
+
+
+      // Always update header count
+      const header = document.getElementById('resultsHeader');
+      if (header) header.textContent = `📊 Live Results (${scans.length} pages scanned)`;
+
+      // Update executive summary metrics live (if it exists)
+      const executiveSummary = document.getElementById('executiveSummary');
+      if (executiveSummary && !isFirstRender) {
+        // Recalculate metrics for live updates
+        const pagesOver20Errors = scans.filter(s => (s.errors || 0) > 20).length;
+
+        // Update the three metric boxes
+        const metricBoxes = executiveSummary.querySelectorAll('[style*="text-align:center"]');
+        if (metricBoxes.length >= 3) {
+          // Update Critical Pages
+          const criticalPagesNum = metricBoxes[0].querySelector('div[style*="font-size:36px"]');
+          if (criticalPagesNum) criticalPagesNum.textContent = pagesOver20Errors;
+
+          // Update Total Violations
+          const totalViolationsNum = metricBoxes[1].querySelector('div[style*="font-size:36px"]');
+          if (totalViolationsNum) totalViolationsNum.textContent = totalErrors;
+
+          // Update Pages Scanned
+          const pagesScannedNum = metricBoxes[2].querySelector('div[style*="font-size:36px"]');
+          if (pagesScannedNum) pagesScannedNum.textContent = scans.length;
+        }
+
+        // Update border color based on current risk
+        executiveSummary.style.borderColor = riskColor;
+      }
+
+      // Incremental row rendering (SMOOTH STREAMING)
+      const tbody = document.getElementById('crawlTableBody');
+      const sortedScans = [...scans].sort((a, b) => (b.errors || 0) - (a.errors || 0));
+
+      // Show all scans, not just top 10
+      sortedScans.forEach((s) => {
+        // Only render if not already rendered
+        if (!renderedScanIds.has(s.id)) {
+          const errorCount = s.errors || 0;
+          let badge = '';
+          let badgeColor = '';
+          if (errorCount > 20) { badge = '🚨 Critical'; badgeColor = 'var(--accent-error)'; }
+          else if (errorCount > 10) { badge = '⚠️ High'; badgeColor = '#f97316'; }
+          else if (errorCount > 5) { badge = '⚡ Medium'; badgeColor = 'var(--accent-warning)'; }
+          else { badge = '✓ Low'; badgeColor = 'var(--accent-success)'; }
+
+          // Truncate long URLs (especially those with query params)
+          let displayUrl = s.url;
+          try {
+            const urlObj = new URL(s.url);
+            const baseUrl = document.getElementById('crawlUrlInput').value;
+            displayUrl = s.url.replace(baseUrl, '') || '/';
+
+            // If URL is still too long (query params), truncate it
+            if (displayUrl.length > 80) {
+              const pathOnly = urlObj.pathname;
+              displayUrl = pathOnly + (urlObj.search ? '?...' : '');
+            }
+          } catch (e) {
+            // Fallback: just truncate if too long
+            if (displayUrl.length > 80) {
+              displayUrl = displayUrl.substring(0, 77) + '...';
+            }
+          }
+
+          const rowId = `spider-row-${s.id}`;
+
+          const tr = document.createElement('tr');
+          tr.id = rowId;
+          tr.style.borderBottom = '1px solid var(--glass-border)';
+          tr.style.animation = 'slideIn 0.4s ease-out';
+          tr.innerHTML = `
+                  <td style="padding:14px 8px; font-size:13px; max-width:500px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                      <a href="${s.url}" target="_blank" style="color:var(--accent-primary); text-decoration:none; font-weight:500;" title="${s.url}">${displayUrl}</a>
+                  </td>
+                  <td style="padding:14px 8px;">
+                      <span onclick="toggleSpiderIssues(${s.id})" style="background:rgba(248,113,113,0.15); color:var(--accent-error); padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; user-select:none;">${errorCount} errors ▼</span>
+                      <div id="issues-${s.id}" style="display:none; margin-top:12px; max-height:300px; overflow-y:auto; background:var(--code-bg); border:1px solid var(--glass-border); border-radius:8px; padding:12px;">
+                        <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Loading issues...</div>
+                      </div>
+                  </td>
+                  <td style="padding:14px 8px; font-weight:700; color:${badgeColor};">${badge}</td>
+          `;
+
+          tbody.appendChild(tr);
+          renderedScanIds.add(s.id);
+        }
+      });
+    }
+
+    function downloadCrawlCSV() {
+      if (!currentCrawlId) return;
+      window.location.href = `/api/report/crawl/${currentCrawlId}/csv`;
+    }
+
+    let allCrawlScans = []; // Store all scans for filtering/sorting
+    let openSpiderDetailIds = new Set(); // Track open details for persistence
+
+    function renderDiscoveryResults(scans) {
+      allCrawlScans = scans; // Update global list for sorting
+      const container = document.getElementById('crawlResults');
+      if (!container) return;
+
+      // Don't wipe if we are just updating status? 
+      // No, we must re-render to show new items or status changes.
+      // But we must preserve scroll position? Browser handles scroll if we don't resize too much.
+
+      // Apply Sort/Filter
+      const sortBy = document.getElementById('crawlSortBy') ? document.getElementById('crawlSortBy').value : 'url';
+      const filterRisk = document.getElementById('crawlFilterRisk') ? document.getElementById('crawlFilterRisk').value : 'all';
+
+      let displayScans = [...scans];
+
+      // FILTER
+      if (filterRisk !== 'all') {
+        displayScans = displayScans.filter(s => {
+          const err = s.errors || 0;
+          if (filterRisk === 'critical') return err > 20;
+          if (filterRisk === 'high') return err > 10;
+          if (filterRisk === 'medium') return err > 0;
+          return true;
+        });
+      }
+
+      // SORT
+      displayScans.sort((a, b) => {
+        if (sortBy === 'issues') return (b.total_issues || 0) - (a.total_issues || 0);
+        return a.url.localeCompare(b.url);
+      });
+
+      // Update Header Count
+      const pagesReady = document.getElementById('pagesReadyCount');
+      if (pagesReady) pagesReady.textContent = displayScans.length;
+
+      const resultsLabel = document.getElementById('resultsCountLabel');
+      if (resultsLabel) resultsLabel.textContent = `${displayScans.length} Pages Found`;
+
+      container.innerHTML = '';
+
+      displayScans.forEach((scan, index) => {
+        const isComplete = scan.scan_status === 'complete';
+        const isScanning = scan.scan_status === 'scanning';
+        const isFailed = scan.scan_status === 'failed';
+        const hasIssues = (scan.errors || 0) > 0;
+
+        // Status Badge
+        let badge = '<span class="status-pill">Pending</span>';
+        let badgeColor = 'var(--text-muted)';
+        if (isScanning) {
+          badge = '<div class="spinner" style="width:16px; height:16px; border-width:2px; display:inline-block; vertical-align:middle; margin:0 8px 0 0;"></div> Scanning...';
+          badgeColor = 'var(--accent-primary)';
+        } else if (isFailed) {
+          badge = '<span class="status-pill error">Failed</span>';
+          badgeColor = 'var(--accent-error)';
+        } else if (isComplete) {
+          if (scan.errors > 0) {
+            badge = `<span class="status-pill error">${scan.errors} Issues</span>`;
+            badgeColor = 'var(--accent-error)';
+          } else {
+            badge = '<span class="status-pill success">Clean</span>';
+            badgeColor = 'var(--accent-success)';
+          }
+        }
+
+        // Action Button
+        let actionBtn = '';
+        if (isComplete) {
+          actionBtn = `<button class="view-btn" onclick="toggleSpiderIssues(${scan.id})" style="background:transparent; border:1px solid var(--glass-border); padding:6px 12px; border-radius:8px; cursor:pointer; color:var(--text-main); font-size:12px;">View Results</button>`;
+        } else if (isScanning) {
+          actionBtn = `<button disabled style="opacity:0.5; background:transparent; border:none; color:var(--text-muted);">Scanning...</button>`;
+        } else if (isFailed) {
+          actionBtn = `<button class="primary" style="padding:6px 16px; font-size:12px; background:var(--accent-warning); color:black;" id="btn-scan-${scan.id}" onclick="scanPage(${scan.id})">Retry</button>`;
+        } else {
+          actionBtn = `<button class="primary" style="padding:6px 16px; font-size:12px;" id="btn-scan-${scan.id}" onclick="scanPage(${scan.id})">Scan</button>`;
+        }
+
+        // Check if details should be open
+        const isOpen = openSpiderDetailIds.has(scan.id);
+        // We need to re-fetch/render issues logic if open? 
+        // Or just let toggleSpiderIssues handle it if we auto-trigger it?
+        // Better: Render the container open/closed. 
+        // But the content is fetched async in toggleSpiderIssues.
+        // We can check 'scan.detailed_json' if available? 
+        // API /status returns scans but maybe not heavy JSON.
+        // Let's rely on toggleSpiderIssues to fetch if empty.
+
+        const div = document.createElement('div');
+        div.className = 'issue-item';
+        div.style.display = 'flex';
+        div.style.flexDirection = 'column';
+        div.style.gap = '0';
+        div.style.padding = '0';
+        div.style.overflow = 'hidden';
+
+        div.innerHTML = `
+            <div style="padding:16px 24px; display:flex; align-items:center; justify-content:space-between; background:var(--glass-panel);">
+                <div style="display:flex; align-items:center; gap:16px; flex:1; overflow:hidden;">
+                    <span style="font-size:12px; font-weight:700; color:var(--text-muted); min-width:30px;">#${index + 1}</span>
+                    <div style="flex:1; overflow:hidden;">
+                        <div style="font-weight:600; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${scan.url}">${scan.url}</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">ID: ${scan.id}</div>
+                    </div>
+                </div>
+                
+                <div style="display:flex; align-items:center; gap:16px; min-width:200px; justify-content:flex-end;">
+                     <div style="text-align:right;">${badge}</div>
+                     ${actionBtn}
+                </div>
+            </div>
+            
+            <div id="issues-${scan.id}" class="detailed-instance" style="display:${isOpen ? 'block' : 'none'}; border-top:1px solid var(--glass-border); margin:0; border-radius:0;">
+                ${isOpen ? '<div style="padding:20px; text-align:center; color:var(--text-muted);">Loading details...</div>' : ''}
+            </div>
+        `;
+
+        container.appendChild(div);
+
+        // If it was open, trigger the load immediately (async)
+        if (isOpen) {
+          // slight delay to ensure DOM is ready? No need.
+          loadSpiderIssues(scan.id);
+        }
+      });
+    }
+
+    // Split toggle into Toggle + Load
+    async function toggleSpiderIssues(scanId) {
+      const container = document.getElementById(`issues-${scanId}`);
+      if (!container) return;
+
+      if (openSpiderDetailIds.has(scanId)) {
+        // Close it
+        openSpiderDetailIds.delete(scanId);
+        container.style.display = 'none';
+      } else {
+        // Open it
+        openSpiderDetailIds.add(scanId);
+        container.style.display = 'block';
+        loadSpiderIssues(scanId);
+      }
+    }
+
+    async function loadSpiderIssues(scanId) {
+      const container = document.getElementById(`issues-${scanId}`);
+      if (!container) return;
+      if (container.dataset.loaded === 'true') return;
+
+      try {
+        const res = await fetch(`/api/scan/${scanId}/issues`);
+        const data = await res.json();
+
+        if (data.issues && data.issues.length > 0) {
+          // GROUP ISSUES (Gold Standard)
+          const grouped = groupIssues(data.issues);
+
+          // Show Top 5 Groups only (User Request)
+          const topIssues = grouped.slice(0, 5);
+          const hiddenCount = grouped.length - topIssues.length;
+
+          renderSpiderIssuesContent(container, topIssues, scanId, hiddenCount);
+          container.dataset.loaded = 'true';
+        } else {
+          container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted);">No detailed issues found.</div>';
+        }
+      } catch (e) {
+        container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--accent-error);">Failed to load issues.</div>';
+      }
+    }
+
+    function groupIssues(issues) {
+      const groups = {};
+      issues.forEach(i => {
+        const key = i.code;
+        if (!groups[key]) {
+          groups[key] = {
+            code: i.code,
+            message: i.message,
+            type: i.type,
+            count: 0,
+            occurrences: []
+          };
+        }
+        groups[key].count++;
+        // Limit occurrences stored to 10 to save memory in UI
+        if (groups[key].occurrences.length < 10) {
+          groups[key].occurrences.push({ selector: i.selector, context: i.context });
+        }
+      });
+      // Sort: errors first, then by count (highest first)
+      return Object.values(groups).sort((a, b) => {
+        if (a.type === 'error' && b.type !== 'error') return -1;
+        if (a.type !== 'error' && b.type === 'error') return 1;
+        return b.count - a.count; // Most occurrences first
+      });
+    }
+
+    function renderSpiderIssuesContent(container, issues, scanId, hiddenCount) {
+      let html = '';
+      issues.forEach((issue, idx) => {
+        const typeClass = issue.type === 'error' ? 'error' : 'warning';
+        const typeColor = issue.type === 'error' ? 'var(--accent-error)' : 'var(--accent-warning)';
+
+        // Build occurrences in GOLDEN STANDARD format
+        let occHtml = '';
+        // Show only 1 sample location (user request)
+        issue.occurrences.slice(0, 1).forEach((occ, i) => {
+          // Extract element ID from selector for display
+          const selectorMatch = occ.selector.match(/#([a-zA-Z0-9_-]+)/);
+          const elementId = selectorMatch ? selectorMatch[0] : describeElement(occ.selector, occ.context);
+
+          occHtml += `
+               <div style="background:var(--code-bg); padding:16px; margin-top:8px; border-radius:8px; border:1px solid var(--glass-border);">
+                   <div style="font-weight:700; color:${typeColor}; font-size:14px; margin-bottom:12px;">
+                       📍 Location ${i + 1}: Element ${elementId}
+                   </div>
+                   
+                   <div style="margin-bottom:12px;">
+                       <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700; margin-bottom:6px;">CSS SELECTOR (DEVELOPER ID)</div>
+                       <div style="background:var(--input-bg); padding:10px 12px; border-radius:6px; font-family:monospace; font-size:12px; color:var(--text-main); overflow-x:auto; word-break:break-all;">${escapeHtml(occ.selector)}</div>
+                   </div>
+                   
+                   <div>
+                       <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700; margin-bottom:6px;">HTML CONTEXT</div>
+                       <div style="background:var(--input-bg); padding:10px 12px; border-radius:6px; font-family:monospace; font-size:12px; color:var(--text-main); overflow-x:auto;">${occ.context ? escapeHtml(occ.context) : '<em style="color:var(--text-muted)">No context available</em>'}</div>
+                   </div>
+               </div>
+             `;
+        });
+
+        // Use getPlainLanguageExplanation
+        const explanation = getPlainLanguageExplanation(issue.code, issue.message);
+
+        html += `
+              <div class="issue-item ${typeClass}" style="margin-bottom:12px; border:1px solid var(--glass-border);">
+                <div class="issue-header">
+                  <span class="issue-badge ${typeClass}">${issue.type}</span>
+                  <span style="color:var(--text-muted); font-size:12px; font-weight:600">${issue.count} LOCATION(S)</span>
+                </div>
+                
+                <div style="font-size:15px; font-weight:700; margin-bottom:8px; color:var(--text-main); margin-top:8px;">${issue.message}</div>
+                
+                <div class="plain-language" style="border-left:2px solid ${typeColor}; padding-left:12px; margin-top:8px;">
+                   <div class="what" style="font-size:13px; margin-bottom:4px;"><strong>💡 The Issue:</strong> ${explanation.what}</div>
+                   <div class="why" style="font-size:13px;"><strong>⚡ Why Fix It:</strong> ${explanation.why}</div>
+                </div>
+
+                <div style="margin-top:12px;">
+                   <button onclick="document.getElementById('occ-${scanId}-${issue.code}').style.display = document.getElementById('occ-${scanId}-${issue.code}').style.display==='none'?'block':'none'" 
+                           style="background:transparent; border:none; color:var(--accent-primary); cursor:pointer; font-size:13px; font-weight:600; padding:0;">
+                      View Technical Details & Locations (${issue.count}) ▼
+                   </button>
+                   <div id="occ-${scanId}-${issue.code}" style="display:none; margin-top:8px;">${occHtml}</div>
+                </div>
+              </div>
+            `;
+      });
+
+      if (hiddenCount > 0) {
+        html += `<div style="text-align:center; padding:12px; color:var(--text-muted); font-size:13px; font-style:italic;">
+             + ${hiddenCount} other issue categories not shown (Top 5 displayed)
+          </div>`;
+      }
+
+      container.innerHTML = html;
+    }
+
+    // Stub for applyCrawlSort since we use renderDiscoveryResults directly now
+    function applyCrawlSort() {
+      // Just re-render with current global data
+      if (allCrawlScans) renderDiscoveryResults(allCrawlScans);
+    }
+
+    // Helper function to get remediation steps
+    function getRemediationSteps(code, msg) {
+      const lowerCode = code.toLowerCase();
+      const lowerMsg = msg.toLowerCase();
+
+      // Color contrast issues
+      if (lowerCode.includes('color-contrast') || lowerMsg.includes('contrast')) {
+        return 'Increase the contrast ratio between text and background to at least 4.5:1 for normal text or 3:1 for large text. Use a color contrast checker tool to verify.';
+      }
+
+      // Image alt text
+      if (lowerCode.includes('image-alt') || lowerCode.includes('alt') || lowerMsg.includes('alt')) {
+        return 'Add descriptive alt text to all images using the alt="" attribute. For decorative images, use alt="" (empty string). For informative images, describe what the image conveys.';
+      }
+
+      // Link names
+      if (lowerCode.includes('link-name') || lowerMsg.includes('link') && lowerMsg.includes('name')) {
+        return 'Ensure all links have descriptive text. Avoid generic phrases like "click here" or "read more". Use aria-label for icon-only links.';
+      }
+
+      // Form labels
+      if (lowerCode.includes('label') || lowerMsg.includes('label')) {
+        return 'Associate every form input with a <label> element using the for="" attribute, or wrap the input inside the label. Alternatively, use aria-label for inputs.';
+      }
+
+      // Button names
+      if (lowerCode.includes('button-name') || lowerMsg.includes('button')) {
+        return 'Add descriptive text or an aria-label to all buttons. Icon-only buttons must have aria-label="Description of action".';
+      }
+
+      // ARIA issues
+      if (lowerCode.includes('aria') || lowerMsg.includes('aria')) {
+        return 'Review ARIA attributes for correctness. Ensure roles are valid, required attributes are present, and values are appropriate. Refer to ARIA authoring practices guide.';
+      }
+
+      // Heading structure
+      if (lowerCode.includes('heading') || lowerMsg.includes('heading')) {
+        return 'Maintain proper heading hierarchy (h1 → h2 → h3). Don\'t skip levels. Use only one h1 per page. Headings should describe the content that follows.';
+      }
+
+      // Language
+      if (lowerCode.includes('lang') || lowerMsg.includes('language')) {
+        return 'Add lang="en" attribute to the <html> tag. For content in other languages, use lang="" on the specific element (e.g., <span lang="es">Hola</span>).';
+      }
+
+      // Duplicate IDs
+      if (lowerCode.includes('duplicate-id') || lowerMsg.includes('duplicate') && lowerMsg.includes('id')) {
+        return 'Ensure all ID attributes are unique on the page. IDs must not be repeated. Use classes for styling multiple elements instead.';
+      }
+
+      // Default fallback
+      return 'Review the element and apply WCAG 2.1 AA guidelines. Consult with your development team or an accessibility specialist for specific remediation steps.';
+    }
+
+    // ============================================
+    // SITE MAP TAB FUNCTIONS
+    // ============================================
+
+    // Load site map data from the current crawl
+    function loadSiteMapData() {
+      // If no current crawl ID, try to fetch the most recent one
+      if (!currentCrawlId) {
+        console.log('No crawl ID in memory, fetching latest crawl...');
+        fetch('/api/crawl/latest')
+          .then(res => res.json())
+          .then(data => {
+            if (data.crawlId) {
+              currentCrawlId = data.crawlId;
+              loadSiteMapData(); // Retry with the fetched ID
+            } else {
+              console.log('No crawls found in database');
+            }
+          })
+          .catch(err => console.error('Failed to fetch latest crawl:', err));
+        return;
+      }
+
+      fetch(`/api/crawl/status/${currentCrawlId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.scans && data.scans.length > 0) {
+            renderSiteMap(data.scans);
+          }
+        })
+        .catch(err => console.error('Failed to load site map data:', err));
+    }
+
+    // Render site map from scans array
+    function renderSiteMap(scans) {
+      if (!scans || scans.length === 0) return;
+
+      // Calculate depth statistics
+      const depthCounts = {};
+      let maxDepth = 0;
+
+      scans.forEach(scan => {
+        const depth = scan.depth || 0;
+        depthCounts[depth] = (depthCounts[depth] || 0) + 1;
+        if (depth > maxDepth) maxDepth = depth;
+      });
+
+      // Update stats display
+      document.getElementById('depthStats').style.display = 'block';
+      document.getElementById('treeControls').style.display = 'flex';
+      document.getElementById('depthBreakdown').style.display = 'block';
+      document.getElementById('siteTreeEmpty').style.display = 'none';
+      document.getElementById('siteTree').style.display = 'block';
+
+      // Update summary stats (simplified)
+      document.getElementById('totalPagesDiscovered').textContent = scans.length.toLocaleString();
+      document.getElementById('maxDepthReached').textContent = maxDepth;
+
+      // Render depth breakdown table
+      const tbody = document.getElementById('depthTableBody');
+      tbody.innerHTML = '';
+
+      const sortedDepths = Object.entries(depthCounts).sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
+      sortedDepths.forEach(([depth, count]) => {
+        const percent = ((count / scans.length) * 100).toFixed(1);
+        const barWidth = Math.max(5, percent);
+        tbody.innerHTML += `
+          <tr style="border-top:1px solid var(--glass-border);">
+            <td style="padding:12px 16px; color:var(--text-main);">
+              <span class="tree-depth-badge">L${depth}</span>
+              Level ${depth} ${depth == 0 ? '(Homepage)' : ''}
+            </td>
+            <td style="padding:12px 16px; text-align:right; font-weight:600; color:var(--text-main); width:80px;">${count.toLocaleString()}</td>
+            <td style="padding:12px 16px; width:200px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="flex:1; background:var(--input-bg); height:8px; border-radius:4px; overflow:hidden;">
+                  <div style="background:var(--accent-primary); height:100%; width:${barWidth}%;"></div>
+                </div>
+                <span style="color:var(--text-main); font-size:14px; font-weight:600; min-width:55px; text-align:right;">${percent}%</span>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      // Build simple tree view (grouped by depth)
+      renderSimpleTree(scans, maxDepth);
+    }
+
+    // Render a simple tree grouped by depth levels
+    function renderSimpleTree(scans, maxDepth) {
+      const tree = document.getElementById('siteTree');
+      let html = '';
+
+      // Group by depth
+      const byDepth = {};
+      scans.forEach(scan => {
+        const d = scan.depth || 0;
+        if (!byDepth[d]) byDepth[d] = [];
+        byDepth[d].push(scan);
+      });
+
+      // Render each level (all levels, no limit)
+      for (let d = 0; d <= maxDepth; d++) {
+        const pages = byDepth[d] || [];
+        if (pages.length === 0) continue;
+
+        const indent = '│   '.repeat(d);
+        const prefix = d === 0 ? '🏠' : '├──';
+
+        html += `<div class="tree-level" data-depth="${d}">`;
+        html += `<div class="tree-item" onclick="toggleTreeLevel(${d})" style="font-weight:600; color:var(--accent-primary);">`;
+        html += `<span class="tree-toggle">▶</span> `;
+        html += `<span class="tree-depth-badge">L${d}</span>`;
+        html += `Level ${d}: ${pages.length} pages`;
+        html += `</div>`;
+        html += `<div class="tree-children" id="treeLevel${d}" style="display:none;">`;
+
+        // Show first 20 pages per level (to prevent huge DOM)
+        const showPages = pages.slice(0, 20);
+        showPages.forEach(page => {
+          const shortUrl = page.url.replace(/^https?:\/\/(www\.)?/, '').substring(0, 60);
+          html += `<div class="tree-node" style="padding-left:${d * 16}px;">`;
+          html += `${indent}${prefix} <a href="${page.url}" target="_blank" style="color:var(--text-main); text-decoration:none;">${shortUrl}${page.url.length > 60 ? '...' : ''}</a>`;
+          html += `</div>`;
+        });
+
+        if (pages.length > 20) {
+          html += `<div class="tree-node" style="padding-left:${d * 16}px; color:var(--text-muted); font-style:italic;">`;
+          html += `${indent}└── ... and ${pages.length - 20} more`;
+          html += `</div>`;
+        }
+
+        html += `</div></div>`;
+      }
+
+      tree.innerHTML = html;
+    }
+
+    // Toggle tree level visibility
+    function toggleTreeLevel(depth) {
+      const children = document.getElementById(`treeLevel${depth}`);
+      const toggle = children.previousElementSibling.querySelector('.tree-toggle');
+
+      if (children.style.display === 'none') {
+        children.style.display = 'block';
+        toggle.textContent = '▼';
+      } else {
+        children.style.display = 'none';
+        toggle.textContent = '▶';
+      }
+    }
+
+    // Expand all tree levels
+    function expandAllTree() {
+      document.querySelectorAll('.tree-children').forEach(el => el.style.display = 'block');
+      document.querySelectorAll('.tree-toggle').forEach(el => el.textContent = '▼');
+    }
+
+    // Collapse all tree levels
+    function collapseAllTree() {
+      document.querySelectorAll('.tree-children').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.tree-toggle').forEach(el => el.textContent = '▶');
+    }
+
+    // Auto-load site map when switching to the tab
+    const originalSwitchTab = switchTab;
+    switchTab = function (tab) {
+      originalSwitchTab(tab);
+      if (tab === 'sitemap') {
+        loadSiteMapData();
+      }
+    };
+
+    // Store current site map data for export
+    let currentSiteMapData = [];
+
+    // Override renderSiteMap to save data
+    const originalRenderSiteMap = renderSiteMap;
+    renderSiteMap = function (scans) {
+      currentSiteMapData = scans;
+      originalRenderSiteMap(scans);
+    };
+
+    // Export Site Map as CSV
+    function exportSiteMapCSV() {
+      if (!currentSiteMapData || currentSiteMapData.length === 0) {
+        showAlert('No data to export. Run a discovery first.', 'error');
+        return;
+      }
+
+      // Build CSV
+      const headers = ['URL', 'Depth Level', 'Parent URL'];
+      let csv = headers.join(',') + '\n';
+
+      currentSiteMapData.forEach(page => {
+        const row = [
+          `"${page.url}"`,
+          page.depth || 0,
+          `"${page.parent_url || 'N/A'}"`
+        ];
+        csv += row.join(',') + '\n';
+      });
+
+      // Download
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/api/download-csv';
+      form.style.display = 'none';
+
+      const inputCsv = document.createElement('input');
+      inputCsv.type = 'hidden';
+      inputCsv.name = 'csv';
+      inputCsv.value = '\uFEFF' + csv;
+      form.appendChild(inputCsv);
+
+      const inputFilename = document.createElement('input');
+      inputFilename.type = 'hidden';
+      inputFilename.name = 'filename';
+      inputFilename.value = `site-map-${new Date().toISOString().split('T')[0]}.csv`;
+      form.appendChild(inputFilename);
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+    }
+
+    // Export Site Map as PDF  
+    function exportSiteMapPDF() {
+      if (!currentSiteMapData || currentSiteMapData.length === 0) {
+        showAlert('No data to export. Run a discovery first.', 'error');
+        return;
+      }
+
+      // Calculate depth stats
+      const depthCounts = {};
+      let maxDepth = 0;
+      currentSiteMapData.forEach(page => {
+        const d = page.depth || 0;
+        depthCounts[d] = (depthCounts[d] || 0) + 1;
+        if (d > maxDepth) maxDepth = d;
+      });
+
+      // Build HTML content for PDF
+      let html = `
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 40px; }
+            h1 { color: #1e3a5f; border-bottom: 2px solid #1e3a5f; padding-bottom: 10px; }
+            h2 { color: #2c5282; margin-top: 30px; }
+            .stat-box { display: inline-block; background: #f0f4f8; padding: 15px 25px; margin: 10px; border-radius: 8px; text-align: center; }
+            .stat-value { font-size: 28px; font-weight: bold; color: #2b6cb0; }
+            .stat-label { font-size: 12px; color: #718096; text-transform: uppercase; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th { background: #2c5282; color: white; padding: 12px; text-align: left; }
+            td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
+            tr:nth-child(even) { background: #f7fafc; }
+            .footer { margin-top: 40px; font-size: 11px; color: #a0aec0; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <h1>🗺️ Site Architecture Report</h1>
+          <p>Generated: ${new Date().toLocaleString()}</p>
+          
+          <div style="margin: 30px 0;">
+            <div class="stat-box">
+              <div class="stat-value">${currentSiteMapData.length.toLocaleString()}</div>
+              <div class="stat-label">Total Pages</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">${maxDepth}</div>
+              <div class="stat-label">Max Depth</div>
+            </div>
+          </div>
+
+          <h2>📊 Depth Breakdown</h2>
+          <table>
+            <tr><th>Depth Level</th><th>Pages</th><th>Percentage</th></tr>
+      `;
+
+      Object.entries(depthCounts).sort((a, b) => a[0] - b[0]).forEach(([depth, count]) => {
+        const percent = ((count / currentSiteMapData.length) * 100).toFixed(1);
+        html += `<tr><td>Level ${depth}${depth == 0 ? ' (Homepage)' : ''}</td><td>${count.toLocaleString()}</td><td>${percent}%</td></tr>`;
+      });
+
+      html += `
+          </table>
+
+          <h2>📄 Sample Pages by Level</h2>
+      `;
+
+      // Show sample pages (first 5 per level)
+      for (let d = 0; d <= Math.min(maxDepth, 5); d++) {
+        const pages = currentSiteMapData.filter(p => (p.depth || 0) === d).slice(0, 5);
+        if (pages.length > 0) {
+          html += `<h3>Level ${d}</h3><ul>`;
+          pages.forEach(p => {
+            html += `<li>${p.url}</li>`;
+          });
+          html += `</ul>`;
+        }
+      }
+
+      html += `
+          <div class="footer">
+            ADA Compliance Scanner - Site Architecture Report
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Open in new window for printing
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+  </script>
+  <script>
+    // Initialize Client Configuration
+    (function initClientConfig() {
+      if (!window.CLIENT_CONFIG) return;
+      const config = window.CLIENT_CONFIG;
+
+      // Apply Branding
+      if (document.getElementById('appTitle')) document.getElementById('appTitle').textContent = config.appName;
+      if (document.getElementById('appTagline')) document.getElementById('appTagline').textContent = config.appTagline;
+      document.title = config.appName + " - " + config.companyName;
+
+      // Apply Theme Colors (Simple Override)
+      const root = document.documentElement;
+      if (config.theme && config.theme.dark && config.theme.dark.primary) {
+        // Update primary gradient for dark mode
+        root.style.setProperty('--primary-gradient', `linear-gradient(135deg, ${config.theme.dark.primary} 0%, ${config.theme.dark.primary} 100%)`);
+      }
+    })();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADA Compliance Scanner - Professional Edition</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .chart-container {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      height: 300px;
+    }
+
+    .history-list {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .score-badge {
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 11px;
+    }
+
+    .score-high {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .score-med {
+      background: #ffedd5;
+      color: #9a3412;
+    }
+
+    .score-low {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 42px;
+      margin-bottom: 8px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      font-size: 16px;
+      opacity: 0.95;
+      font-weight: 400;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 6px;
+      border-radius: 16px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 12px 24px;
+      background: transparent;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      opacity: 0.7;
+    }
+
+    .tab:hover {
+      opacity: 0.9;
+    }
+
+    .tab.active {
+      background: white;
+      color: #1e40af;
+      opacity: 1;
+    }
+
+    .scanner-box {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      padding: 40px;
+      margin-bottom: 24px;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    input[type="url"] {
+      flex: 1;
+      padding: 16px 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 15px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    input[type="url"]:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .upload-area {
+      border: 3px dashed #cbd5e0;
+      border-radius: 16px;
+      padding: 48px 32px;
+      text-align: center;
+      transition: all 0.3s;
+      cursor: pointer;
+      background: #f7fafc;
+      position: relative;
+    }
+
+    .upload-area:hover {
+      border-color: #3b82f6;
+      background: #eff6ff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+    }
+
+    .upload-area.dragover {
+      border-color: #1e40af;
+      background: #dbeafe;
+      transform: scale(1.02);
+      box-shadow: 0 8px 24px rgba(30, 64, 175, 0.2);
+    }
+
+    .upload-area.dragover::before {
+      content: '\1F4E5 Drop files here';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e40af;
+      z-index: 10;
+    }
+
+    .upload-area.dragover>* {
+      opacity: 0.3;
+    }
+
+    .upload-area .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .upload-area h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: #2d3748;
+    }
+
+    .upload-area p {
+      color: #718096;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-list {
+      margin-top: 20px;
+      display: none;
+    }
+
+    .file-list.active {
+      display: block;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: #f7fafc;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .file-item .name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #2d3748;
+    }
+
+    .file-item .size {
+      color: #718096;
+      margin-left: 16px;
+      margin-right: 12px;
+    }
+
+    .file-item button {
+      padding: 6px 12px;
+      background: #fed7d7;
+      color: #c53030;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    button.primary {
+      padding: 16px 40px;
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(30, 64, 175, 0.4);
+    }
+
+    button.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(30, 64, 175, 0.5);
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    }
+
+    button.primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .examples {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .examples span {
+      color: #718096;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .example-btn {
+      padding: 8px 16px;
+      background: #edf2f7;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #2d3748;
+      font-weight: 500;
+    }
+
+    .example-btn:hover {
+      background: #e2e8f0;
+      transform: translateY(-1px);
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 60px 40px;
+    }
+
+    .loading.active {
+      display: block;
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 24px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading p {
+      color: white;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .results {
+      display: none;
+    }
+
+    .results.active {
+      display: block;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 28px 24px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-card .number {
+      font-size: 52px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      line-height: 1;
+    }
+
+    .stat-card .label {
+      font-size: 13px;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .stat-card.total .number {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-card.errors .number {
+      color: #f56565;
+    }
+
+    .stat-card.warnings .number {
+      color: #ed8936;
+    }
+
+    .stat-card.notices .number {
+      color: #48bb78;
+    }
+
+    .section {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .section h2 {
+      font-size: 22px;
+      margin-bottom: 24px;
+      color: #1a202c;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+    }
+
+    .chart-item {
+      background: #f7fafc;
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #3b82f6;
+      transition: all 0.2s;
+    }
+
+    .chart-item:hover {
+      transform: translateX(4px);
+      background: #edf2f7;
+    }
+
+    .chart-item .label {
+      font-size: 13px;
+      color: #4a5568;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .chart-item .value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1a202c;
+    }
+
+    .chart-item .percentage {
+      font-size: 14px;
+      color: #718096;
+      margin-left: 8px;
+    }
+
+    .issue-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .issue-item {
+      background: #f7fafc;
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #cbd5e0;
+      transition: all 0.2s;
+    }
+
+    .issue-item:hover {
+      transform: translateX(4px);
+    }
+
+    .issue-item.error {
+      border-left-color: #f56565;
+      background: #fff5f5;
+    }
+
+    .issue-item.warning {
+      border-left-color: #ed8936;
+      background: #fffaf0;
+    }
+
+    .issue-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .issue-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .issue-badge.error {
+      background: #f56565;
+      color: white;
+    }
+
+    .issue-badge.warning {
+      background: #ed8936;
+      color: white;
+    }
+
+    .issue-count {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a202c;
+    }
+
+    .issue-code {
+      font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+      font-size: 12px;
+      color: #718096;
+      margin-bottom: 8px;
+    }
+
+    .issue-message {
+      font-size: 14px;
+      color: #2d3748;
+      line-height: 1.6;
+    }
+
+    .issue-details {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+      display: none;
+    }
+
+    .issue-details.expanded {
+      display: block;
+    }
+
+    .occurrence {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .occurrence-header {
+      font-size: 12px;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 8px;
+    }
+
+    .plain-language {
+      background: #eff6ff;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border-left: 4px solid #3b82f6;
+      margin-bottom: 12px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .plain-language strong {
+      color: #1e40af;
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .plain-language .what {
+      margin-bottom: 8px;
+      color: #2d3748;
+    }
+
+    .plain-language .why {
+      color: #4a5568;
+      font-size: 13px;
+      font-style: italic;
+    }
+
+    .technical-toggle {
+      background: #edf2f7;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      color: #4a5568;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    .technical-toggle:hover {
+      background: #e2e8f0;
+    }
+
+    .technical-details {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .technical-details.visible {
+      display: block;
+    }
+
+    .selector-box {
+      background: #f7fafc;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 12px;
+      color: #1e40af;
+      margin-bottom: 8px;
+      word-break: break-all;
+    }
+
+    .context-box {
+      background: #fffaf0;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 11px;
+      color: #744210;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .toggle-details {
+      background: none;
+      border: none;
+      color: #1e40af;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 0;
+      margin-top: 8px;
+    }
+
+    .toggle-details:hover {
+      color: #3b82f6;
+    }
+
+    .help-link {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 6px 12px;
+      background: #667eea;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .help-link:hover {
+      background: #764ba2;
+    }
+
+    .impact-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .impact-critical {
+      background: #fed7d7;
+      color: #c53030;
+    }
+
+    .impact-serious {
+      background: #feebc8;
+      color: #c05621;
+    }
+
+    .impact-moderate {
+      background: #fefcbf;
+      color: #744210;
+    }
+
+    .impact-minor {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+
+    .filters {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .filter-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #4a5568;
+    }
+
+    .filter-select {
+      padding: 8px 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 13px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .export-btn {
+      padding: 8px 16px;
+      background: #059669;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-left: auto;
+      transition: all 0.2s;
+    }
+
+    .export-btn:hover {
+      background: #047857;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+    }
+
+    .page-info {
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      padding: 20px 24px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .page-info-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .page-info-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .page-info-row strong {
+      color: #2d3748;
+      margin-right: 8px;
+      min-width: 80px;
+      font-weight: 600;
+    }
+
+    .page-info-row a {
+      color: #1e40af;
+      text-decoration: none;
+      word-break: break-all;
+      font-weight: 500;
+    }
+
+    .page-info-row a:hover {
+      text-decoration: underline;
+    }
+
+    .alert {
+      padding: 20px 24px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .alert.active {
+      display: block;
+    }
+
+    .alert.error {
+      background: #fff5f5;
+      border: 2px solid #feb2b2;
+      color: #c53030;
+    }
+
+    .alert.success {
+      background: #f0fff4;
+      border: 2px solid #9ae6b4;
+      color: #22543d;
+    }
+
+    .pdf-results {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .pdf-card {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .pdf-card h3 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: #1a202c;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pdf-card .status {
+      margin-left: auto;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .pdf-card .status.success {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+
+    .pdf-card .status.warning {
+      background: #feebc8;
+      color: #7c2d12;
+    }
+
+    .pdf-card .status.error {
+      background: #fed7d7;
+      color: #742a2a;
+    }
+
+    .pdf-issues {
+      margin-top: 16px;
+    }
+
+    .pdf-issue {
+      padding: 12px;
+      background: #f7fafc;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .pdf-issue.error {
+      background: #fff5f5;
+      color: #c53030;
+    }
+
+    .pdf-issue.warning {
+      background: #fffaf0;
+      color: #7c2d12;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 32px;
+      }
+
+      .scanner-box {
+        padding: 24px;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .stat-card .number {
+        font-size: 40px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔍 ADA Compliance Scanner</h1>
+      <p>Professional accessibility auditing for websites and documents</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('website')">Website Scan</button>
+      <button class="tab" onclick="switchTab('ocr')">Intelligent OCR</button>
+      <button class="tab" onclick="switchTab('crawler')">Gap Analysis</button>
+    </div>
+
+    <!-- Crawler Tab (New) -->
+    <div id="crawlerTab" class="tab-content">
+      <div class="search-box">
+        <input type="text" id="crawlUrlInput" placeholder="Enter Domain URL to Audit (e.g. https://cityofbowie.org)" />
+        <select id="crawlLimit"
+          style="padding:12px; border:2px solid #e2e8f0; border-radius:12px; margin-left:8px; font-size:16px;">
+          <option value="10">Scan 10 Pages (Fast)</option>
+          <option value="50" selected>Scan 50 Pages (Standard)</option>
+          <option value="100">Scan 100 Pages (Deep)</option>
+        </select>
+        <button onclick="startCrawl()" id="crawlBtn">Start Full Site Audit</button>
+      </div>
+
+      <div id="crawlStatus" style="display:none; margin-top:24px;">
+        <div
+          style="background:white; padding:24px; border-radius:16px; box-shadow:0 4px 6px rgba(0,0,0,0.05); text-align:center;">
+          <h3 style="color:#2d3748; margin-bottom:16px;">Audit in Progress...</h3>
+          <div
+            style="width:100%; height:12px; background:#edf2f7; border-radius:6px; overflow:hidden; margin-bottom:12px;">
+            <div id="crawlProgressBar" style="width:0%; height:100%; background:#4299e1; transition:width 0.5s;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-around; color:#718096; font-size:14px;">
+            <span>Found: <strong id="crawlFoundCount" style="color:#2d3748">0</strong> pages</span>
+            <span>Scanned: <strong id="crawlScannedCount" style="color:#2d3748">0</strong> pages</span>
+          </div>
+        </div>
+
+        <div style="margin-top:24px;">
+          <h4>Live Results</h4>
+          <div id="crawlResultsList" style="display:grid; gap:12px; margin-top:12px;">
+            <!-- Crawl items go here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scanner-box">
+      <!-- Website Tab -->
+      <div id="websiteTab" class="tab-content active">
+        <div class="input-group">
+          <input type="url" id="urlInput" placeholder="Enter website URL (e.g., https://example.com)"
+            value="https://www.cityofbowie.org">
+          <button class="primary" id="scanBtn" onclick="scanWebsite()">
+            Scan Website
+          </button>
+        </div>
+
+        <div class="examples">
+          <span>Quick Start:</span>
+          <button class="example-btn" onclick="setUrl('https://www.cityofbowie.org')">City of Bowie</button>
+          <button class="example-btn" onclick="setUrl('https://www.maryland.gov')">Maryland.gov</button>
+          <button class="example-btn" onclick="setUrl('https://www.section508.gov')">Section508.gov</button>
+        </div>
+      </div>
+
+      <!-- OCR Tab -->
+      <div id="ocrTab" class="tab-content">
+        <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="color:#2d3748">Advanced Document Automation</h3>
+          <select id="ocrStrategy" class="filter-select">
+            <option value="auto">Auto-Detect (Best)</option>
+            <option value="local">Local Tesseract (Free)</option>
+            <option value="cloud">AWS Textract (Premium)</option>
+          </select>
+        </div>
+
+        <div class="upload-area" id="ocrDropZone" onclick="document.getElementById('ocrInput').click()">
+          <div class="icon">🤖</div>
+          <h3>Upload Documents for OCR</h3>
+          <p>Drag & Drop PDFs or Images</p>
+          <button class="example-btn">Select Files</button>
+        </div>
+        <input type="file" id="ocrInput" multiple accept=".pdf,.png,.jpg,.jpeg" style="display:none"
+          onchange="handleOcrFiles(this.files)">
+
+        <div class="file-list" id="ocrFileList"></div>
+
+        <div style="margin-top: 20px; text-align: right;">
+          <button class="primary" onclick="startOcr()" id="ocrBtn" disabled>Process Documents</button>
+        </div>
+
+        <div id="ocrJobs" class="issue-list" style="margin-top: 30px; display: none;">
+          <h4 style="margin-bottom:10px; color:#4a5568">Active Jobs</h4>
+          <div id="ocrJobsList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p id="loadingText">Scanning... This may take 30-60 seconds</p>
+      <button id="stopScanBtn" onclick="stopScan()"
+        style="display:none; margin-top:15px; background:#e53e3e; color:white; padding:8px 16px; border:none; border-radius:8px; cursor:pointer;">
+        Stop Scan
+      </button>
+    </div>
+
+    <div class="alert" id="alertMessage"></div>
+    <div class="results" id="results">
+      <div class="page-info" id="pageInfo"></div>
+
+      <div class="summary-grid">
+        <div class="stat-card total">
+          <div class="number" id="totalIssues">0</div>
+          <div class="label">Total Issues</div>
+        </div>
+
+        <!-- Trash Can Delete Button (User Request) -->
+        <button id="clearResultsBtn" onclick="clearResults()" class="trash-btn" title="Clear Results">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="red">
+            <path d="M3 6h18v2H3V6zm2 2h14v14H5V8zm5 2v10h2V10h-2zm4 0v10h2V10h-2zM9 4V2h6v2h5v2H4V4h5z" />
+          </svg>
+        </button>
+
+        <style>
+          .trash-btn {
+            background-color: blue !important;
+            border: 2px solid blue;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            margin-left: auto;
+            /* Push to right if in flex container */
+            align-self: flex-start;
+          }
+
+          .trash-btn:hover {
+            transform: scale(1.1);
+            background-color: darkblue !important;
+          }
+        </style>
+
+        <div class="stat-card errors">
+          <div class="number" id="totalErrors">0</div>
+          <div class="label">Errors</div>
+        </div>
+        <div class="stat-card warnings">
+          <div class="number" id="totalWarnings">0</div>
+          <div class="label">Warnings</div>
+        </div>
+        <div class="stat-card notices">
+          <div class="number" id="totalNotices">0</div>
+          <div class="label">Notices</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>📊 Issue Breakdown by WCAG Principle</h2>
+        <div class="chart-grid" id="categoryChart"></div>
+      </div>
+
+      <div class="section">
+        <h2>🔍 All Issues Found (with locations)</h2>
+        <div class="filters">
+          <div class="filter-group">
+            <label>Filter by Type:</label>
+            <select class="filter-select" id="filterType" onchange="applyFilters()">
+              <option value="all">All Types</option>
+              <option value="error">Errors Only</option>
+              <option value="warning">Warnings Only</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Sort by:</label>
+            <select class="filter-select" id="sortBy" onchange="applyFilters()">
+              <option value="count">Most Common</option>
+              <option value="impact">Impact Level</option>
+              <option value="alpha">Alphabetical</option>
+            </select>
+          </div>
+          <button class="export-btn" onclick="exportToCSV()">📊 Export to CSV</button>
+        </div>
+        <div class="issue-list" id="issueList"></div>
+      </div>
+    </div>
+
+    <div class="results" id="pdfResults">
+      <div class="pdf-results" id="pdfResultsContent"></div>
+    </div>
+  </div>
+
+  <script>
+    let currentScanController = null;
+
+    function stopScan() {
+      if (currentScanController) {
+        currentScanController.abort();
+      }
+    }
+
+    async function scanWebsite() {
+      const urlInput = document.getElementById('urlInput');
+      const url = urlInput.value.trim();
+
+      if (!url) {
+        showAlert('Please enter a URL', 'error');
+        return;
+      }
+
+      let fullUrl = url;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        fullUrl = 'https://' + url;
+      }
+
+      // Cancel previous if any
+      if (currentScanController) currentScanController.abort();
+      currentScanController = new AbortController();
+      const signal = currentScanController.signal;
+
+      showLoading('Scanning website... This may take 30-60 seconds');
+      document.getElementById('stopScanBtn').style.display = 'inline-block';
+      hideResults();
+
+      try {
+        const response = await fetch('/api/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: fullUrl }),
+          signal: signal
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Scan failed');
+        }
+
+        displayWebsiteResults(data);
+        showAlert('Scan completed successfully!', 'success');
+
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          showAlert('Scan cancelled by user.', 'warning');
+        } else {
+          console.error('Error:', error);
+          showAlert(`Scan failed: ${error.message}`, 'error');
+        }
+      } finally {
+        hideLoading();
+        document.getElementById('stopScanBtn').style.display = 'none';
+        currentScanController = null;
+      }
+    }
+
+    <div class="alert" id="alertMessage"></div>
+
+    <div class="results" id="results">
+      <div class="page-info" id="pageInfo"></div>
+
+      <div class="summary-grid">
+        <div class="stat-card total">
+          <div class="number" id="totalIssues">0</div>
+          <div class="label">Total Issues</div>
+        </div>
+
+        <!-- Trash Can Delete Button (User Request) -->
+        <button id="clearResultsBtn" onclick="clearResults()" class="trash-btn" title="Clear Results">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="red">
+            <path d="M3 6h18v2H3V6zm2 2h14v14H5V8zm5 2v10h2V10h-2zm4 0v10h2V10h-2zM9 4V2h6v2h5v2H4V4h5z" />
+          </svg>
+        </button>
+
+        <style>
+          .trash-btn {
+            background-color: blue !important;
+            border: 2px solid blue;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            margin-left: auto;
+            /* Push to right if in flex container */
+            align-self: flex-start;
+          }
+
+          .trash-btn:hover {
+            transform: scale(1.1);
+            background-color: darkblue !important;
+          }
+        </style>
+
+        <div class="stat-card errors">
+          <div class="number" id="totalErrors">0</div>
+          <div class="label">Errors</div>
+        </div>
+        <div class="stat-card warnings">
+          <div class="number" id="totalWarnings">0</div>
+          <div class="label">Warnings</div>
+        </div>
+        <div class="stat-card notices">
+          <div class="number" id="totalNotices">0</div>
+          <div class="label">Notices</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>📊 Issue Breakdown by WCAG Principle</h2>
+        <div class="chart-grid" id="categoryChart"></div>
+      </div>
+
+      <div class="section">
+        <h2>🔍 All Issues Found (with locations)</h2>
+        <div class="filters">
+          <div class="filter-group">
+            <label>Filter by Type:</label>
+            <select class="filter-select" id="filterType" onchange="applyFilters()">
+              <option value="all">All Types</option>
+              <option value="error">Errors Only</option>
+              <option value="warning">Warnings Only</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Sort by:</label>
+            <select class="filter-select" id="sortBy" onchange="applyFilters()">
+              <option value="count">Most Common</option>
+              <option value="impact">Impact Level</option>
+              <option value="alpha">Alphabetical</option>
+            </select>
+          </div>
+          <button class="export-btn" onclick="exportToCSV()">📊 Export to CSV</button>
+        </div>
+        <div class="issue-list" id="issueList"></div>
+      </div>
+    </div>
+
+    <div class="results" id="pdfResults">
+      <div class="pdf-results" id="pdfResultsContent"></div>
+    </div>
+  </div >
+
+      <script>
+        let selectedFiles = [];
+        let currentTab = 'website';
+
+        function switchTab(tab) {
+          currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+        event.target.classList.add('active');
+        document.getElementById(tab + 'Tab').classList.add('active');
+
+        hideResults();
+    }
+
+        function setUrl(url) {
+      const input = document.getElementById('urlInput');
+        input.value = '';
+        input.value = url;
+    }
+
+        // Drag and drop handlers
+        const uploadArea = document.getElementById('uploadArea');
+
+    uploadArea.addEventListener('dragover', (e) => {
+          e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+          uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+          e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+
+        function handleFiles(files) {
+          selectedFiles = Array.from(files).filter(f => f.type === 'application/pdf');
+
+        if (selectedFiles.length === 0) {
+          showAlert('Please select PDF files only', 'error');
+        return;
+      }
+
+      if (selectedFiles.length > 10) {
+          showAlert('Maximum 10 files allowed', 'error');
+        selectedFiles = selectedFiles.slice(0, 10);
+      }
+
+        displayFileList();
+        document.getElementById('scanPdfBtn').style.display = 'inline-block';
+    }
+
+        function displayFileList() {
+      const fileList = document.getElementById('fileList');
+        fileList.classList.add('active');
+      fileList.innerHTML = selectedFiles.map((file, index) => `
+        <div class="file-item">
+          <span class="name">📄 ${file.name}</span>
+          <span class="size">${(file.size / 1024).toFixed(1)} KB</span>
+          <button onclick="removeFile(${index})">Remove</button>
+        </div>
+        `).join('');
+    }
+
+        function removeFile(index) {
+          selectedFiles.splice(index, 1);
+        if (selectedFiles.length === 0) {
+          document.getElementById('fileList').classList.remove('active');
+        document.getElementById('scanPdfBtn').style.display = 'none';
+      } else {
+          displayFileList();
+      }
+    }
+
+        async function scanWebsite() {
+      const urlInput = document.getElementById('urlInput');
+        const url = urlInput.value.trim();
+
+        if (!url) {
+          showAlert('Please enter a URL', 'error');
+        return;
+      }
+
+        let fullUrl = url;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          fullUrl = 'https://' + url;
+      }
+
+        showLoading('Scanning website... This may take 30-60 seconds');
+        hideResults();
+
+        try {
+        const response = await fetch('/api/scan', {
+          method: 'POST',
+        headers: {'Content-Type': 'application/json' },
+        body: JSON.stringify({url: fullUrl })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Scan failed');
+        }
+
+        displayWebsiteResults(data);
+        showAlert('Scan completed successfully!', 'success');
+
+      } catch (error) {
+          console.error('Error:', error);
+        showAlert(`Scan failed: ${error.message}`, 'error');
+      } finally {
+          hideLoading();
+      }
+    }
+
+        async function scanPDFs() {
+      if (selectedFiles.length === 0) {
+          showAlert('Please select PDF files first', 'error');
+        return;
+      }
+
+        showLoading(`Scanning ${selectedFiles.length} PDF document(s)...`);
+        hideResults();
+
+        try {
+        const formData = new FormData();
+        selectedFiles.forEach(file => formData.append('pdfs', file));
+
+        const response = await fetch('/api/scan-pdf', {
+          method: 'POST',
+        body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'PDF scan failed');
+        }
+
+        displayPDFResults(data);
+        showAlert(`Successfully scanned ${data.totalFiles} PDF document(s)`, 'success');
+
+      } catch (error) {
+          console.error('Error:', error);
+        showAlert(`PDF scan failed: ${error.message}`, 'error');
+      } finally {
+          hideLoading();
+      }
+    }
+
+        let allIssuesData = [];
+        let currentFilters = {type: 'all', sort: 'count' };
+
+        function displayWebsiteResults(data) {
+      const {summary, categories, detailedIssues, totalUniqueIssues} = data;
+        allIssuesData = detailedIssues;
+
+        document.getElementById('pageInfo').innerHTML = `
+        <div class="page-info-row">
+          <strong>Page:</strong>
+          <span>${summary.title || 'Untitled'}</span>
+        </div>
+        <div class="page-info-row">
+          <strong>URL:</strong>
+          <a href="${summary.url}" target="_blank">${summary.url}</a>
+        </div>
+        <div class="page-info-row">
+          <strong>Scanned:</strong>
+          <span>${new Date(summary.timestamp).toLocaleString()}</span>
+        </div>
+        <div class="page-info-row">
+          <strong>Unique Issues:</strong>
+          <span>${totalUniqueIssues} different issue types found</span>
+        </div>
+        `;
+
+        document.getElementById('totalIssues').textContent = summary.total;
+        document.getElementById('totalErrors').textContent = summary.errors;
+        document.getElementById('totalWarnings').textContent = summary.warnings;
+        document.getElementById('totalNotices').textContent = summary.notices;
+
+        const categoryChart = document.getElementById('categoryChart');
+        categoryChart.innerHTML = '';
+      Object.entries(categories).forEach(([principle, count]) => {
+        if (count > 0) {
+          const percentage = ((count / summary.total) * 100).toFixed(1);
+        categoryChart.innerHTML += `
+        <div class="chart-item">
+          <div class="label">${principle}</div>
+          <div class="value">${count}<span class="percentage">${percentage}%</span></div>
+        </div>
+        `;
+        }
+      });
+
+        renderIssueList(allIssuesData);
+
+        document.getElementById('results').classList.add('active');
+        document.getElementById('pdfResults').classList.remove('active');
+        document.getElementById('results').scrollIntoView({behavior: 'smooth', block: 'nearest' });
+    }
+
+        function clearResults() {
+      if (confirm('Are you sure you want to delete these results?')) {
+          document.getElementById('results').style.display = 'none';
+        document.getElementById('inputUrl').value = '';
+        document.getElementById('pageInfo').innerHTML = '';
+        // Clear charts if needed
+      }
+    }
+
+        function renderIssueList(issues) {
+      const issueList = document.getElementById('issueList');
+        issueList.innerHTML = '';
+
+      issues.forEach((issue, index) => {
+        const typeClass = issue.type === 'error' ? 'error' : 'warning';
+        const impactClass = `impact-${issue.impact}`;
+        const occurrenceText = issue.count === 1 ? '1 location' : `${issue.count} locations`;
+
+        const plainText = getPlainLanguageExplanation(issue.code, issue.message);
+
+        let occurrencesHTML = '';
+        issue.occurrences.forEach((occ, occIndex) => {
+          const elementDescription = describeElement(occ.selector, occ.context);
+        occurrencesHTML += `
+        <div class="occurrence">
+          <div class="occurrence-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>📍 Location ${occIndex + 1}</span>
+            <button onclick="generateFix('${escapeHtml(occ.selector)}', '${issue.code}')" style="background:#059669; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:10px; cursor:pointer; font-weight:700;">✨ Generate Fix (Beta)</button>
+          </div>
+          <div class="plain-language">
+            <strong>🎯 Summary:</strong>
+            <div class="what">${elementDescription}</div>
+            <button class="technical-toggle" onclick="toggleTechnical(${index}, ${occIndex})">Show Technical Details</button>
+          </div>
+          <div class="technical-details" id="tech-${index}-${occIndex}">
+            <div class="selector-box"><strong>CSS Selector:</strong><br>${escapeHtml(occ.selector)}</div>
+            <div class="context-box"><strong>HTML Code:</strong><br>${escapeHtml(occ.context)}</div>
+          </div>
+        </div>
+        `;
+        });
+
+        issueList.innerHTML += `
+        <div class="issue-item ${typeClass}" data-type="${issue.type}" data-impact="${issue.impact}">
+          <div class="issue-header">
+            <span class="issue-badge ${typeClass}">${issue.type}</span>
+            <span class="impact-badge ${impactClass}">${issue.impact}</span>
+            <span class="issue-count">${occurrenceText}</span>
+          </div>
+          <div class="plain-language" style="margin-top: 12px;">
+            <strong>Summary:</strong>
+            <div class="what">${plainText.what}</div>
+            <div class="why">Why it matters: ${plainText.why}</div>
+          </div>
+          <div class="issue-code" style="margin-top: 12px;">Technical Code: ${issue.code}</div>
+          <div class="issue-message" style="font-size: 13px; color: #718096;">${issue.message}</div>
+          <button class="toggle-details" onclick="toggleDetails(${index})">
+            ▼ Show All Locations
+          </button>
+          <div class="issue-details" id="details-${index}">
+            ${occurrencesHTML}
+          </div>
+        </div>
+        `;
+      });
+    }
+
+        function toggleDetails(index) {
+      const details = document.getElementById(`details-${index}`);
+        const button = event.target;
+
+        if (details.classList.contains('expanded')) {
+          details.classList.remove('expanded');
+        button.textContent = '▼ Show All Locations';
+      } else {
+          details.classList.add('expanded');
+        button.textContent = '▲ Hide Locations';
+      }
+    }
+
+        function applyFilters() {
+          currentFilters.type = document.getElementById('filterType').value;
+        currentFilters.sort = document.getElementById('sortBy').value;
+
+        let filtered = [...allIssuesData];
+
+        // Filter by type
+        if (currentFilters.type !== 'all') {
+          filtered = filtered.filter(issue => issue.type === currentFilters.type);
+      }
+
+        // Sort
+        if (currentFilters.sort === 'count') {
+          filtered.sort((a, b) => b.count - a.count);
+      } else if (currentFilters.sort === 'impact') {
+        const impactOrder = {critical: 0, serious: 1, moderate: 2, minor: 3, unknown: 4 };
+        filtered.sort((a, b) => impactOrder[a.impact] - impactOrder[b.impact]);
+      } else if (currentFilters.sort === 'alpha') {
+          filtered.sort((a, b) => a.code.localeCompare(b.code));
+      }
+
+        renderIssueList(filtered);
+    }
+
+        function escapeHtml(text) {
+      const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+        function toggleTechnical(issueIndex, occIndex) {
+      const elem = document.getElementById(`tech-${issueIndex}-${occIndex}`);
+        const btn = event.target;
+        if (elem.classList.contains('visible')) {
+          elem.classList.remove('visible');
+        btn.textContent = 'Show Technical Details';
+      } else {
+          elem.classList.add('visible');
+        btn.textContent = 'Hide Technical Details';
+      }
+    }
+
+        function describeElement(selector, context) {
+          // Convert technical selector to plain English
+          let description = '';
+
+        if (selector.includes('button')) {
+          description = 'A button';
+      } else if (selector.includes('a[') || selector.includes('a:')) {
+          description = 'A link';
+      } else if (selector.includes('img')) {
+          description = 'An image';
+      } else if (selector.includes('input')) {
+          description = 'A form field';
+      } else if (selector.includes('nav')) {
+          description = 'A navigation menu item';
+      } else if (selector.includes('header')) {
+          description = 'An element in the page header';
+      } else if (selector.includes('footer')) {
+          description = 'An element in the page footer';
+      } else {
+          description = 'An element';
+      }
+
+        // Try to extract text content or class name
+        const classMatch = context.match(/class="([^"]+)"/);
+      const textMatch = context.match(/>([^<]{1, 50})</)
+
+    if (textMatch && textMatch[1].trim()) {
+      description += ` that says "${textMatch[1].trim()}"`;
+    } else if (classMatch) {
+      const className = classMatch[1].split(' ')[0];
+      description += ` with style "${className}"`;
+    }
+
+    return description;
+    }
+
+    function generateFix(selector, code) {
+      let css = '';
+      if (code.includes('color-contrast')) {
+        css = `/* Fix Contrast Issue for ${selector.split(' > ').pop()} */\n${selector} {\n    color: #000000 !important; /* Forces Pass (Ratio 21:1) */\n    background-color: #ffffff !important;\n}`;
+      } else if (code.includes('image-alt')) {
+        css = `/* Fix Missing Alt Text */\n${selector} {\n    /* Note: CSS cannot add alt text. Please add alt="Description" to the HTML tag. */\n    border: 2px dashed #f56565; /* Highlight for developer */\n}`;
+      } else if (code.includes('label')) {
+        css = `/* Fix Missing Form Label */\n${selector} {\n    /* Note: Add aria-label="Description" to this input */\n    border: 2px solid #ed8936;\n}`;
+      } else {
+        css = `/* Generic Fix for ${code} */\n${selector} {\n    outline: 2px solid red !important; /* Highlight element */\n}`;
+      }
+
+      // Show modal or alert
+      const modalHtml = `
+            <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; display:flex; justify-content:center; align-items:center">
+                <div style="background:white; padding:20px; border-radius:12px; width:500px; max-width:90%; box-shadow:0 10px 25px rgba(0,0,0,0.2)">
+                    <h3 style="margin-bottom:10px">✨ Auto-Generated Remediation</h3>
+                    <p style="font-size:13px; color:#666; margin-bottom:15px">Copy this CSS into your site's stylesheet to potentially fix or highlight the issue.</p>
+                    <textarea style="width:100%; height:100px; padding:10px; font-family:monospace; border:1px solid #ccc; border-radius:8px; margin-bottom:15px">${css}</textarea>
+                    <div style="text-align:right">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding:8px 16px; border:none; background:#eee; border-radius:6px; cursor:pointer">Close</button>
+                        <button onclick="navigator.clipboard.writeText(this.parentElement.previousElementSibling.value); this.innerText='Copied!'" style="padding:8px 16px; border:none; background:#059669; color:white; border-radius:6px; cursor:pointer; margin-left:8px; font-weight:600">Copy Code</button>
+                    </div>
+                </div>
+            </div>
+        `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function getPlainLanguageExplanation(code, technicalMessage) {
+      const explanations = {
+        'color-contrast': {
+          what: 'Text is too hard to read because there isn\'t enough contrast between the text color and the background color.',
+          why: 'People with low vision or color blindness can\'t read the text easily.'
+        },
+        'link-in-text-block': {
+          what: 'A link looks too similar to regular text - it\'s hard to tell it\'s clickable.',
+          why: 'Users might not realize they can click it, or might click the wrong thing.'
+        },
+        'duplicate-id': {
+          what: 'Two elements on the page have the same ID, which confuses screen readers.',
+          why: 'Screen reader users might jump to the wrong location or miss important content.'
+        },
+        'image-alt': {
+          what: 'An image is missing a description (alt text).',
+          why: 'Blind users using screen readers can\'t tell what the image shows.'
+        },
+        'label': {
+          what: 'A form field is missing a label that describes what it\'s for.',
+          why: 'Users (especially screen reader users) won\'t know what to type in the field.'
+        },
+        'heading-order': {
+          what: 'Headings are out of order (like jumping from Heading 1 to Heading 4).',
+          why: 'Screen reader users use headings to navigate - wrong order makes the page confusing.'
+        },
+        'aria': {
+          what: 'Accessibility code (ARIA) is used incorrectly.',
+          why: 'Screen readers will announce the wrong information or get confused.'
+        },
+        'landmark': {
+          what: 'The page is missing navigation landmarks (like "main content" or "navigation").',
+          why: 'Screen reader users can\'t quickly jump to different sections of the page.'
+        },
+        'region': {
+          what: 'A section of the page needs a label so screen readers know what it is.',
+          why: 'Without labels, screen reader users can\'t understand the page structure.'
+        }
+      };
+
+      // Find matching explanation
+      for (const [key, value] of Object.entries(explanations)) {
+        if (code.toLowerCase().includes(key) || technicalMessage.toLowerCase().includes(key)) {
+          return value;
+        }
+      }
+
+      // Default explanation
+      return {
+        what: technicalMessage,
+        why: 'This makes the website harder to use for people with disabilities.'
+      };
+    }
+
+    function exportToCSV() {
+      if (!allIssuesData || allIssuesData.length === 0) {
+        alert('No data to export');
+        return;
+      }
+
+      let csv = 'Issue Code,Type,Impact,Message,Occurrences,CSS Selector,HTML Context,Fix URL\n';
+
+      allIssuesData.forEach(issue => {
+        issue.occurrences.forEach((occ, idx) => {
+          const row = [
+            `"${issue.code}"`,
+            issue.type,
+            issue.impact,
+            `"${issue.message.replace(/"/g, '""')}"`,
+            idx === 0 ? issue.count : '',
+            `"${occ.selector.replace(/"/g, '""')}"`,
+            `"${occ.context.replace(/"/g, '""').substring(0, 200)}..."`,
+            issue.helpUrl || ''
+          ];
+          csv += row.join(',') + '\n';
+        });
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ada-scan-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+
+    function displayPDFResults(data) {
+      const { totalFiles, results, summary } = data;
+
+      const content = document.getElementById('pdfResultsContent');
+      content.innerHTML = `
+        <div class="page-info">
+          <div class="page-info-row">
+            <strong>Files Scanned:</strong>
+            <span>${totalFiles}</span>
+          </div>
+          <div class="page-info-row">
+            <strong>Total Issues:</strong>
+            <span>${summary.totalIssues}</span>
+          </div>
+          <div class="page-info-row">
+            <strong>Total Warnings:</strong>
+            <span>${summary.totalWarnings}</span>
+          </div>
+        </div>
+      `;
+
+      results.forEach(result => {
+        const totalProblems = result.issues.length + result.warnings.length;
+        let status = 'success';
+        if (result.issues.length > 0) status = 'error';
+        else if (result.warnings.length > 0) status = 'warning';
+
+        content.innerHTML += `
+          <div class="pdf-card">
+            <h3>
+              📄 ${result.filename}
+              <span class="status ${status}">
+                ${totalProblems === 0 ? 'Passed' : totalProblems + ' issue(s)'}
+              </span>
+            </h3>
+            <div style="color: #718096; font-size: 13px; margin-top: 4px;">
+              Size: ${(result.size / 1024).toFixed(1)} KB
+            </div>
+            ${result.issues.length > 0 ? `
+              <div class="pdf-issues">
+                <strong style="color: #c53030; font-size: 14px;">Critical Issues:</strong>
+                ${result.issues.map(issue => `
+                  <div class="pdf-issue error">❌ ${issue}</div>
+                `).join('')}
+              </div>
+            ` : ''}
+            ${result.warnings.length > 0 ? `
+              <div class="pdf-issues">
+                <strong style="color: #7c2d12; font-size: 14px;">Warnings:</strong>
+                ${result.warnings.map(warning => `
+                  <div class="pdf-issue warning">⚠️ ${warning}</div>
+                `).join('')}
+              </div>
+            ` : ''}
+            ${totalProblems === 0 ? `
+              <div style="margin-top: 16px; color: #22543d; font-weight: 500;">
+                ✅ No accessibility issues detected in basic scan
+              </div>
+            ` : ''}
+          </div>
+        `;
+      });
+
+      document.getElementById('results').classList.remove('active');
+      document.getElementById('pdfResults').classList.add('active');
+      document.getElementById('pdfResults').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function showLoading(text) {
+      document.getElementById('loadingText').textContent = text;
+      document.getElementById('loading').classList.add('active');
+      document.getElementById('scanBtn').disabled = true;
+      document.getElementById('scanPdfBtn').disabled = true;
+    }
+
+    function hideLoading() {
+      document.getElementById('loading').classList.remove('active');
+      document.getElementById('scanBtn').disabled = false;
+      document.getElementById('scanPdfBtn').disabled = false;
+    }
+
+    function hideResults() {
+      document.getElementById('results').classList.remove('active');
+      document.getElementById('pdfResults').classList.remove('active');
+      document.getElementById('alertMessage').classList.remove('active');
+    }
+
+    function showAlert(message, type) {
+      const alert = document.getElementById('alertMessage');
+      alert.textContent = message;
+      alert.className = `alert ${type} active`;
+      setTimeout(() => alert.classList.remove('active'), 5000);
+    }
+
+    function switchTab(tabName) {
+      // Deactivate all
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      // Activate selected
+      if (tabName === 'website') {
+        document.querySelectorAll('.tab')[0].classList.add('active');
+        document.getElementById('websiteTab').classList.add('active');
+      } else if (tabName === 'ocr') {
+        document.querySelectorAll('.tab')[1].classList.add('active');
+        document.getElementById('ocrTab').classList.add('active');
+        pollOcrJobs();
+      } else if (tabName === 'crawler') {
+        document.querySelectorAll('.tab')[2].classList.add('active');
+        document.getElementById('crawlerTab').classList.add('active');
+      }
+    }
+
+    // --- Crawler Logic ---
+    let currentCrawlId = null;
+    let crawlPollInterval = null;
+
+    async function startCrawl() {
+      const url = document.getElementById('crawlUrlInput').value;
+      const maxPages = document.getElementById('crawlLimit').value;
+
+      if (!url) return alert('Please enter a URL');
+
+      document.getElementById('crawlBtn').disabled = true;
+      document.getElementById('crawlBtn').innerText = 'Initializing...';
+      document.getElementById('crawlStatus').style.display = 'block';
+
+      try {
+        const formData = new FormData();
+        formData.append('url', url);
+        formData.append('maxPages', maxPages);
+
+        const res = await fetch('/api/crawl/start', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.error) throw new Error(data.error);
+
+        currentCrawlId = data.crawlId;
+        pollCrawlStatus();
+
+      } catch (e) {
+        alert('Failed to start crawl: ' + e.message);
+        document.getElementById('crawlBtn').disabled = false;
+      }
+    }
+
+    function pollCrawlStatus() {
+      if (crawlPollInterval) clearInterval(crawlPollInterval);
+
+      crawlPollInterval = setInterval(async () => {
+        if (!currentCrawlId) return;
+
+        try {
+          const res = await fetch(`/api/crawl/status/${currentCrawlId}`);
+          const data = await res.json();
+
+          // Update Progress
+          const progress = data.progress || 0;
+          document.getElementById('crawlProgressBar').style.width = `${progress}%`;
+          document.getElementById('crawlFoundCount').innerText = data.crawl.total_pages;
+          document.getElementById('crawlScannedCount').innerText = data.scans.length;
+
+          // Update List (Limit to last 10 for performance)
+          const list = document.getElementById('crawlResultsList');
+          list.innerHTML = data.scans.slice(0, 50).map(scan => {
+            const scoreColor = scan.score >= 90 ? '#48bb78' : scan.score >= 50 ? '#ecc94b' : '#f56565';
+            return `
+                        <div class="result-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px;">
+                            <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:60%;">
+                                <strong>${new URL(scan.url).pathname}</strong><br>
+                                <span style="font-size:11px; color:#a0aec0">${scan.url}</span>
+                            </div>
+                            <div style="text-align:right;">
+                                <span class="score-badge" style="background:${scoreColor}20; color:${scoreColor}">${scan.score}</span>
+                                <div style="font-size:10px; color:#718096; margin-top:2px;">${scan.total_issues} issues</div>
+                            </div>
+                        </div>
+                    `;
+          }).join('');
+
+          if (progress >= 100 && data.crawl.total_pages > 0) {
+            clearInterval(crawlPollInterval);
+            document.getElementById('crawlBtn').innerText = 'Audit Complete';
+
+            // Show Download Report Button
+            const statusDiv = document.getElementById('crawlStatus');
+            let dlBtn = document.getElementById('crawlDownloadBtn');
+            if (!dlBtn) {
+              dlBtn = document.createElement('button');
+              dlBtn.id = 'crawlDownloadBtn';
+              dlBtn.className = 'action-btn'; // Re-use styling
+              dlBtn.style.marginTop = '16px';
+              dlBtn.style.backgroundColor = '#48bb78';
+              dlBtn.innerHTML = '📄 Download Gap Analysis Report';
+              dlBtn.onclick = () => window.location.href = `/api/report/crawl/${currentCrawlId}`;
+
+              // Insert after progress bar container section
+              statusDiv.children[0].appendChild(dlBtn);
+            }
+          }
+
+        } catch (e) { console.error('Poll failed', e); }
+      }, 3000);
+    }
+
+    // --- Dashboard Logic ---
+    let trendChart = null;
+
+    async function loadDashboard() {
+      try {
+        const res = await fetch('/api/reports/history');
+        const scans = await res.json();
+
+        // Render History List
+        const list = document.getElementById('scanHistoryList');
+        list.innerHTML = scans.map(s => {
+          const scoreClass = s.score > 80 ? 'score-high' : s.score > 50 ? 'score-med' : 'score-low';
+          return `
+                <div class="history-item">
+                    <div>
+                        <div style="font-weight:600; color:#333; margin-bottom:2px;">${new URL(s.url).hostname}</div>
+                        <div style="color:#999; font-size:11px;">${new Date(s.timestamp).toLocaleDateString()}</div>
+                    </div>
+                    <div style="text-align:right">
+                         <span class="score-badge ${scoreClass}">Score: ${s.score}</span>
+                         <br>
+                         <a href="#" onclick="downloadReport(${s.id})" style="font-size:10px; color:#3b82f6; text-decoration:none; margin-top:4px; display:inline-block;">Download PDF</a>
+                    </div>
+                </div>`;
+        }).join('');
+
+        // Render Chart
+        const ctx = document.getElementById('trendChart').getContext('2d');
+
+        // Process data for chart (reverse to show oldest to newest)
+        const chartData = [...scans].reverse();
+        const labels = chartData.map(s => new Date(s.timestamp).toLocaleDateString());
+        const scores = chartData.map(s => s.score);
+        const issues = chartData.map(s => s.total_issues);
+
+        if (trendChart) trendChart.destroy();
+
+        trendChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Compliance Score',
+              data: scores,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              yAxisID: 'y',
+              fill: true,
+              tension: 0.4
+            }, {
+              label: 'Total Issues',
+              data: issues,
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              yAxisID: 'y1',
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: 'index',
+              intersect: false,
+            },
+            plugins: {
+              title: { display: true, text: 'Compliance Trends Over Time' }
+            },
+            scales: {
+              y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                min: 0,
+                max: 100
+              },
+              y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                grid: { drawOnChartArea: false }
+              }
+            }
+          }
+        });
+
+      } catch (e) {
+        console.error('Failed to load dashboard', e);
+      }
+    }
+
+    function downloadReport(id) {
+      window.open(`/api/reports/executive/${id}`, '_blank');
+    }
+
+    // Auto-load dashboard on start
+    // window.onload = () => loadDashboard();
+
+
+
+    // --- OCR Logic ---
+    let ocrFiles = [];
+
+    function handleOcrFiles(files) {
+      if (!files.length) return;
+
+      ocrFiles = []; // Clear previous
+      Array.from(files).forEach(file => ocrFiles.push(file));
+
+      // Render File List
+      const listContainer = document.getElementById('ocrFileList');
+      listContainer.innerHTML = ocrFiles.map(file => `
+            <div class="file-item">
+                <span class="name">${file.name}</span>
+                <span class="size">${(file.size / 1024).toFixed(1)} KB</span>
+            </div>
+        `).join('');
+      listContainer.style.display = 'block';
+
+      document.getElementById('ocrBtn').disabled = false;
+    }
+
+    async function startOcr() {
+      if (ocrFiles.length === 0) return;
+
+      const strategy = document.getElementById('ocrStrategy').value;
+      const formData = new FormData();
+      formData.append('strategy', strategy);
+      ocrFiles.forEach(file => formData.append('files', file));
+
+      document.getElementById('ocrBtn').disabled = true;
+      document.getElementById('ocrBtn').innerText = 'Uploading...';
+
+      try {
+        const res = await fetch('/api/ocr/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.error) throw new Error(data.error);
+
+        // Reset UI
+        ocrFiles = [];
+        document.getElementById('ocrFileList').innerHTML = '';
+        document.getElementById('ocrBtn').innerText = 'Process Documents';
+
+        // Show jobs
+        pollOcrJobs();
+      } catch (e) {
+        alert('Upload failed: ' + e.message);
+        document.getElementById('ocrBtn').disabled = false;
+      }
+    }
+
+    let pollInterval = null;
+    function pollOcrJobs() {
+      if (pollInterval) clearInterval(pollInterval);
+
+      const fetchJobs = async () => {
+        try {
+          const res = await fetch('/api/ocr/list');
+          const jobs = await res.json();
+
+          const container = document.getElementById('ocrJobsList');
+          const jobsDiv = document.getElementById('ocrJobs');
+
+          if (jobs.length === 0) {
+            container.innerHTML = '<div style="padding:10px; color:#666">No active jobs.</div>';
+            jobsDiv.style.display = 'block';
+            return;
+          }
+
+          container.innerHTML = jobs.map(job => `
+                    <div class="file-item" style="border-left: 4px solid ${job.status === 'completed' ? '#48bb78' : job.status === 'failed' ? '#f56565' : '#4299e1'}">
+                       <div style="flex:1">
+                           <strong>${job.filename}</strong><br>
+                           <span style="font-size:11px; color:#a0aec0">ID: ${job.id.substring(0, 8)}... &bull; ${new Date(job.createdAt).toLocaleTimeString()}</span>
+                       </div>
+                       <div style="margin-right:15px; font-weight:600; font-size:13px; color:${job.status === 'completed' ? '#48bb78' : '#4a5568'}">
+                           ${job.status.toUpperCase()}
+                       </div>
+                       ${job.status === 'completed' ? `
+                           <div style="display:flex; gap:8px; margin-top:4px;">
+                               <button onclick="viewOcrResult('${job.id}')" style="background:#ebf8ff; color:#2b6cb0; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px">View Text</button>
+                               <a href="/api/ocr/download-html/${job.id}" target="_blank" style="background:#d1fae5; color:#065f46; text-decoration:none; padding:6px 12px; border-radius:6px; font-weight:600; font-size:12px; display:inline-block">Download HTML (Elon Mode)</a>
+                           </div>
+                       ` : ''}
+                       ${job.status === 'failed' ? `<span style="color:#f56565; font-size:12px">${job.error}</span>` : ''}
+                    </div>
+                `).join('');
+
+          jobsDiv.style.display = 'block';
+        } catch (e) { console.error('Polling failed', e); }
+      };
+
+      fetchJobs();
+      pollInterval = setInterval(fetchJobs, 2000); // Poll every 2s
+    }
+
+    async function viewOcrResult(id) {
+      // Simple alert for now, or basic modal
+      const res = await fetch(`/api/ocr/status/${id}`);
+      const data = await res.json();
+      const text = data.result.text || "No text found";
+
+      // Very basic "View" - just a popup or replace results
+      const w = window.open("", "_blank", "width=600,height=800");
+      w.document.write(`
+            <html><head><title>OCR Result: ${data.filename}</title>
+            <style>body{font-family:sans-serif; padding:20px; background:#f7fafc} pre{white-space:pre-wrap; background:white; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1)}</style>
+            </head><body>
+            <h2>${data.filename}</h2>
+            <div style="margin-bottom:20px; font-size:14px; color:#666">
+                Method: <strong>${data.result.method}</strong><br>
+                Confidence: <strong>${data.result.confidence || 'N/A'}%</strong>
+            </div>
+            <h3>Extracted Text:</h3>
+            <pre>${text}</pre>
+            </body></html>
+        `);
+    }
+
+    // Allow Enter key to trigger scan
+    document.getElementById('urlInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') scanWebsite();
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,14 @@
+node_modules/
+uploads/
+reports/
+*.log
+.DS_Store
+.env
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+*.pdf
+debug_scan.js
+
+fix_html.js
