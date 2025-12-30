@@ -1,0 +1,63 @@
+# CodeRabbit Configuration for ADA Compliance Project
+# This file configures how CodeRabbit reviews your code
+
+# Language settings
+language: en-US
+
+# Review settings
+reviews:
+  # Review level: strict, balanced, or permissive
+  level: balanced
+
+  # Auto-review on push
+  auto_review: true
+
+  # Review the entire PR or just changed files
+  scope: changed_files
+
+  # Enable/disable specific checks
+  checks:
+    security: true
+    performance: true
+    best_practices: true
+    code_style: true
+    documentation: true
+    accessibility: true  # Important for ADA compliance!
+
+# Path-specific settings
+path_filters:
+  # Include these paths in reviews
+  include:
+    - "tools/**/*.js"
+    - "**/*.md"
+
+  # Exclude these paths from reviews
+  exclude:
+    - "node_modules/**"
+    - "**/node_modules/**"
+    - "tools/scanner/reports/**"
+    - "**/*.min.js"
+    - "**/*.min.css"
+
+# Comment settings
+comments:
+  # How CodeRabbit should comment
+  style: conversational
+
+  # Minimum severity to comment on
+  min_severity: low
+
+  # Auto-resolve comments when fixed
+  auto_resolve: true
+
+# Custom rules for this project
+custom_rules:
+  - name: "WCAG Compliance"
+    description: "Ensure accessibility standards are maintained"
+    pattern: "aria-|alt=|role=|tabindex"
+    severity: high
+
+  - name: "Environment Variables"
+    description: "No hardcoded credentials or API keys"
+    pattern: "api_key|password|secret|token"
+    severity: critical
