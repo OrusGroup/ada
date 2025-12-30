@@ -2821,10 +2821,10 @@
               <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">Filter By Risk:</label>
               <select id="crawlFilterRisk" onchange="applyCrawlSort()" style="width:100%; padding:8px; background:var(--input-bg); border:1px solid var(--glass-border); border-radius:6px; color:var(--text-main); font-size:13px;">
                 <option value="all">All Pages</option>
-                <option value="critical">🚨 Critical Only (20+ errors)</option>
-                <option value="high">⚠️ High Only (10-20 errors)</option>
-                <option value="medium">⚡ Medium Only (5-10 errors)</option>
-                <option value="low">✓ Low Only (<5 errors)</option>
+                <option value="critical">🚨 Critical Only (20+ flags)</option>
+                <option value="high">⚠️ High Only (10-20 flags)</option>
+                <option value="medium">⚡ Medium Only (5-10 flags)</option>
+                <option value="low">✓ Low Only (<5 flags)</option>
               </select>
             </div>
           </div>
@@ -2937,7 +2937,7 @@
                       <a href="${s.url}" target="_blank" style="color:var(--accent-primary); text-decoration:none; font-weight:500;" title="${s.url}">${displayUrl}</a>
                   </td>
                   <td style="padding:14px 8px;">
-                      <span onclick="toggleSpiderIssues(${s.id})" style="background:rgba(248,113,113,0.15); color:var(--accent-error); padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; user-select:none;">${errorCount} errors ▼</span>
+                      <span onclick="toggleSpiderIssues(${s.id})" style="background:rgba(248,113,113,0.15); color:var(--accent-error); padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; user-select:none;">${errorCount} flags ▼</span>
                       <div id="issues-${s.id}" style="display:none; margin-top:12px; max-height:300px; overflow-y:auto; background:var(--code-bg); border:1px solid var(--glass-border); border-radius:8px; padding:12px;">
                         <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Loading issues...</div>
                       </div>
