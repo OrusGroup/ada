@@ -11,12 +11,24 @@ const { createClient } = require('@supabase/supabase-js');
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-    console.error('❌ SUPABASE_URL and SUPABASE_SERVICE_KEY must be set in .env');
-    process.exit(1);
-}
+let supabase;
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+if (!supabaseUrl || !supabaseKey) {
+    console.error('❌ SUPABASE_URL and SUPABASE_SERVICE_KEY missing. Running in OFFLINE mode.');
+    // Mock supabase to prevent crashes
+    supabase = {
+        from: () => ({
+            select: () => ({
+                eq: () => ({ single: async () => ({ data: null, error: null }) }),
+                is: () => ({ order: () => ({ limit: async () => ({ data: [], error: null }) }) }),
+                insert: async () => ({ error: null }),
+                update: () => ({ eq: async () => ({ error: null }) })
+            })
+        })
+    };
+} else {
+    supabase = createClient(supabaseUrl, supabaseKey);
+}
 
 console.log('🔗 Connected to Supabase:', supabaseUrl);
 

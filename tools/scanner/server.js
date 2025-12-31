@@ -40,7 +40,11 @@ const contentAnalysis = require('./services/contentAnalysis');
 const { generateExecutiveReport, generateCrawlReport } = require('./services/reportGenerator');
 
 // Initialize Database
-db.init();
+try {
+  db.init();
+} catch (err) {
+  console.error('❌ Database Initialization Failed (Non-Fatal):', err);
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
