@@ -1,35 +1,19 @@
-FROM node:18-bullseye-slim
-
-# Install latest chrome dev package and fonts to support major charsets (Chinese, Japanese, Arabic, Hebrew, Thai and a few others)
-# Note: this installs the necessary libs to make the bundled version of Chromium that Puppeteer
-# installs, work.
-RUN apt-get update \
-    && apt-get install -y wget gnupg \
-    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg \
-    && sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-    && apt-get update \
-    && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
-      --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
+FROM node:18-alpine
 
 WORKDIR /app
 
-# Install dependencies
-COPY package*.json ./
-# Install ALL dependencies (including devDeps like puppeteer if needed, or if listed in deps)
-RUN npm ci
+# Create a minimal package.json on the fly to avoid using the massive original one
+RUN echo '{"name": "ada-lite", "version": "1.0.0", "dependencies": {"express": "^4.18.2"}}' > package.json
 
-# Copy source
-COPY . .
+# Install ONLY express
+RUN npm install
+
+# Copy minimal server and public assets
+COPY server.js .
+COPY public ./public
 
 # Environment
-ENV NODE_ENV=production
 ENV PORT=3000
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
-
-# Expose port
 EXPOSE 3000
 
 CMD ["node", "server.js"]
-
