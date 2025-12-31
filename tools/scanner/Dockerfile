@@ -1,19 +1,16 @@
-FROM node:18-alpine
+FROM nginx:alpine
 
-WORKDIR /app
+# Copy custom configuration
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Create a minimal package.json on the fly to avoid using the massive original one
-RUN echo '{"name": "ada-lite", "version": "1.0.0", "dependencies": {"express": "^4.18.2"}}' > package.json
+# Copy static assets
+COPY public /usr/share/nginx/html
 
-# Install ONLY express
-RUN npm install
+# Ensure permissions (optional but good practice)
+RUN chmod -R 755 /usr/share/nginx/html
 
-# Copy minimal server and public assets
-COPY server.js .
-COPY public ./public
-
-# Environment
-ENV PORT=3000
+# Expose port (must match nginx.conf)
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
