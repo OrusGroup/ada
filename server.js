@@ -235,10 +235,17 @@ const scanOptions = {
   runners: ['axe'],
   includeNotices: false,
   includeWarnings: true,
-  timeout: 30000,
-  wait: 1000,
+  timeout: 90000, // Increased to 90s to match scanQueue
+  wait: 2000, // Wait 2s for JS to settle
   chromeLaunchConfig: {
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    headless: 'new',
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable',
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu'
+    ]
   }
 };
 
