@@ -238,15 +238,7 @@ const scanOptions = {
   timeout: 90000, // Increased to 90s to match scanQueue
   wait: 2000, // Wait 2s for JS to settle
   chromeLaunchConfig: {
-    headless: 'new',
-    // Let Puppeteer use its bundled Chromium (more reliable in Docker)
-    // executablePath will be auto-detected by Puppeteer
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu'
-    ]
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   }
 };
 
