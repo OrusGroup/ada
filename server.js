@@ -378,8 +378,28 @@ app.post('/api/scan', async (req, res) => {
   }
 
   try {
-    console.log(`Scanning: ${url}`);
+    console.log(`\n========================================`);
+    console.log(`🔍 SCAN REQUEST RECEIVED`);
+    console.log(`URL: ${url}`);
+    console.log(`Timestamp: ${new Date().toISOString()}`);
+    console.log(`========================================\n`);
+
+    console.log('📋 Scan Options:', JSON.stringify({
+      standard: scanOptions.standard,
+      runners: scanOptions.runners,
+      timeout: scanOptions.timeout,
+      wait: scanOptions.wait,
+      headless: scanOptions.chromeLaunchConfig.headless,
+      args: scanOptions.chromeLaunchConfig.args
+    }, null, 2));
+
+    console.log('\n🚀 Starting Pa11y scan...');
+    const startTime = Date.now();
     const results = await pa11y(url, scanOptions);
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+
+    console.log(`✅ Scan completed successfully in ${duration}s`);
+    console.log(`Found ${results.issues.length} issues`);
 
     const summary = {
       url: results.pageUrl,
@@ -450,10 +470,45 @@ app.post('/api/scan', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Scan error:', error);
+    console.error('\n========================================');
+    console.error('❌ SCAN FAILED');
+    console.error('========================================');
+    console.error('Error Name:', error.name);
+    console.error('Error Message:', error.message);
+    console.error('Error Code:', error.code);
+    console.error('\n📍 Stack Trace:');
+    console.error(error.stack);
+    console.error('\n🔧 Diagnostic Information:');
+    console.error('- Node Version:', process.version);
+    console.error('- Platform:', process.platform);
+    console.error('- Architecture:', process.arch);
+    console.error('- Memory Usage:', JSON.stringify(process.memoryUsage(), null, 2));
+    console.error('- Environment Variables:');
+    console.error('  - NODE_ENV:', process.env.NODE_ENV);
+    console.error('  - PUPPETEER_EXECUTABLE_PATH:', process.env.PUPPETEER_EXECUTABLE_PATH || 'not set');
+    console.error('  - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD:', process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD || 'not set');
+
+    // Try to get Puppeteer path
+    try {
+      const puppeteer = require('puppeteer');
+      console.error('  - Puppeteer executablePath:', puppeteer.executablePath());
+    } catch (e) {
+      console.error('  - Puppeteer path check failed:', e.message);
+    }
+
+    console.error('========================================\n');
+
     res.status(500).json({
       error: 'Scan failed',
-      message: error.message
+      message: error.message,
+      errorName: error.name,
+      errorCode: error.code,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      diagnostics: {
+        nodeVersion: process.version,
+        platform: process.platform,
+        timestamp: new Date().toISOString()
+      }
     });
   }
 });
