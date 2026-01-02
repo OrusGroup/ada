@@ -2301,13 +2301,13 @@
                        badge.level === 'AA' ? '#8b5cf6' :
                        badge.level === 'Required' ? '#ef4444' : '#6366f1';
 
-        html += `
-          <span style="display:inline-flex; align-items:center; gap:6px; background:${bgColor}22; border:1px solid ${bgColor}; color:${bgColor}; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700; letter-spacing:0.3px;">
-            <span style="opacity:0.8;">📋</span>
-            <span>${badge.regulation}</span>
-            ${badge.name ? `<span style="opacity:0.7; font-weight:500;">· ${badge.name}</span>` : ''}
-          </span>
-        `;
+        const namePart = badge.name ? '<span style="opacity:0.7; font-weight:500;">· ' + badge.name + '</span>' : '';
+
+        html += '<span style="display:inline-flex; align-items:center; gap:6px; background:' + bgColor + '22; border:1px solid ' + bgColor + '; color:' + bgColor + '; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700; letter-spacing:0.3px;">' +
+          '<span style="opacity:0.8;">📋</span>' +
+          '<span>' + badge.regulation + '</span>' +
+          namePart +
+          '</span>';
       });
 
       html += '</div>';
