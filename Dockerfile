@@ -24,12 +24,12 @@ COPY . .
 
 # Environment
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=8080
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 # Expose port
-EXPOSE 3000
+EXPOSE 8080
 
 CMD ["node", "server.js"]
 
