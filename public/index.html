@@ -831,8 +831,8 @@
     }
 
     .issue-item:hover {
-      transform: translateX(4px);
-      box-shadow: 0 4px 12px var(--shadow-color);
+      box-shadow: 0 6px 16px var(--shadow-color);
+      border-left-width: 6px;
     }
 
     .issue-item.error {
@@ -1140,7 +1140,19 @@
           </div>
 
           <div class="section-header">
-            <h2>Detected Issues & Recommendations</h2>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <span style="display:inline-flex; align-items:center; gap:6px; background:#0066CC22; border:2px solid #0066CC; color:#0066CC; padding:4px 10px; border-radius:6px; font-size:10px; font-weight:800; letter-spacing:0.5px;">
+                  <span>♿</span>
+                  <span>ADA TITLE II</span>
+                </span>
+                <span style="display:inline-flex; align-items:center; gap:6px; background:#8b5cf622; border:2px solid #8b5cf6; color:#8b5cf6; padding:4px 10px; border-radius:6px; font-size:10px; font-weight:800; letter-spacing:0.5px;">
+                  <span>📋</span>
+                  <span>WCAG 2.1 AA</span>
+                </span>
+              </div>
+              <h2>Detected Issues & Recommendations</h2>
+            </div>
             <div class="filters">
               <select class="filter-select" id="filterType" onchange="applyFilters()">
                 <option value="all">All Issues</option>
