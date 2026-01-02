@@ -85,12 +85,12 @@ async function provisionUsers() {
     console.log('⏭️  Skipping user provisioning (not using Supabase)');
     return;
   }
-  
+
   try {
     console.log('🔐 Checking Authorized Users...');
 
     // We need to use the Supabase Admin client (which we have via SERVICE_KEY)
-    const { db: { supabase } } = require('./services/db-supabase'); // Access raw client
+    const { supabase } = require('./services/db-supabase'); // Access raw client
 
     for (const email of ALLOWED_USERS) {
       try {
@@ -147,7 +147,7 @@ app.post('/api/login', async (req, res) => {
     }
 
     // Use the database adapter's client to sign in
-    const { db: { supabase } } = require('./services/db-supabase');
+    const { supabase } = require('./services/db-supabase');
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -188,7 +188,7 @@ const authMiddleware = async (req, res, next) => {
     let supabase;
     try {
       const supabaseModule = require('./services/db-supabase');
-      supabase = supabaseModule.db?.supabase;
+      supabase = supabaseModule.supabase;
 
       if (!supabase) {
         console.error('⚠️  Supabase client not initialized');
