@@ -43,8 +43,14 @@ const scanQueue = {
 const contentAnalysis = require('./services/contentAnalysis');
 const { generateExecutiveReport, generateCrawlReport } = require('./services/reportGenerator');
 
-// Initialize Database
-db.init();
+// Initialize Database with error handling
+try {
+  db.init();
+  console.log('✓ Database initialized successfully');
+} catch (err) {
+  console.error('⚠️  Database initialization error:', err.message);
+  console.error('Server will continue but database features may not work');
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
