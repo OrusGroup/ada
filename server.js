@@ -196,20 +196,14 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-// Health Check Endpoints (MUST be before auth middleware)
-app.get('/', (req, res) => {
-  res.status(200).json({ 
-    status: 'healthy', 
-    service: 'ADA Scanner', 
-    timestamp: new Date().toISOString() 
-  });
-});
-
+// Health Check Endpoint (for AWS App Runner health checks)
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'healthy', 
+  res.status(200).json({
+    status: 'healthy',
+    service: 'ADA Scanner',
     database: db ? 'connected' : 'disconnected',
-    uptime: process.uptime() 
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
   });
 });
 
