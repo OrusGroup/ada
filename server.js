@@ -239,7 +239,8 @@ const scanOptions = {
   wait: 2000, // Wait 2s for JS to settle
   chromeLaunchConfig: {
     headless: 'new',
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable',
+    // Let Puppeteer use its bundled Chromium (more reliable in Docker)
+    // executablePath will be auto-detected by Puppeteer
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
