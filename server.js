@@ -172,14 +172,16 @@ const authMiddleware = async (req, res, next) => {
     return next();
   }
 
+  // Skip authentication if Supabase is not configured
+  if (!process.env.SUPABASE_URL) {
+    console.log('⚠️  Authentication skipped (Supabase not configured)');
+    return next();
+  }
+
   try {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
       return res.status(401).json({ error: 'Missing Authentication Token' });
-    }
-
-    if (!process.env.SUPABASE_URL) {
-      return res.status(500).json({ error: 'Authentication not configured' });
     }
 
     const { db: { supabase } } = require('./services/db-supabase');
@@ -189,7 +191,7 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ error: 'Invalid or Expired Token' });
     }
 
-    // Check Whitelist again
+    // Check Whitelist
     if (!ALLOWED_USERS.includes(user.email)) {
       return res.status(403).json({ error: 'Unauthorized User' });
     }
