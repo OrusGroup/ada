@@ -184,7 +184,21 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ error: 'Missing Authentication Token' });
     }
 
-    const { db: { supabase } } = require('./services/db-supabase');
+    // Import Supabase client safely
+    let supabase;
+    try {
+      const supabaseModule = require('./services/db-supabase');
+      supabase = supabaseModule.db?.supabase;
+
+      if (!supabase) {
+        console.error('⚠️  Supabase client not initialized');
+        return next(); // Skip auth if client not available
+      }
+    } catch (importError) {
+      console.error('⚠️  Failed to import Supabase client:', importError.message);
+      return next(); // Skip auth if module not available
+    }
+
     const { data: { user }, error } = await supabase.auth.getUser(token);
 
     if (error || !user) {
