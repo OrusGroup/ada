@@ -1891,6 +1891,16 @@
       allIssuesData = detailedIssues;
 
       document.getElementById('pageInfo').innerHTML = `
+        <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+          <span style="display:inline-flex; align-items:center; gap:6px; background:#0066CC22; border:2px solid #0066CC; color:#0066CC; padding:6px 14px; border-radius:8px; font-size:11px; font-weight:800; letter-spacing:0.5px;">
+            <span>♿</span>
+            <span>ADA TITLE II</span>
+          </span>
+          <span style="display:inline-flex; align-items:center; gap:6px; background:#8b5cf622; border:2px solid #8b5cf6; color:#8b5cf6; padding:6px 14px; border-radius:8px; font-size:11px; font-weight:800; letter-spacing:0.5px;">
+            <span>📋</span>
+            <span>WCAG 2.1 AA</span>
+          </span>
+        </div>
         <div class="page-info-row"><strong>TARGET</strong> <span>${summary.title || 'Untitled'}</span></div>
         <div class="page-info-row"><strong>URL</strong> <a href="${summary.url}" target="_blank">${summary.url}</a></div>
         <div class="page-info-row"><strong>TIMESTAMP</strong> <span>${new Date(summary.timestamp).toLocaleTimeString()}</span></div>
@@ -2297,14 +2307,29 @@
       let html = '<div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; margin-bottom:12px;">';
 
       badges.forEach(badge => {
-        const bgColor = badge.level === 'A' ? '#3b82f6' :
-                       badge.level === 'AA' ? '#8b5cf6' :
-                       badge.level === 'Required' ? '#ef4444' : '#6366f1';
+        // ADA Title II gets special treatment with official ADA blue (#0066CC)
+        let bgColor, icon;
+        if (badge.regulation.includes('ADA Title II')) {
+          bgColor = '#0066CC'; // Official ADA blue
+          icon = '♿'; // Accessibility icon
+        } else if (badge.level === 'A') {
+          bgColor = '#3b82f6';
+          icon = '📋';
+        } else if (badge.level === 'AA') {
+          bgColor = '#8b5cf6';
+          icon = '📋';
+        } else if (badge.level === 'Required') {
+          bgColor = '#ef4444';
+          icon = '⚠️';
+        } else {
+          bgColor = '#6366f1';
+          icon = '📋';
+        }
 
         const namePart = badge.name ? '<span style="opacity:0.7; font-weight:500;">· ' + badge.name + '</span>' : '';
 
         html += '<span style="display:inline-flex; align-items:center; gap:6px; background:' + bgColor + '22; border:1px solid ' + bgColor + '; color:' + bgColor + '; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700; letter-spacing:0.3px;">' +
-          '<span style="opacity:0.8;">📋</span>' +
+          '<span style="opacity:0.8;">' + icon + '</span>' +
           '<span>' + badge.regulation + '</span>' +
           namePart +
           '</span>';
@@ -2939,6 +2964,16 @@
             
             <!-- Bold Headline -->
             <div style="margin-bottom:24px; padding-bottom:20px; border-bottom:2px solid var(--glass-border);">
+              <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+                <span style="display:inline-flex; align-items:center; gap:6px; background:#0066CC22; border:2px solid #0066CC; color:#0066CC; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:800; letter-spacing:0.5px;">
+                  <span>♿</span>
+                  <span>ADA TITLE II</span>
+                </span>
+                <span style="display:inline-flex; align-items:center; gap:6px; background:#8b5cf622; border:2px solid #8b5cf6; color:#8b5cf6; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:800; letter-spacing:0.5px;">
+                  <span>📋</span>
+                  <span>WCAG 2.1 AA</span>
+                </span>
+              </div>
               <h2 style="margin:0 0 8px 0; font-size:28px; font-weight:900; color:${riskColor}; line-height:1.2;">
                 ${complianceStatus === 'PASSING' ? '✓ Your Website is ADA Compliant!' :
             complianceStatus === 'FAILING' ? '⚠️ Your Website is Not ADA Compliant' :
