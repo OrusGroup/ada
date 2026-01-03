@@ -1130,7 +1130,7 @@
             </div>
             <div class="stat-card errors" onclick="filterByStat('error')">
               <div class="number" id="totalErrors">0</div>
-              <div class="label">Errors</div>
+              <div class="label">Non-Compliant Flags</div>
               <div id="apiStatusMessage" class="hidden api-status-message"></div>
             </div>
             <div class="stat-card warnings" onclick="filterByStat('warning')">
@@ -1903,16 +1903,6 @@
       allIssuesData = detailedIssues;
 
       document.getElementById('pageInfo').innerHTML = `
-        <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
-          <span style="display:inline-flex; align-items:center; gap:6px; background:#0066CC22; border:2px solid #0066CC; color:#0066CC; padding:6px 14px; border-radius:8px; font-size:11px; font-weight:800; letter-spacing:0.5px;">
-            <span>♿</span>
-            <span>ADA TITLE II</span>
-          </span>
-          <span style="display:inline-flex; align-items:center; gap:6px; background:#8b5cf622; border:2px solid #8b5cf6; color:#8b5cf6; padding:6px 14px; border-radius:8px; font-size:11px; font-weight:800; letter-spacing:0.5px;">
-            <span>📋</span>
-            <span>WCAG 2.1 AA</span>
-          </span>
-        </div>
         <div class="page-info-row"><strong>TARGET</strong> <span>${summary.title || 'Untitled'}</span></div>
         <div class="page-info-row"><strong>URL</strong> <a href="${summary.url}" target="_blank">${summary.url}</a></div>
         <div class="page-info-row"><strong>TIMESTAMP</strong> <span>${new Date(summary.timestamp).toLocaleTimeString()}</span></div>
@@ -2976,16 +2966,6 @@
             
             <!-- Bold Headline -->
             <div style="margin-bottom:24px; padding-bottom:20px; border-bottom:2px solid var(--glass-border);">
-              <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
-                <span style="display:inline-flex; align-items:center; gap:6px; background:#0066CC22; border:2px solid #0066CC; color:#0066CC; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:800; letter-spacing:0.5px;">
-                  <span>♿</span>
-                  <span>ADA TITLE II</span>
-                </span>
-                <span style="display:inline-flex; align-items:center; gap:6px; background:#8b5cf622; border:2px solid #8b5cf6; color:#8b5cf6; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:800; letter-spacing:0.5px;">
-                  <span>📋</span>
-                  <span>WCAG 2.1 AA</span>
-                </span>
-              </div>
               <h2 style="margin:0 0 8px 0; font-size:28px; font-weight:900; color:${riskColor}; line-height:1.2;">
                 ${complianceStatus === 'PASSING' ? '✓ Your Website is ADA Compliant!' :
             complianceStatus === 'FAILING' ? '⚠️ Your Website is Not ADA Compliant' :
