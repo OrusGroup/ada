@@ -2468,7 +2468,7 @@
 
       // TRANSFORM BUTTON
       const btn = document.getElementById('discoverBtn');
-      btn.textContent = '🛑 Stop Discovery';
+      btn.textContent = 'Stop Discovery';
       btn.onclick = stopDiscovery;
       btn.style.background = 'rgba(239, 68, 68, 0.2)';
       btn.style.color = '#f87171';
@@ -2491,13 +2491,13 @@
 
       // Start Timer
       discoveryStartTime = Date.now();
-      document.getElementById('discoveryTimer').textContent = '⏱️ 0:00';
+      document.getElementById('discoveryTimer').textContent = '0:00';
       if (discoveryTimerInterval) clearInterval(discoveryTimerInterval);
       discoveryTimerInterval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - discoveryStartTime) / 1000);
         const mins = Math.floor(elapsed / 60);
         const secs = elapsed % 60;
-        document.getElementById('discoveryTimer').textContent = `⏱️ ${mins}:${secs.toString().padStart(2, '0')}`;
+        document.getElementById('discoveryTimer').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
       }, 1000);
 
       try {
