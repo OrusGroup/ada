@@ -8,7 +8,7 @@ if (process.env.SUPABASE_URL) {
     db = require('./db');
 }
 
-const CONCURRENCY = 10; // Increased to 10 for much faster parallel scanning
+const CONCURRENCY = 2; // Reduced to 2 - AWS environment can't handle 10 Chrome instances
 const queue = [];
 let activeWorkers = 0;
 
@@ -16,11 +16,18 @@ let activeWorkers = 0;
 const scanOptions = {
     standard: 'WCAG2AA',
     runners: ['axe'],
-    timeout: 90000, // 90s for slow government websites
-    wait: 2000, // 2s for JS to settle properly
+    timeout: 60000, // 60s timeout
+    wait: 1000, // 1s wait
     chromeLaunchConfig: {
         headless: 'new',
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+            '--single-process', // Critical: prevent hung processes
+            '--no-zygote'
+        ]
     }
 };
 
@@ -43,9 +50,9 @@ async function processQueue() {
     console.log(`🔍 [${activeWorkers}/${CONCURRENCY}] Scanning: ${job.url} (scanId: ${job.scanId}, ${queue.length} remaining)`);
 
     try {
-        // Enforce timeout via Promise.race (aligned with 90s timeout)
+        // Enforce timeout via Promise.race (aligned with 60s timeout)
         const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Scan timed out after 95s')), 95000)
+            setTimeout(() => reject(new Error('Scan timed out after 65s')), 65000)
         );
 
         const results = await Promise.race([

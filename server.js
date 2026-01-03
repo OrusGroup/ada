@@ -249,10 +249,17 @@ const scanOptions = {
   runners: ['axe'],
   includeNotices: false,
   includeWarnings: true,
-  timeout: 90000, // 90s for slow government websites
-  wait: 2000, // 2s for JS to settle properly
+  timeout: 60000, // 60s timeout
+  wait: 1000, // 1s wait
   chromeLaunchConfig: {
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--single-process', // Critical: prevent hung processes
+      '--no-zygote'
+    ]
   }
 };
 
