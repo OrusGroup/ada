@@ -1110,7 +1110,7 @@
           style="display:none; margin-top:20px; padding:16px; background:var(--glass-panel); border:2px solid var(--accent-primary); border-radius:12px;">
           <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
             <div class="spinner" style="width:24px; height:24px; margin:0;"></div>
-            <span id="scanStatusText" style="font-weight:600; color:var(--text-main); font-size:15px;">🔍 Scanning
+            <span id="scanStatusText" style="font-weight:600; color:var(--text-main); font-size:15px;">Scanning
               website...</span>
           </div>
           <div style="font-size:13px; color:var(--text-muted);" id="scanProgress">Initializing scan...</div>
@@ -1143,11 +1143,11 @@
             <div style="display: flex; flex-direction: column; gap: 8px;">
               <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <span style="display:inline-flex; align-items:center; gap:6px; background:#0066CC22; border:2px solid #0066CC; color:#0066CC; padding:4px 10px; border-radius:6px; font-size:10px; font-weight:800; letter-spacing:0.5px;">
-                  <span>♿</span>
+                  <span></span>
                   <span>ADA TITLE II</span>
                 </span>
                 <span style="display:inline-flex; align-items:center; gap:6px; background:#8b5cf622; border:2px solid #8b5cf6; color:#8b5cf6; padding:4px 10px; border-radius:6px; font-size:10px; font-weight:800; letter-spacing:0.5px;">
-                  <span>📋</span>
+                  <span></span>
                   <span>WCAG 2.1 AA</span>
                 </span>
               </div>
@@ -1357,7 +1357,7 @@
         <!-- Scan Button -->
         <div id="pdfScanControls" style="display:none; margin-top:24px; text-align:center;">
           <button class="primary" onclick="scanAllPdfs()" id="scanPdfsBtn" style="padding:14px 32px; font-size:16px;">
-            🔍 Scan All Documents
+            Scan All Documents
           </button>
         </div>
 
@@ -1666,7 +1666,7 @@
         const statusText = hasIssues ? 'ISSUES FOUND' : 'CLEAN';
         const statusBadge = hasIssues ?
           `<span style="background:rgba(239,68,68,0.2); color:var(--accent-error); padding:4px 12px; border-radius:6px; font-size:11px; font-weight:700;">${result.issues.length} ISSUE(S)</span>` :
-          `<span style="background:rgba(34,197,94,0.2); color:var(--accent-success); padding:4px 12px; border-radius:6px; font-size:11px; font-weight:700;">✓ CLEAN</span>`;
+          `<span style="background:rgba(34,197,94,0.2); color:var(--accent-success); padding:4px 12px; border-radius:6px; font-size:11px; font-weight:700;">PASS CLEAN</span>`;
 
         // Build issues HTML in golden standard format
         let issuesHtml = '';
@@ -1680,8 +1680,8 @@
                 </div>
                 <div style="font-weight:700; color:var(--text-main); font-size:14px; margin-bottom:8px;">${escapeHtml(issue)}</div>
                 <div style="border-left:2px solid var(--accent-error); padding-left:12px; margin-top:8px;">
-                  <div style="font-size:13px; margin-bottom:4px;"><strong>💡 The Issue:</strong> ${explanation.what}</div>
-                  <div style="font-size:13px;"><strong>⚡ Why Fix It:</strong> ${explanation.why}</div>
+                  <div style="font-size:13px; margin-bottom:4px;"><strong>The Issue:</strong> ${explanation.what}</div>
+                  <div style="font-size:13px;"><strong>Why Fix It:</strong> ${explanation.why}</div>
                 </div>
               </div>
             `;
@@ -1714,7 +1714,7 @@
               </div>
             </div>
             <div id="pdfDetail-${idx}" style="display:none; padding:0 16px 16px 16px; border-top:1px solid var(--glass-border);">
-              ${hasIssues ? issuesHtml : '<div style="padding:16px; text-align:center; color:var(--accent-success);">✓ No accessibility issues detected</div>'}
+              ${hasIssues ? issuesHtml : '<div style="padding:16px; text-align:center; color:var(--accent-success);">PASS No accessibility issues detected</div>'}
             </div>
           </div>
         `;
@@ -1781,7 +1781,7 @@
       let fullUrl = url;
       if (!url.startsWith('http://') && !url.startsWith('https://')) { fullUrl = 'https://' + url; }
 
-      console.log('🔍 [SCAN START] Initiating scan for:', fullUrl);
+      console.log('[SCAN START] Initiating scan for:', fullUrl);
 
       // Create abort controller for this scan
       scanAbortController = new AbortController();
@@ -1794,7 +1794,7 @@
 
       // Show scan status
       document.getElementById('scanStatus').style.display = 'block';
-      document.getElementById('scanStatusText').textContent = '🔍 Scanning website...';
+      document.getElementById('scanStatusText').textContent = 'Scanning website...';
       document.getElementById('scanProgress').textContent = 'Analyzing page structure and accessibility...';
       // document.getElementById('scanBtn').disabled = true; // This line was removed in the diff
       hideResults();
@@ -1823,7 +1823,7 @@
         }
 
         console.log('✅ [SCAN SUCCESS] Scan completed, found', data.issues?.length || 0, 'issues');
-        document.getElementById('scanProgress').textContent = '✓ Scan complete! Generating report...';
+        document.getElementById('scanProgress').textContent = 'PASS Scan complete! Generating report...';
         displayWebsiteResults(data);
         showAlert('Audit Complete', 'success');
       } catch (error) {
@@ -1956,12 +1956,12 @@
             ${renderRegulationBadges(issue.code, issue.message)}
 
             <div class="plain-language">
-               <div class="what"><strong>💡 The Issue:</strong> ${getPlainLanguageExplanation(issue.code, issue.message).what}</div>
-               <div class="why" style="margin-top:8px;"><strong>⚡ Why Fix It:</strong> ${getPlainLanguageExplanation(issue.code, issue.message).why}</div>
+               <div class="what"><strong>The Issue:</strong> ${getPlainLanguageExplanation(issue.code, issue.message).what}</div>
+               <div class="why" style="margin-top:8px;"><strong>Why Fix It:</strong> ${getPlainLanguageExplanation(issue.code, issue.message).why}</div>
             </div>
 
             <button onclick="toggleDetails(${index})" style="background:transparent; border:none; color:#818cf8; cursor:pointer; font-size:14px; margin-top:16px; font-weight:600; display:flex; align-items:center;">
-               View Technical Details & Locations (${issue.count}) ▼
+               View Technical Details & Locations (${issue.count})
             </button>
             <div id="details-${index}" style="display:none; margin-top:12px;">${occurrencesHTML}</div>
           </div>
@@ -2313,19 +2313,19 @@
         let bgColor, icon;
         if (badge.regulation.includes('ADA Title II')) {
           bgColor = '#0066CC'; // Official ADA blue
-          icon = '♿'; // Accessibility icon
+          icon = ''; // Accessibility icon
         } else if (badge.level === 'A') {
           bgColor = '#3b82f6';
-          icon = '📋';
+          icon = '';
         } else if (badge.level === 'AA') {
           bgColor = '#8b5cf6';
-          icon = '📋';
+          icon = '';
         } else if (badge.level === 'Required') {
           bgColor = '#ef4444';
-          icon = '⚠️';
+          icon = '';
         } else {
           bgColor = '#6366f1';
-          icon = '📋';
+          icon = '';
         }
 
         const namePart = badge.name ? '<span style="opacity:0.7; font-weight:500;">· ' + badge.name + '</span>' : '';
@@ -2481,7 +2481,7 @@
       document.getElementById('crawlResults').innerHTML = '';
       document.getElementById('crawlResults').style.display = 'block';
       document.getElementById('discoverySpinner').style.display = 'block';
-      document.getElementById('discoveryStatusText').textContent = '🔍 Discovering pages...';
+      document.getElementById('discoveryStatusText').textContent = 'Discovering pages...';
 
       // Reset discovery state flags
       window.discoveryAutoStopped = false;
@@ -2513,7 +2513,7 @@
           hideLoading();
 
           // Setup Timer
-          document.getElementById('discoveryStatusText').textContent = '🔍 Discovering pages...';
+          document.getElementById('discoveryStatusText').textContent = 'Discovering pages...';
 
           pollDiscoveryStatus();
         } else {
@@ -2613,9 +2613,9 @@
             // No new pages found since last poll
             const staleDuration = (Date.now() - window.lastDiscoveryTime) / 1000;
             if (staleDuration >= 60 && crawl.status !== 'discovered') {
-              console.log(`⚠️ Discovery stale for ${staleDuration}s - auto-stopping`);
+              console.log(` Discovery stale for ${staleDuration}s - auto-stopping`);
               stopDiscovery();
-              document.getElementById('discoveryStatusText').innerHTML = `⚠️ Discovery Stopped (No new pages for ${Math.round(staleDuration)}s)`;
+              document.getElementById('discoveryStatusText').innerHTML = ` Discovery Stopped (No new pages for ${Math.round(staleDuration)}s)`;
               window.lastDiscoveryCount = 0;
               window.lastDiscoveryTime = null;
               return;
@@ -2967,10 +2967,10 @@
             <!-- Bold Headline -->
             <div style="margin-bottom:24px; padding-bottom:20px; border-bottom:2px solid var(--glass-border);">
               <h2 style="margin:0 0 8px 0; font-size:28px; font-weight:900; color:${riskColor}; line-height:1.2;">
-                ${complianceStatus === 'PASSING' ? '✓ Your Website is ADA Compliant!' :
-            complianceStatus === 'FAILING' ? '⚠️ Your Website is Not ADA Compliant' :
-              complianceStatus === 'AT RISK' ? '⚠️ Significant Compliance Gaps Detected' :
-                '⚠️ Accessibility Issues Found'}
+                ${complianceStatus === 'PASSING' ? 'PASS Your Website is ADA Compliant!' :
+            complianceStatus === 'FAILING' ? ' Your Website is Not ADA Compliant' :
+              complianceStatus === 'AT RISK' ? ' Significant Compliance Gaps Detected' :
+                ' Accessibility Issues Found'}
               </h2>
               <p style="margin:0; font-size:16px; color:var(--text-muted); line-height:1.5;">
                 ${complianceStatus === 'PASSING' ?
@@ -3020,10 +3020,10 @@
               <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">Filter By Risk:</label>
               <select id="crawlFilterRisk" onchange="applyCrawlSort()" style="width:100%; padding:8px; background:var(--input-bg); border:1px solid var(--glass-border); border-radius:6px; color:var(--text-main); font-size:13px;">
                 <option value="all">All Pages</option>
-                <option value="critical">🚨 Critical Only (20+ errors)</option>
-                <option value="high">⚠️ High Only (10-20 errors)</option>
-                <option value="medium">⚡ Medium Only (5-10 errors)</option>
-                <option value="low">✓ Low Only (<5 errors)</option>
+                <option value="critical">CRITICAL Critical Only (20+ errors)</option>
+                <option value="high"> High Only (10-20 errors)</option>
+                <option value="medium">MEDIUM Medium Only (5-10 errors)</option>
+                <option value="low">PASS Low Only (<5 errors)</option>
               </select>
             </div>
           </div>
@@ -3101,10 +3101,10 @@
           const errorCount = s.errors || 0;
           let badge = '';
           let badgeColor = '';
-          if (errorCount > 20) { badge = '🚨 Critical'; badgeColor = 'var(--accent-error)'; }
-          else if (errorCount > 10) { badge = '⚠️ High'; badgeColor = '#f97316'; }
-          else if (errorCount > 5) { badge = '⚡ Medium'; badgeColor = 'var(--accent-warning)'; }
-          else { badge = '✓ Low'; badgeColor = 'var(--accent-success)'; }
+          if (errorCount > 20) { badge = 'CRITICAL Critical'; badgeColor = 'var(--accent-error)'; }
+          else if (errorCount > 10) { badge = ' High'; badgeColor = '#f97316'; }
+          else if (errorCount > 5) { badge = 'MEDIUM Medium'; badgeColor = 'var(--accent-warning)'; }
+          else { badge = 'PASS Low'; badgeColor = 'var(--accent-success)'; }
 
           // Truncate long URLs (especially those with query params)
           let displayUrl = s.url;
@@ -3136,7 +3136,7 @@
                       <a href="${s.url}" target="_blank" style="color:var(--accent-primary); text-decoration:none; font-weight:500;" title="${s.url}">${displayUrl}</a>
                   </td>
                   <td style="padding:14px 8px;">
-                      <span onclick="toggleSpiderIssues(${s.id})" style="background:rgba(248,113,113,0.15); color:var(--accent-error); padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; user-select:none;">${errorCount} errors ▼</span>
+                      <span onclick="toggleSpiderIssues(${s.id})" style="background:rgba(248,113,113,0.15); color:var(--accent-error); padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; user-select:none;">${errorCount} errors</span>
                       <div id="issues-${s.id}" style="display:none; margin-top:12px; max-height:300px; overflow-y:auto; background:var(--code-bg); border:1px solid var(--glass-border); border-radius:8px; padding:12px;">
                         <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Loading issues...</div>
                       </div>
@@ -3406,14 +3406,14 @@
                 ${renderRegulationBadges(issue.code, issue.message)}
 
                 <div class="plain-language" style="border-left:2px solid ${typeColor}; padding-left:12px; margin-top:8px;">
-                   <div class="what" style="font-size:13px; margin-bottom:4px;"><strong>💡 The Issue:</strong> ${explanation.what}</div>
-                   <div class="why" style="font-size:13px;"><strong>⚡ Why Fix It:</strong> ${explanation.why}</div>
+                   <div class="what" style="font-size:13px; margin-bottom:4px;"><strong>The Issue:</strong> ${explanation.what}</div>
+                   <div class="why" style="font-size:13px;"><strong>Why Fix It:</strong> ${explanation.why}</div>
                 </div>
 
                 <div style="margin-top:12px;">
                    <button onclick="document.getElementById('occ-${scanId}-${issue.code}').style.display = document.getElementById('occ-${scanId}-${issue.code}').style.display==='none'?'block':'none'"
                            style="background:transparent; border:none; color:var(--accent-primary); cursor:pointer; font-size:13px; font-weight:600; padding:0;">
-                      View Technical Details & Locations (${issue.count}) ▼
+                      View Technical Details & Locations (${issue.count})
                    </button>
                    <div id="occ-${scanId}-${issue.code}" style="display:none; margin-top:8px;">${occHtml}</div>
                 </div>
