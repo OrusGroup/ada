@@ -249,8 +249,8 @@ const scanOptions = {
   runners: ['axe'],
   includeNotices: false,
   includeWarnings: true,
-  timeout: 60000, // Reduced from 90s to 60s for faster scanning
-  wait: 1000, // Reduced from 2s to 1s for faster JS settling
+  timeout: 45000, // Reduced to 45s for faster scanning
+  wait: 500, // Reduced to 500ms for faster JS settling
   chromeLaunchConfig: {
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   }
