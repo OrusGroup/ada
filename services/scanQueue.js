@@ -30,12 +30,17 @@ function addJob(url, crawlId, scanId = null) {
 }
 
 async function processQueue() {
-    if (activeWorkers >= CONCURRENCY || queue.length === 0) return;
+    if (activeWorkers >= CONCURRENCY || queue.length === 0) {
+        if (queue.length > 0) {
+            console.log(`⏸️  Queue paused: ${activeWorkers}/${CONCURRENCY} workers active, ${queue.length} jobs waiting`);
+        }
+        return;
+    }
 
     activeWorkers++;
     const job = queue.shift();
 
-    console.log(`🔍 Scanning queued page: ${job.url}`);
+    console.log(`🔍 [${activeWorkers}/${CONCURRENCY}] Scanning: ${job.url} (scanId: ${job.scanId}, ${queue.length} remaining)`);
 
     try {
         // Enforce timeout via Promise.race (aligned with 45s timeout)
@@ -80,41 +85,24 @@ async function processQueue() {
             scanId: job.scanId // Will be null for old-style crawls, or a specific ID for split spider
         });
 
-        // Check if all pages have been scanned and mark crawl as complete
-        db.db.get("SELECT total_pages FROM crawls WHERE id = ?", [job.crawlId], (err, crawl) => {
-            if (!err && crawl && crawl.total_pages > 0) {
-                db.db.get("SELECT COUNT(*) as count FROM scans WHERE crawl_id = ?", [job.crawlId], (err, result) => {
-                    if (!err && result && result.count >= crawl.total_pages) {
-                        db.db.run("UPDATE crawls SET status = 'completed' WHERE id = ?", [job.crawlId]);
-                        console.log(`✅ Crawl ${job.crawlId} completed: ${result.count}/${crawl.total_pages} pages scanned`);
-                    }
-                });
-            }
-        });
+        console.log(`✅ Successfully scanned ${job.url} - ${summary.total} issues found`);
 
     } catch (error) {
         console.error(`❌ Failed to scan ${job.url}:`, error.message);
 
         // Save "failed" record to DB so UI updates from "Queueing" to "Failed"
-        await db.saveScan({
-            summary: { url: job.url, total: 0, errors: 0, warnings: 0, notices: 0 },
-            detailedIssues: [],
-            crawlId: job.crawlId,
-            scanId: job.scanId,
-            status: 'failed' // NEW: Explicit failed status
-        });
-
-        // Check completion even for failed scans
-        db.db.get("SELECT total_pages FROM crawls WHERE id = ?", [job.crawlId], (err, crawl) => {
-            if (!err && crawl && crawl.total_pages > 0) {
-                db.db.get("SELECT COUNT(*) as count FROM scans WHERE crawl_id = ?", [job.crawlId], (err, result) => {
-                    if (!err && result && result.count >= crawl.total_pages) {
-                        db.db.run("UPDATE crawls SET status = 'completed' WHERE id = ?", [job.crawlId]);
-                        console.log(`✅ Crawl ${job.crawlId} completed: ${result.count}/${crawl.total_pages} pages scanned`);
-                    }
-                });
-            }
-        });
+        try {
+            await db.saveScan({
+                summary: { url: job.url, total: 0, errors: 0, warnings: 0, notices: 0 },
+                detailedIssues: [],
+                crawlId: job.crawlId,
+                scanId: job.scanId,
+                status: 'failed' // NEW: Explicit failed status
+            });
+            console.log(`⚠️  Marked ${job.url} as failed in database`);
+        } catch (dbError) {
+            console.error(`❌ Failed to save failed scan to DB:`, dbError.message);
+        }
     } finally {
         activeWorkers--;
         // Process next job immediately
