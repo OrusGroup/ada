@@ -1171,10 +1171,10 @@
 
       <!-- Crawler Tab -->
       <div id="crawlerTab" class="tab-content">
-        <div class="input-group">
-          <input type="url" id="crawlUrlInput" placeholder="Enter starting URL (e.g., https://www.cityofbowie.org)">
+        <div class="input-group" style="display: flex; gap: 12px; align-items: center;">
+          <input type="url" id="crawlUrlInput" placeholder="Enter starting URL (e.g., https://www.cityofbowie.org)" style="flex: 1;">
           <button class="primary" id="discoverBtn" onclick="startDiscovery()">Discover Pages</button>
-          <button class="secondary" id="demoDiscoverBtn" onclick="startDiscoveryDemo()" style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">Demo Mode (100 pages)</button>
+          <button class="secondary" id="demoDiscoverBtn" onclick="startDiscoveryDemo()">Demo (100 Pages)</button>
         </div>
         <p style="color:var(--text-muted); font-size:13px; margin-top:12px; margin-bottom:24px;">
           <strong>Step 1:</strong> Discover all pages on the site. <strong>Step 2:</strong> Choose which pages to scan
@@ -2455,6 +2455,8 @@
     let activeScanMode = 'IDLE'; // 'BATCH' or 'SINGLE'
     let discoveryTimerInterval = null;
     let discoveryStartTime = null;
+    let isDemoMode = false; // Track if we're in demo mode
+    let demoPageLimit = 100; // Demo mode page limit
     // No page limit - scan until complete
 
     // Tier selection removed - unlimited scanning
@@ -2465,7 +2467,10 @@
 
       if (!url) { showAlert('Please enter a URL', 'error'); return; }
 
-      showLoading(maxPages ? 'Initializing Demo Discovery (100 pages)...' : 'Initializing Discovery...');
+      // Set demo mode flag
+      isDemoMode = maxPages !== null;
+
+      showLoading(isDemoMode ? 'Initializing Demo Discovery (100 pages)...' : 'Initializing Discovery...');
 
       // TRANSFORM BUTTON
       const btn = document.getElementById('discoverBtn');
@@ -2531,6 +2536,8 @@
         console.error(e);
         showAlert('Discovery failed: ' + e.message, 'error');
         hideLoading();
+        // Reset demo mode flag
+        isDemoMode = false;
         // Reset button on failure
         btn.textContent = 'Discover Pages';
         btn.onclick = () => startDiscovery();
@@ -2549,11 +2556,14 @@
     }
 
     async function stopDiscovery() {
+      // Reset demo mode flag
+      isDemoMode = false;
+
       // CALL SERVER TO STOP THE CRAWLER
       if (currentCrawlId) {
         try {
           await fetch(`/api/crawl/stop/${currentCrawlId}`, { method: 'POST' });
-          console.log('🛑 Discovery stop signal sent to server');
+          console.log('Discovery stop signal sent to server');
         } catch (e) {
           console.error('Failed to stop discovery:', e);
         }
@@ -2645,11 +2655,22 @@
             window.lastDiscoveryTime = Date.now();
           }
 
-          // Page limit auto-stop removed - now scans until discovery is complete
+          // DEMO MODE: Auto-stop at 100 pages
+          if (isDemoMode && scans.length >= demoPageLimit && crawl.status === 'discovering') {
+            console.log(`Demo mode limit reached: ${scans.length} pages discovered`);
+            await stopDiscovery();
+            document.getElementById('discoveryStatusText').innerHTML = `Demo Complete (${scans.length} pages discovered)`;
+            return;
+          }
+
+          // Page limit auto-stop removed - now scans until discovery is complete (unless demo mode)
 
           if (crawl.status === 'discovered') {
             // DON'T clear interval - keep polling so scan status updates show in UI
             // clearInterval(crawlPollInterval);
+
+            // Reset demo mode flag
+            isDemoMode = false;
 
             // STOP TIMER
             if (discoveryTimerInterval) {
