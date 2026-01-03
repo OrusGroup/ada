@@ -3432,17 +3432,48 @@
         const data = await res.json();
 
         if (data.issues && data.issues.length > 0) {
-          // GROUP ISSUES (Gold Standard)
+          // Simple summary view - just show top 3 issues
           const grouped = groupIssues(data.issues);
+          const topIssues = grouped.slice(0, 3);
+          const totalIssues = data.issues.length;
+          const totalTypes = grouped.length;
 
-          // Show Top 5 Groups only (User Request)
-          const topIssues = grouped.slice(0, 5);
-          const hiddenCount = grouped.length - topIssues.length;
+          let html = `
+            <div style="padding:16px; background:var(--glass-panel);">
+              <div style="font-size:13px; font-weight:600; color:var(--text-main); margin-bottom:12px;">
+                Found ${totalIssues} total issues (${totalTypes} unique types)
+              </div>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+          `;
 
-          renderSpiderIssuesContent(container, topIssues, scanId, hiddenCount);
+          topIssues.forEach(issue => {
+            const typeColor = issue.type === 'error' ? 'var(--accent-error)' : 'var(--accent-warning)';
+            const typeLabel = issue.type === 'error' ? 'NON-COMPLIANT FLAG' : 'WARNING';
+            html += `
+              <div style="padding:10px 12px; background:var(--input-bg); border-radius:8px; border-left:3px solid ${typeColor};">
+                <div style="font-size:12px; font-weight:600; color:${typeColor}; margin-bottom:4px;">${typeLabel} (${issue.count}×)</div>
+                <div style="font-size:11px; color:var(--text-main); line-height:1.4;">${escapeHtml(issue.message)}</div>
+              </div>
+            `;
+          });
+
+          if (totalTypes > 3) {
+            html += `
+              <div style="padding:8px; text-align:center; font-size:11px; color:var(--text-muted);">
+                + ${totalTypes - 3} more issue types...
+              </div>
+            `;
+          }
+
+          html += `
+              </div>
+            </div>
+          `;
+
+          container.innerHTML = html;
           container.dataset.loaded = 'true';
         } else {
-          container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted);">No detailed issues found.</div>';
+          container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted);">No issues found.</div>';
         }
       } catch (e) {
         container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--accent-error);">Failed to load issues.</div>';
