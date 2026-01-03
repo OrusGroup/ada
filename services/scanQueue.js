@@ -16,8 +16,8 @@ let activeWorkers = 0;
 const scanOptions = {
     standard: 'WCAG2AA',
     runners: ['axe'],
-    timeout: 45000, // Reduced to 45s for faster scans
-    wait: 500, // Reduced to 500ms for faster JS settling
+    timeout: 90000, // 90s for slow government websites
+    wait: 2000, // 2s for JS to settle properly
     chromeLaunchConfig: {
         headless: 'new',
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
@@ -43,9 +43,9 @@ async function processQueue() {
     console.log(`🔍 [${activeWorkers}/${CONCURRENCY}] Scanning: ${job.url} (scanId: ${job.scanId}, ${queue.length} remaining)`);
 
     try {
-        // Enforce timeout via Promise.race (aligned with 45s timeout)
+        // Enforce timeout via Promise.race (aligned with 90s timeout)
         const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Scan timed out after 50s')), 50000)
+            setTimeout(() => reject(new Error('Scan timed out after 95s')), 95000)
         );
 
         const results = await Promise.race([
