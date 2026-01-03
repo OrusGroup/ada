@@ -1942,10 +1942,12 @@
       `;
         });
 
+        const displayType = issue.type === 'error' ? 'NON-COMPLIANT FLAG' : issue.type.toUpperCase();
+
         issueList.innerHTML += `
           <div class="issue-item ${typeClass}">
             <div class="issue-header">
-              <span class="issue-badge ${typeClass}">${issue.type}</span>
+              <span class="issue-badge ${typeClass}">${displayType}</span>
               <span style="color:var(--text-muted); font-size:12px; font-weight:600">${issue.count} LOCATION(S)</span>
             </div>
 
@@ -2219,6 +2221,9 @@
       const lowerMsg = (msg || '').toLowerCase();
       const badges = [];
 
+      // ALWAYS start with ADA Title II badge
+      badges.push({ regulation: 'ADA Title II', name: 'Web Accessibility', level: 'Required' });
+
       // Color contrast issues - WCAG 1.4.3
       if (lowerCode.includes('color-contrast') || lowerMsg.includes('contrast')) {
         badges.push({ regulation: 'WCAG 1.4.3', name: 'Contrast (Minimum)', level: 'AA' });
@@ -2294,12 +2299,7 @@
         badges.push({ regulation: 'WCAG 4.1.1', name: 'Parsing', level: 'A' });
       }
 
-      // If no specific match, return ADA Title II general
-      if (badges.length === 0) {
-        badges.push({ regulation: 'ADA Title II', name: 'Web Accessibility', level: 'Required' });
-        badges.push({ regulation: 'WCAG 2.1', name: 'Level AA', level: 'Standard' });
-      }
-
+      // Note: ADA Title II badge is already added at the top of this function
       return badges;
     }
 
@@ -3392,10 +3392,12 @@
         // Use getPlainLanguageExplanation
         const explanation = getPlainLanguageExplanation(issue.code, issue.message);
 
+        const displayType = issue.type === 'error' ? 'NON-COMPLIANT FLAG' : issue.type.toUpperCase();
+
         html += `
               <div class="issue-item ${typeClass}" style="margin-bottom:12px; border:1px solid var(--glass-border);">
                 <div class="issue-header">
-                  <span class="issue-badge ${typeClass}">${issue.type}</span>
+                  <span class="issue-badge ${typeClass}">${displayType}</span>
                   <span style="color:var(--text-muted); font-size:12px; font-weight:600">${issue.count} LOCATION(S)</span>
                 </div>
 
