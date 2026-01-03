@@ -8,7 +8,7 @@ if (process.env.SUPABASE_URL) {
     db = require('./db');
 }
 
-const CONCURRENCY = 2;
+const CONCURRENCY = 5; // Increased from 2 to 5 for faster parallel scanning
 const queue = [];
 let activeWorkers = 0;
 
@@ -16,8 +16,8 @@ let activeWorkers = 0;
 const scanOptions = {
     standard: 'WCAG2AA',
     runners: ['axe'],
-    timeout: 90000, // Increased to 90s
-    wait: 2000, // Wait 2s for JS to settle
+    timeout: 60000, // Reduced from 90s to 60s - still generous
+    wait: 1000, // Reduced from 2s to 1s for faster JS settling
     chromeLaunchConfig: {
         headless: 'new',
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
@@ -38,9 +38,9 @@ async function processQueue() {
     console.log(`🔍 Scanning queued page: ${job.url}`);
 
     try {
-        // Enforce timeout via Promise.race
+        // Enforce timeout via Promise.race (aligned with new 60s timeout)
         const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Scan timed out after 95s')), 95000)
+            setTimeout(() => reject(new Error('Scan timed out after 65s')), 65000)
         );
 
         const results = await Promise.race([
