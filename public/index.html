@@ -1174,6 +1174,7 @@
         <div class="input-group">
           <input type="url" id="crawlUrlInput" placeholder="Enter starting URL (e.g., https://www.cityofbowie.org)">
           <button class="primary" id="discoverBtn" onclick="startDiscovery()">Discover Pages</button>
+          <button class="secondary" id="demoDiscoverBtn" onclick="startDiscoveryDemo()" style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">Demo Mode (100 pages)</button>
         </div>
         <p style="color:var(--text-muted); font-size:13px; margin-top:12px; margin-bottom:24px;">
           <strong>Step 1:</strong> Discover all pages on the site. <strong>Step 2:</strong> Choose which pages to scan
@@ -2458,13 +2459,13 @@
 
     // Tier selection removed - unlimited scanning
 
-    async function startDiscovery() {
+    async function startDiscovery(maxPages = null) {
       const url = document.getElementById('crawlUrlInput').value;
       // Default handled by backend (500)
 
       if (!url) { showAlert('Please enter a URL', 'error'); return; }
 
-      showLoading('Initializing Discovery...');
+      showLoading(maxPages ? 'Initializing Demo Discovery (100 pages)...' : 'Initializing Discovery...');
 
       // TRANSFORM BUTTON
       const btn = document.getElementById('discoverBtn');
@@ -2473,6 +2474,10 @@
       btn.style.background = 'rgba(239, 68, 68, 0.2)';
       btn.style.color = '#f87171';
       btn.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+
+      // HIDE DEMO BUTTON
+      const demoBtn = document.getElementById('demoDiscoverBtn');
+      if (demoBtn) demoBtn.style.display = 'none';
 
       document.getElementById('discoveryStatus').style.display = 'flex';
       document.getElementById('discoveryStatus').style.display = 'flex';
@@ -2503,7 +2508,10 @@
       try {
         const formData = new FormData();
         formData.append('url', url);
-        // No page limit - discover all pages
+        if (maxPages) {
+          formData.append('maxPages', maxPages);
+        }
+        // No page limit unless specified
 
         const res = await fetch('/api/crawl/discover', { method: 'POST', body: formData });
         const data = await res.json();
@@ -2525,13 +2533,20 @@
         hideLoading();
         // Reset button on failure
         btn.textContent = 'Discover Pages';
-        btn.onclick = startDiscovery;
+        btn.onclick = () => startDiscovery();
         btn.style.background = '';
         btn.style.color = '';
         btn.style.border = '';
+        // Restore demo button
+        const demoBtn = document.getElementById('demoDiscoverBtn');
+        if (demoBtn) demoBtn.style.display = '';
       }
     }
 
+    // Demo Mode - limits discovery to 100 pages
+    async function startDiscoveryDemo() {
+      await startDiscovery(100);
+    }
 
     async function stopDiscovery() {
       // CALL SERVER TO STOP THE CRAWLER
@@ -2570,11 +2585,15 @@
       const btn = document.getElementById('discoverBtn');
       if (btn) {
         btn.textContent = 'Discover Pages';
-        btn.onclick = startDiscovery;
+        btn.onclick = () => startDiscovery();
         btn.style.background = '';
         btn.style.color = '';
         btn.style.border = '';
       }
+
+      // RESTORE DEMO BUTTON
+      const demoBtn = document.getElementById('demoDiscoverBtn');
+      if (demoBtn) demoBtn.style.display = '';
 
       // DO NOT overwrite crawlResults. Just ensure they are visible.
       // If we have scans, re-render to be safe?
@@ -2646,10 +2665,14 @@
             hideLoading();
             const btn = document.getElementById('discoverBtn');
             btn.textContent = 'Discover Pages';
-            btn.onclick = startDiscovery;
+            btn.onclick = () => startDiscovery();
             btn.style.background = '';
             btn.style.color = '';
             btn.style.border = '';
+
+            // RESTORE DEMO BUTTON
+            const demoBtn = document.getElementById('demoDiscoverBtn');
+            if (demoBtn) demoBtn.style.display = '';
 
           } else if (crawl.status === 'scanning' || crawl.status === 'completed') {
             // If we reloaded and it's already scanning/done
