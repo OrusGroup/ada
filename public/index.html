@@ -3540,20 +3540,9 @@
 
     // Load site map data from the current crawl
     function loadSiteMapData() {
-      // If no current crawl ID, try to fetch the most recent one
+      // Only load if we have an active crawl ID from the current session
       if (!currentCrawlId) {
-        console.log('No crawl ID in memory, fetching latest crawl...');
-        fetch('/api/crawl/latest')
-          .then(res => res.json())
-          .then(data => {
-            if (data.crawlId) {
-              currentCrawlId = data.crawlId;
-              loadSiteMapData(); // Retry with the fetched ID
-            } else {
-              console.log('No crawls found in database');
-            }
-          })
-          .catch(err => console.error('Failed to fetch latest crawl:', err));
+        console.log('No active crawl - site map empty');
         return;
       }
 
@@ -3699,11 +3688,11 @@
       document.querySelectorAll('.tree-toggle').forEach(el => el.textContent = '▶');
     }
 
-    // Auto-load site map when switching to the tab
+    // Auto-load site map when switching to the tab (only if we have an active crawl)
     const originalSwitchTab = switchTab;
     switchTab = function (tab) {
       originalSwitchTab(tab);
-      if (tab === 'sitemap') {
+      if (tab === 'sitemap' && currentCrawlId) {
         loadSiteMapData();
       }
     };
